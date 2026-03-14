@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yuxuan Cai | Urban AI Researcher</title>
+<meta name="description" content="Yuxuan Cai – PhD Student at UNC Chapel Hill, City and Regional Planning. Research on urban AI, VLM interpretability, LLM simulation, and urban health.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080C10;
+  --bg2:#0D1318;
+  --accent:#4ECDC4;
+  --accent2:#FF6B6B;
+  --amber:#F7C59F;
+  --text:#E8EDF2;
+  --muted:#6B7F8E;
+  --faint:#2A3540;
+  --serif:'Instrument Serif',serif;
+  --cn:'Noto Serif SC',serif;
+  --sans:'Space Grotesk',sans-serif;
+}
+html{scroll-behavior:smooth;cursor:none}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden;line-height:1.6}
+
+#cursor{position:fixed;width:8px;height:8px;background:var(--accent);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .3s,height .3s;mix-blend-mode:difference}
+#cursor-ring{position:fixed;width:36px;height:36px;border:1px solid rgba(78,205,196,0.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:width .3s,height .3s,opacity .3s}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:20px 48px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(8,12,16,0.97),transparent)}
+.nav-logo{font-family:var(--serif);font-size:20px;color:var(--text);letter-spacing:0.02em}
+.nav-logo span{color:var(--accent);font-style:italic}
+.nav-links{display:flex;gap:32px;list-style:none}
+.nav-links a{font-size:11px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-status{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.status-dot{width:6px;height:6px;background:#4ade80;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.hero{position:relative;height:100vh;display:flex;align-items:center;overflow:hidden}
+#city-canvas{position:absolute;inset:0;width:100%;height:100%}
+.hero-content{position:relative;z-index:2;padding:0 80px;max-width:700px}
+.hero-tag{font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);margin-bottom:24px;display:flex;align-items:center;gap:12px}
+.hero-tag::before{content:'';display:block;width:32px;height:1px;background:var(--accent)}
+.hero-name{font-family:var(--serif);font-size:clamp(52px,6vw,80px);font-weight:400;line-height:1.05;margin-bottom:8px;color:var(--text)}
+.hero-name em{color:var(--accent);font-style:italic}
+.hero-sub{font-family:var(--cn);font-size:15px;color:var(--muted);margin-bottom:28px;letter-spacing:0.12em}
+.hero-desc{font-size:15px;color:var(--muted);line-height:1.9;max-width:520px;margin-bottom:36px}
+.hero-desc strong{color:var(--amber);font-weight:500}
+.hero-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:44px}
+.chip{font-size:11px;letter-spacing:0.06em;padding:6px 14px;border:1px solid var(--faint);color:var(--muted);border-radius:2px;transition:all .2s;cursor:default}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:rgba(78,205,196,0.05)}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap}
+.btn-glow{background:var(--accent);color:var(--bg);padding:12px 28px;font-family:var(--sans);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;border:none;border-radius:2px;cursor:pointer;transition:all .2s;box-shadow:0 0 24px rgba(78,205,196,0.25)}
+.btn-glow:hover{box-shadow:0 0 40px rgba(78,205,196,0.5);transform:translateY(-1px)}
+.btn-ghost{background:transparent;color:var(--text);padding:12px 28px;font-family:var(--sans);font-size:12px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid var(--faint);border-radius:2px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block}
+.btn-ghost:hover{border-color:var(--muted)}
+
+.scroll-hint{position:absolute;bottom:40px;left:80px;z-index:2;display:flex;align-items:center;gap:12px;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)}
+.scroll-line{width:40px;height:1px;background:var(--faint);position:relative;overflow:hidden}
+.scroll-line::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:var(--accent);animation:scanline 2s ease-in-out infinite}
+@keyframes scanline{0%{left:-100%}100%{left:100%}}
+
+.stats-bar{background:var(--bg2);border-top:1px solid var(--faint);border-bottom:1px solid var(--faint);padding:14px 0;overflow:hidden;white-space:nowrap}
+.stats-track{display:inline-flex;gap:64px;animation:ticker 24s linear infinite}
+.stat-item{display:flex;align-items:center;gap:10px}
+.stat-num{font-family:var(--serif);font-size:20px;color:var(--accent)}
+.stat-label{color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:0.1em}
+.stat-sep{color:var(--faint);font-size:20px}
+@keyframes ticker{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+section{padding:100px 80px}
+.s-label{font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.s-title{font-family:var(--serif);font-size:clamp(28px,3vw,42px);font-weight:400;color:var(--text);margin-bottom:48px;line-height:1.2}
+.s-title em{color:var(--accent);font-style:italic}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start}
+.about-photo{width:100%;aspect-ratio:3/4;background:var(--bg2);border:1px solid var(--faint);border-radius:2px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;letter-spacing:0.06em;text-transform:uppercase;position:relative;overflow:hidden}
+.about-photo::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(78,205,196,0.05),transparent)}
+.about-body p{font-size:15px;color:var(--muted);line-height:1.9;margin-bottom:20px}
+.about-body p strong{color:var(--text);font-weight:500}
+.about-meta{margin-top:32px;display:flex;flex-direction:column;gap:12px}
+.meta-row{display:flex;gap:16px;font-size:13px;border-bottom:1px solid var(--faint);padding-bottom:12px}
+.meta-key{color:var(--muted);min-width:90px;font-size:11px;letter-spacing:0.08em;text-transform:uppercase;padding-top:2px}
+.meta-val{color:var(--text)}
+.meta-val a{color:var(--accent);text-decoration:none}
+.meta-val a:hover{text-decoration:underline}
+
+/* RESEARCH */
+.research-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--faint);border:1px solid var(--faint)}
+.r-card{background:var(--bg2);padding:40px 32px;transition:background .25s;position:relative;overflow:hidden;cursor:default}
+.r-card::after{content:'';position:absolute;bottom:0;left:0;width:0;height:2px;background:var(--accent);transition:width .4s}
+.r-card:hover{background:#111820}
+.r-card:hover::after{width:100%}
+.r-num{font-family:var(--serif);font-size:52px;color:var(--faint);line-height:1;margin-bottom:20px;transition:color .3s}
+.r-card:hover .r-num{color:var(--accent)}
+.r-card h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:12px;color:var(--text);line-height:1.3}
+.r-card p{font-size:13px;color:var(--muted);line-height:1.9}
+.r-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.r-tag{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(78,205,196,0.2);padding:3px 10px;border-radius:2px}
+
+/* DATA VIZ */
+.dataviz-section{background:var(--bg2);border-top:1px solid var(--faint);border-bottom:1px solid var(--faint);padding:80px}
+.dataviz-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;margin-bottom:40px}
+.dataviz-canvas-wrap{position:relative;height:300px;border:1px solid var(--faint);border-radius:2px;overflow:hidden;background:var(--bg)}
+.viz-label{position:absolute;top:14px;left:16px;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);z-index:1}
+
+/* PAPERS */
+.papers-section{border-top:1px solid var(--faint)}
+.paper-tabs{display:flex;gap:0;margin-bottom:40px;border-bottom:1px solid var(--faint)}
+.p-tab{font-size:11px;letter-spacing:0.1em;text-transform:uppercase;padding:10px 20px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s;background:none;border-left:none;border-right:none;border-top:none;font-family:var(--sans)}
+.p-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.paper-list{display:none}
+.paper-list.active{display:block}
+.paper-row{display:grid;grid-template-columns:56px 1fr 110px;gap:24px;align-items:start;padding:24px 0;border-bottom:1px solid var(--faint);transition:background .15s}
+.paper-row:first-child{border-top:1px solid var(--faint)}
+.paper-row:hover{background:rgba(78,205,196,0.02)}
+.p-year{font-family:var(--serif);font-size:13px;color:var(--accent);padding-top:2px}
+.p-title{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--text);margin-bottom:6px;line-height:1.4}
+.p-venue{font-size:12px;color:var(--muted);font-style:italic;margin-bottom:6px}
+.p-authors{font-size:12px;color:var(--muted)}
+.p-authors strong{color:var(--amber)}
+.p-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.p-btn{font-size:10px;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(78,205,196,0.25);padding:4px 10px;border-radius:2px;cursor:pointer;background:transparent;transition:all .2s;font-family:var(--sans);text-decoration:none;display:inline-block}
+.p-btn:hover{background:rgba(78,205,196,0.1)}
+.p-badge{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:2px;white-space:nowrap;text-align:center}
+.badge-q1{background:rgba(78,205,196,0.1);color:var(--accent);border:1px solid rgba(78,205,196,0.25)}
+.badge-rev{background:rgba(247,197,159,0.1);color:var(--amber);border:1px solid rgba(247,197,159,0.25)}
+.badge-conf{background:rgba(255,107,107,0.1);color:var(--accent2);border:1px solid rgba(255,107,107,0.25)}
+
+/* PROJECTS */
+.projects-section{background:var(--bg2);border-top:1px solid var(--faint)}
+.projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--faint)}
+.proj-card{background:var(--bg2);padding:36px;cursor:pointer;transition:background .2s}
+.proj-card:hover{background:#111820}
+.proj-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px}
+.proj-icon{font-size:26px}
+.proj-arrow{color:var(--faint);font-size:18px;transition:all .3s}
+.proj-card:hover .proj-arrow{color:var(--accent);transform:translate(3px,-3px)}
+.proj-card h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:10px;color:var(--text)}
+.proj-card p{font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px}
+.proj-stack{display:flex;gap:6px;flex-wrap:wrap}
+.stack{font-size:10px;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);border:1px solid var(--faint);padding:3px 8px;border-radius:2px}
+
+/* AWARDS */
+.awards-section{border-top:1px solid var(--faint)}
+.awards-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--faint)}
+.award-item{background:var(--bg2);padding:24px 28px;display:flex;gap:16px;align-items:start}
+.award-year{font-family:var(--serif);font-size:13px;color:var(--accent);min-width:40px;padding-top:1px}
+.award-text{font-size:13px;color:var(--muted);line-height:1.6}
+.award-text strong{color:var(--text);font-weight:500;display:block;margin-bottom:2px}
+
+/* CONTACT */
+.contact-section{border-top:1px solid var(--faint);display:grid;grid-template-columns:1fr 1fr;gap:80px}
+.c-intro{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.5;color:var(--muted);margin-bottom:36px}
+.c-intro em{color:var(--accent);font-style:italic}
+.c-links{display:flex;flex-direction:column;gap:0}
+.c-link{display:flex;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--faint);cursor:pointer;transition:all .2s;text-decoration:none;color:inherit}
+.c-link:first-child{border-top:1px solid var(--faint)}
+.c-link:hover .c-link-label{color:var(--accent)}
+.c-link:hover .c-link-arrow{transform:translate(4px,-4px);color:var(--accent)}
+.c-link-icon{width:36px;height:36px;border:1px solid var(--faint);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;transition:border-color .2s}
+.c-link:hover .c-link-icon{border-color:var(--accent)}
+.c-link-label{font-size:14px;color:var(--text);flex:1;transition:color .2s}
+.c-link-val{font-size:12px;color:var(--muted)}
+.c-link-arrow{color:var(--faint);transition:all .2s}
+.c-form{display:flex;flex-direction:column;gap:12px}
+.c-form input,.c-form textarea{background:var(--bg2);border:1px solid var(--faint);padding:13px 16px;font-family:var(--sans);font-size:13px;color:var(--text);border-radius:2px;outline:none;resize:none;transition:border-color .2s}
+.c-form input:focus,.c-form textarea:focus{border-color:var(--accent)}
+.c-form textarea{height:120px}
+.c-form input::placeholder,.c-form textarea::placeholder{color:var(--muted)}
+
+footer{background:var(--bg2);border-top:1px solid var(--faint);padding:28px 80px;display:flex;justify-content:space-between;align-items:center}
+.f-left{font-size:12px;color:var(--muted)}
+.f-right{display:flex;gap:24px}
+.f-link{font-size:11px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .2s}
+.f-link:hover{color:var(--accent)}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:none}
+
+@media(max-width:860px){
+  nav{padding:16px 20px}
+  .nav-links,.nav-status{display:none}
+  section{padding:64px 24px}
+  .hero-content{padding:0 24px}
+  .about-grid,.dataviz-grid,.contact-section{grid-template-columns:1fr}
+  .research-grid,.projects-grid,.awards-grid{grid-template-columns:1fr}
+  .paper-row{grid-template-columns:48px 1fr;gap:16px}
+  .p-actions{display:none}
+  footer{padding:24px;flex-direction:column;gap:12px;text-align:center}
+  .dataviz-section{padding:60px 24px}
+}
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">Yuxuan <span>Cai</span></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#research">Research</a></li>
+    <li><a href="#papers">Papers</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-status"><div class="status-dot"></div>Open to Collaboration</div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <canvas id="city-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-tag">PhD Student · UNC Chapel Hill · City & Regional Planning</div>
+    <h1 class="hero-name">Yuxuan<br><em>Cai</em></h1>
+    <div class="hero-sub">蔡宇轩 · Nature AI Lab PI</div>
+    <p class="hero-desc">
+      Decoding how AI systems perceive and reason about cities —
+      from <strong>VLM interpretability</strong> and <strong>LLM multi-agent simulation</strong>
+      to urban health, environmental justice & transportation.
+    </p>
+    <div class="hero-chips">
+      <span class="chip">Urban AI & Planning</span>
+      <span class="chip">VLM Interpretability</span>
+      <span class="chip">LLM Simulation</span>
+      <span class="chip">Environmental Justice</span>
+      <span class="chip">Urban Health</span>
+    </div>
+    <div class="hero-cta">
+      <button class="btn-glow" onclick="document.getElementById('papers').scrollIntoView({behavior:'smooth'})">Publications →</button>
+      <a class="btn-ghost" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank">Google Scholar ↗</a>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="scroll-line"></div>Scroll</div>
+</div>
+
+<!-- STATS TICKER -->
+<div class="stats-bar">
+  <div class="stats-track">
+    <div class="stat-item"><span class="stat-num">11</span><span class="stat-label">Published Papers</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">4</span><span class="stat-label">Under Review / Revision</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">5</span><span class="stat-label">Conference Papers</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">1M+</span><span class="stat-label">Park Perception Records</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">6+</span><span class="stat-label">Journal Reviewer</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">11</span><span class="stat-label">Published Papers</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">4</span><span class="stat-label">Under Review / Revision</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">5</span><span class="stat-label">Conference Papers</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">1M+</span><span class="stat-label">Park Perception Records</span></div>
+    <div class="stat-sep">·</div>
+    <div class="stat-item"><span class="stat-num">6+</span><span class="stat-label">Journal Reviewer</span></div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="s-label reveal">00 / About</div>
+  <div class="about-grid">
+    <div>
+      <div class="about-photo reveal">
+        <!-- Replace with: <img src="photo.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+        <span>Your Photo Here</span>
+      </div>
+    </div>
+    <div class="about-body reveal">
+      <h2 class="s-title" style="margin-bottom:24px">Teaching machines<br>to <em>sense the city</em></h2>
+      <p>I am a PhD student in <strong>City and Regional Planning at UNC Chapel Hill</strong>, advised by Prof. Nikhil Kaza, supported by the Doctoral Merit Fellowship. Previously I completed my MA in Computational Social Science at the <strong>University of Chicago</strong> (Outstanding Thesis Award nominee) and studied architecture at UC Berkeley.</p>
+      <p>My research sits at the intersection of urban planning, AI interpretability, and public health — probing how vision-language models encode urban perception, building LLM multi-agent simulations for planning decision-making, and diagnosing AI consistency-misalignment issues in spatial reasoning.</p>
+      <p>I am also PI of <strong>Nature AI Lab</strong>, an interdisciplinary group working on AI-driven urban and environmental research.</p>
+      <div class="about-meta">
+        <div class="meta-row"><span class="meta-key">Position</span><span class="meta-val">PhD Student, UNC Chapel Hill</span></div>
+        <div class="meta-row"><span class="meta-key">Advisor</span><span class="meta-val">Prof. Nikhil Kaza</span></div>
+        <div class="meta-row"><span class="meta-key">Email</span><span class="meta-val"><a href="mailto:yuxuancai@unc.edu">yuxuancai@unc.edu</a></span></div>
+        <div class="meta-row"><span class="meta-key">Website</span><span class="meta-val"><a href="https://yuxuancai.com" target="_blank">yuxuancai.com</a></span></div>
+        <div class="meta-row"><span class="meta-key">Scholar</span><span class="meta-val"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank">Google Scholar ↗</a></span></div>
+        <div class="meta-row"><span class="meta-key">Lab</span><span class="meta-val"><a href="https://natureailab.com" target="_blank">Nature AI Lab ↗</a></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section id="research" style="background:var(--bg2);border-top:1px solid var(--faint)">
+  <div class="s-label reveal">01 / Research</div>
+  <h2 class="s-title reveal">Three pillars of<br><em>urban AI</em> research</h2>
+  <div class="research-grid reveal">
+    <div class="r-card">
+      <div class="r-num">01</div>
+      <h3>Urban Perception & AI</h3>
+      <p>Using crowdsourced data, street-view imagery, and social media to understand how humans experience the city — and training VLMs to replicate and explain that perception at scale.</p>
+      <div class="r-tags"><span class="r-tag">VLM / CLIP</span><span class="r-tag">Street View</span><span class="r-tag">NLP</span><span class="r-tag">Crowdsourced Data</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-num">02</div>
+      <h3>LLM Interpretability & Simulation</h3>
+      <p>Probing internal representations of AI models for urban concepts; developing LLM multi-agent frameworks that simulate planning decision-making and exposing Consistency-Misalignment issues.</p>
+      <div class="r-tags"><span class="r-tag">Mechanistic Interp.</span><span class="r-tag">Multi-Agent LLM</span><span class="r-tag">SHAP</span></div>
+    </div>
+    <div class="r-card">
+      <div class="r-num">03</div>
+      <h3>Urban Health & Environmental Justice</h3>
+      <p>Examining how long-term environmental exposures — air pollution, heat, green space inequality — shape health outcomes across demographic groups, with ML and spatial analysis.</p>
+      <div class="r-tags"><span class="r-tag">Environmental Health</span><span class="r-tag">GIS</span><span class="r-tag">ML / DL</span><span class="r-tag">Equity</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- DATA VIZ -->
+<section class="dataviz-section" id="dataviz">
+  <div class="dataviz-grid">
+    <div class="reveal">
+      <div class="s-label">Research Profile</div>
+      <h2 class="s-title" style="margin-bottom:20px">Quantified<br><em>expertise</em></h2>
+      <p style="font-size:14px;color:var(--muted);line-height:1.9">Bridging computational social science, urban planning, and AI — with methods spanning deep learning, NLP, spatial analysis, and mechanistic interpretability.</p>
+    </div>
+    <div class="dataviz-canvas-wrap reveal">
+      <span class="viz-label">Skill Radar</span>
+      <canvas id="radar-canvas"></canvas>
+    </div>
+  </div>
+  <div class="dataviz-canvas-wrap reveal" style="height:190px">
+    <span class="viz-label">Publication Timeline</span>
+    <canvas id="bar-canvas"></canvas>
+  </div>
+</section>
+
+<!-- PAPERS -->
+<section id="papers" class="papers-section">
+  <div class="s-label reveal">02 / Publications</div>
+  <h2 class="s-title reveal">Selected <em>publications</em></h2>
+  <div class="paper-tabs reveal">
+    <button class="p-tab active" onclick="switchTab('published')">Published (11)</button>
+    <button class="p-tab" onclick="switchTab('review')">Under Review / Revision (4)</button>
+    <button class="p-tab" onclick="switchTab('conference')">Conference (5)</button>
+  </div>
+
+  <!-- PUBLISHED -->
+  <div class="paper-list active" id="tab-published">
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?</div>
+        <div class="p-venue">Urban Forestry & Urban Greening (JCR Q1, IF 6.0)</div>
+        <div class="p-authors"><strong>Cai, Y.*</strong>, Huang, Y., Chen, A., Yang, Z., Chen, M., et al.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128835" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 6.0</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis</div>
+        <div class="p-venue">PLOS ONE (JCR Q1, IF 2.9) — Accepted</div>
+        <div class="p-authors"><strong>Cai, Y.*</strong>, & Chen, A.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0331788" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Assessing Influence of Urban Scene Characteristics on Urban Heat Island: Interpretable ML in NYC</div>
+        <div class="p-venue">Urban Climate (JCR Q1, IF 6.0)</div>
+        <div class="p-authors">Li, H., <strong>Cai, Y.*</strong>, Yang, Y., & Cai, X.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 6.0</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Disparate Impacts of Air Pollution on Depression and Anxiety Incidence in the United States</div>
+        <div class="p-venue">Environmental Research (JCR Q1, IF 7.7)</div>
+        <div class="p-authors">Burrows, K., Luo, J., <strong>Cai, Y.</strong>, & Aschebrook-Kilfoy, B.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.envres.2025.122691" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 7.7</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver</div>
+        <div class="p-venue">Land Use Policy (JCR Q1, IF 6.0)</div>
+        <div class="p-authors">Huang, Y., Du, J., Chen, M., Lin, Y., Huang, S., & <strong>Cai, Y.</strong></div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.landusepol.2025.107824" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 6.0</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Greenery Inequalities in New York and London: Socio-economic and Spatial Dimensions</div>
+        <div class="p-venue">Urban Forestry & Urban Greening (JCR Q1, IF 6.0)</div>
+        <div class="p-authors">Hu, Y., Chen, M., & <strong>Cai, Y.</strong></div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128939" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 6.0</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Enhancing Sustainable Indoor Air: Potted Plants and ML Models for VOC Mitigation</div>
+        <div class="p-venue">Urban Climate (JCR Q1, IF 6.0)</div>
+        <div class="p-authors">Shen, X., Sun, Q., Mosey, G., <strong>Cai, Y.</strong>, & Cheng, W.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102497" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · IF 6.0</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Residential Segregation: ML, SHAP Interpretability, and Deep Learning — A Las Vegas Case Study</div>
+        <div class="p-venue">Land (JCR Q1, IF 3.2)</div>
+        <div class="p-authors">Liu, J., <strong>Cai, Y.</strong>, & Shen, X.*</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/land14050957" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2024</div>
+      <div>
+        <div class="p-title">Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census & Social Media</div>
+        <div class="p-venue">Urban Forestry & Urban Greening (JCR Q1, IF 6.0) — Cited 50+</div>
+        <div class="p-authors">Chen, M., <strong>Cai, Y.</strong>, Guo, S., Sun, R., Song, Y., & Shen, X.*</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2024.128289" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1 · 50+ cited</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2024</div>
+      <div>
+        <div class="p-title">Empathy and Redemption: Online Support for Mental Health Before and After COVID-19</div>
+        <div class="p-venue">PLOS ONE (JCR Q1, IF 2.9)</div>
+        <div class="p-authors"><strong>Cai, Y.*</strong>, Wei, E., & Cai, X.</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0307042" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q1</span></div>
+    </div>
+
+    <div class="paper-row reveal">
+      <div class="p-year">2024</div>
+      <div>
+        <div class="p-title">Urban Amenities and Urban Green Space Transformation in Guangzhou</div>
+        <div class="p-venue">ISPRS International Journal of Geo-Information (JCR Q2, IF 2.8)</div>
+        <div class="p-authors">Zhang, S., Chen, J., <strong>Cai, Y.</strong>, Wen, Y., Niu, J., & Chen, M.*</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/ijgi13120452" target="_blank">DOI ↗</a><span class="p-badge badge-q1">Q2</span></div>
+    </div>
+
+  </div>
+
+  <!-- UNDER REVIEW -->
+  <div class="paper-list" id="tab-review">
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Desirable Bikeshare Routes: Nonlinear Impact of Micro-Level Street Environment</div>
+        <div class="p-venue">Transportation Research Part A (JCR Q1, IF 6.3) — Minor Revision</div>
+        <div class="p-authors"><strong>Cai, Y.</strong>, Song, Q., Cheng, Y., Chen, A., Wang, Y., Li, W., & Qiu, W.*</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-rev">Minor Revision</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2026</div>
+      <div>
+        <div class="p-title">How Park and Non-Park Urban Nature Shape Urban Vitality</div>
+        <div class="p-venue">Landscape and Urban Planning — Major Revision</div>
+        <div class="p-authors">Chen, M., Yu, J., Mao, Q., <strong>Cai, Y.</strong>, Ma, C., & Yang, J.</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-rev">Major Revision</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Defining Urban Vitality Using Image-based, Text-based, and GPS Data</div>
+        <div class="p-venue">npj Urban Sustainability (JCR Q1, IF 8.8) — Under Review</div>
+        <div class="p-authors">Chen, M., Huang, Y., Zheng, Y., Du, J., & <strong>Cai, Y.</strong></div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-rev">Under Review</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">From Infestation to Injustice: Bed Bug Risk as Urban Social Inequality Perspective</div>
+        <div class="p-venue">Applied Geography (JCR Q1, IF 5.4) — Under Review</div>
+        <div class="p-authors"><strong>Cai, Y.*</strong>, Yang, Z., Li, H., Chen, M., & Huang, Y.</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-rev">Under Review</span></div>
+    </div>
+  </div>
+
+  <!-- CONFERENCE -->
+  <div class="paper-list" id="tab-conference">
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">Nonlinear Impact of Macro and Micro Level Built Environments on Bike-Share Route Discrepancies</div>
+        <div class="p-venue">TRB 2025 Annual Meeting</div>
+        <div class="p-authors"><strong>Cai, Y.</strong>, Chen, Y., & Chen, A.</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-conf">TRB 2025</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2025</div>
+      <div>
+        <div class="p-title">From Streets to Cities: A Systematic Review of Multi-Scale Walkability and Built Environment Studies</div>
+        <div class="p-venue">CELA 2025 Annual Conference</div>
+        <div class="p-authors">Li, X., Wen, Y., <strong>Cai, Y.</strong>, & Yang, Q.</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-conf">CELA 2025</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2024</div>
+      <div>
+        <div class="p-title">Multiscale Assessment of Environmental and Socio-Economic Factors on Mental Health</div>
+        <div class="p-venue">ACSP 64th Annual Conference 2024</div>
+        <div class="p-authors"><strong>Cai, Y.*</strong>, Li, H., Gao, J., & Yang, W.</div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-conf">ACSP 2024</span></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2023</div>
+      <div>
+        <div class="p-title">Street-Level Factors and Sexual Crime Using Computer Vision and Big Data — Manhattan</div>
+        <div class="p-venue">AESOP 35th Annual Congress — Full Paper Oral Report</div>
+        <div class="p-authors"><strong>Cai, Y.</strong>, Li, H., & Dai, S.*</div>
+      </div>
+      <div class="p-actions"><a class="p-btn" href="https://hdl.handle.net/20.500.14235/1202" target="_blank">Full Paper ↗</a></div>
+    </div>
+    <div class="paper-row reveal">
+      <div class="p-year">2023</div>
+      <div>
+        <div class="p-title">Human Perceptions to Inform Urban Landscape Design for Promoting Biking-Friendliness — Shanghai</div>
+        <div class="p-venue">IFLA 2023 Conference — Oral Report</div>
+        <div class="p-authors">Li, H., & <strong>Cai, Y.</strong></div>
+      </div>
+      <div class="p-actions"><span class="p-badge badge-conf">IFLA 2023</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects" class="projects-section">
+  <div class="s-label reveal">03 / Ongoing Projects</div>
+  <h2 class="s-title reveal">Research in <em>progress</em></h2>
+  <div class="projects-grid reveal">
+    <div class="proj-card">
+      <div class="proj-header"><div class="proj-icon">🔬</div><div class="proj-arrow">↗</div></div>
+      <h3>VLM Urban Perception Probing</h3>
+      <p>Probing CLIP/VLM internal representations of urban scenes; identifying Consistency-Misalignment issues in spatial reasoning for planning AI. UNC Chapel Hill.</p>
+      <div class="proj-stack"><span class="stack">CLIP</span><span class="stack">PyTorch</span><span class="stack">Mechanistic Interp.</span></div>
+    </div>
+    <div class="proj-card">
+      <div class="proj-header"><div class="proj-icon">🤖</div><div class="proj-arrow">↗</div></div>
+      <h3>LLM Multi-Agent Planning Sim</h3>
+      <p>Building LLM-based multi-agent frameworks to simulate urban planning decision-making, with scene theory applied to cross-cultural urban analysis (w/ Prof. Terry N. Clark, UChicago).</p>
+      <div class="proj-stack"><span class="stack">LLM Agents</span><span class="stack">Scene Theory</span><span class="stack">Google Reviews</span></div>
+    </div>
+    <div class="proj-card">
+      <div class="proj-header"><div class="proj-icon">🚲</div><div class="proj-arrow">↗</div></div>
+      <h3>Urban Cycling & Perception (HKU)</h3>
+      <p>Analyzing cycling trajectory data across major U.S. cities; examining perception-driven route decisions and micro-level environmental influences on cycling behavior.</p>
+      <div class="proj-stack"><span class="stack">GPS Trajectories</span><span class="stack">Street View</span><span class="stack">GIS</span></div>
+    </div>
+    <div class="proj-card">
+      <div class="proj-header"><div class="proj-icon">🏙️</div><div class="proj-arrow">↗</div></div>
+      <h3>Transit Perception (MIT Mobility Lab)</h3>
+      <p>Dynamic topic models on 1M+ transit feedback records and news data using LLM/NLP to quantify multi-domain public transit perceptions. Chicago Transit Authority collaboration.</p>
+      <div class="proj-stack"><span class="stack">LLM</span><span class="stack">Topic Models</span><span class="stack">NLP</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- AWARDS -->
+<section id="awards" class="awards-section">
+  <div class="s-label reveal">04 / Recognition</div>
+  <h2 class="s-title reveal">Awards & <em>honors</em></h2>
+  <div class="awards-grid reveal">
+    <div class="award-item"><span class="award-year">2025</span><div class="award-text"><strong>Outstanding Thesis Award — Nominee</strong>UChicago MACSS · Burnout Dynamics via Weibo</div></div>
+    <div class="award-item"><span class="award-year">2024</span><div class="award-text"><strong>Doctoral Merit Fellowship</strong>University of North Carolina at Chapel Hill</div></div>
+    <div class="award-item"><span class="award-year">2024</span><div class="award-text"><strong>University Scholarship $30,600</strong>University of Chicago</div></div>
+    <div class="award-item"><span class="award-year">2023</span><div class="award-text"><strong>World Landscape Architecture Awards — Merit Award</strong></div></div>
+    <div class="award-item"><span class="award-year">2023</span><div class="award-text"><strong>Phoenix Research & Merit Scholarship $22,000</strong>University of Chicago</div></div>
+    <div class="award-item"><span class="award-year">2022</span><div class="award-text"><strong>Fred and Beth Karren Architecture Fellowship $20,000</strong>UC Berkeley</div></div>
+    <div class="award-item"><span class="award-year">2021</span><div class="award-text"><strong>ASLA Student Honor Award — Communications Category</strong></div></div>
+    <div class="award-item"><span class="award-year">2020</span><div class="award-text"><strong>iF Design Talent Award</strong></div></div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="contact-section">
+  <div>
+    <div class="s-label reveal">05 / Contact</div>
+    <p class="c-intro reveal">Open to <em>collaborations</em>, visiting opportunities & conversations about urban AI.</p>
+    <div class="c-links reveal">
+      <a class="c-link" href="mailto:yuxuancai@unc.edu">
+        <div class="c-link-icon">✉</div>
+        <div><div class="c-link-label">Email</div><div class="c-link-val">yuxuancai@unc.edu</div></div>
+        <div class="c-link-arrow">↗</div>
+      </a>
+      <a class="c-link" href="https://yuxuancai.com" target="_blank">
+        <div class="c-link-icon">🌐</div>
+        <div><div class="c-link-label">Personal Website</div><div class="c-link-val">yuxuancai.com</div></div>
+        <div class="c-link-arrow">↗</div>
+      </a>
+      <a class="c-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank">
+        <div class="c-link-icon">🎓</div>
+        <div><div class="c-link-label">Google Scholar</div><div class="c-link-val">11 published · 4 under review</div></div>
+        <div class="c-link-arrow">↗</div>
+      </a>
+      <a class="c-link" href="https://natureailab.com" target="_blank">
+        <div class="c-link-icon">🔬</div>
+        <div><div class="c-link-label">Nature AI Lab</div><div class="c-link-val">natureailab.com</div></div>
+        <div class="c-link-arrow">↗</div>
+      </a>
+    </div>
+  </div>
+  <div class="reveal">
+    <p style="font-size:11px;color:var(--muted);margin-bottom:16px;letter-spacing:0.08em;text-transform:uppercase">Send a message</p>
+    <div class="c-form">
+      <input type="text" placeholder="Name">
+      <input type="email" placeholder="Email">
+      <input type="text" placeholder="Subject">
+      <textarea placeholder="Message…"></textarea>
+      <button class="btn-glow" style="align-self:flex-start">Send →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="f-left">© 2025 Yuxuan Cai · UNC Chapel Hill · City & Regional Planning</div>
+  <div class="f-right">
+    <a class="f-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank">Scholar</a>
+    <a class="f-link" href="https://natureailab.com" target="_blank">Nature AI Lab</a>
+    <a class="f-link" href="https://yuxuancai.com" target="_blank">yuxuancai.com</a>
+  </div>
+</footer>
+
+<script>
+// CURSOR
+const cur=document.getElementById('cursor'),ring=document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx+'px';ring.style.top=ry+'px';requestAnimationFrame(animRing)})();
+document.querySelectorAll('a,button,.r-card,.proj-card,.award-item,.c-link').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cur.style.width='16px';cur.style.height='16px';ring.style.width='52px';ring.style.height='52px';ring.style.opacity='0.5'});
+  el.addEventListener('mouseleave',()=>{cur.style.width='8px';cur.style.height='8px';ring.style.width='36px';ring.style.height='36px';ring.style.opacity='1'});
+});
+
+// CITY CANVAS
+(function(){
+  const cv=document.getElementById('city-canvas'),ctx=cv.getContext('2d');
+  let W,H,nodes=[],mouse={x:-999,y:-999};
+  function resize(){W=cv.width=cv.offsetWidth;H=cv.height=cv.offsetHeight}
+  resize();window.addEventListener('resize',()=>{resize();init()});
+  document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+  function init(){
+    nodes=[];
+    const count=Math.floor(W*H/12000);
+    for(let i=0;i<count;i++)nodes.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*0.3,vy:(Math.random()-.5)*0.3,r:Math.random()*1.6+0.4,pulse:Math.random()*Math.PI*2,type:Math.random()<0.12?'hub':'node'});
+  }
+  init();
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle='rgba(78,205,196,0.025)';ctx.lineWidth=0.5;
+    for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+    for(let y=0;y<H;y+=60){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}
+    nodes.forEach(n=>{
+      const dx=n.x-mouse.x,dy=n.y-mouse.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<130){const f=((130-dist)/130)*0.55;n.vx+=dx/dist*f;n.vy+=dy/dist*f}
+      n.vx*=0.98;n.vy*=0.98;n.x+=n.vx;n.y+=n.vy;
+      if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;
+      n.pulse+=0.018;
+    });
+    for(let i=0;i<nodes.length;i++){
+      for(let j=i+1;j<nodes.length;j++){
+        const a=nodes[i],b=nodes[j],dx=a.x-b.x,dy=a.y-b.y,d=Math.sqrt(dx*dx+dy*dy);
+        const maxD=a.type==='hub'||b.type==='hub'?170:105;
+        if(d<maxD){
+          const alpha=(1-d/maxD)*0.3;
+          ctx.strokeStyle=`rgba(78,205,196,${alpha})`;ctx.lineWidth=0.5;
+          ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n=>{
+      const p=Math.sin(n.pulse)*0.4+0.6;
+      if(n.type==='hub'){
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r*3.5,0,Math.PI*2);ctx.strokeStyle=`rgba(78,205,196,${0.12*p})`;ctx.lineWidth=0.5;ctx.stroke();
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r*1.6,0,Math.PI*2);ctx.fillStyle=`rgba(78,205,196,${0.65*p})`;ctx.fill();
+      } else {
+        ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fillStyle=`rgba(78,205,196,${0.38*p})`;ctx.fill();
+      }
+    });
+    const g=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,200);
+    g.addColorStop(0,'rgba(78,205,196,0.035)');g.addColorStop(1,'rgba(78,205,196,0)');
+    ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// RADAR
+(function(){
+  const cv=document.getElementById('radar-canvas'),ctx=cv.getContext('2d');
+  function setup(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  setup();
+  const labels=['Urban Planning','LLM / NLP','Spatial Analysis','Machine Learning','Data Visualization','Env. Health'];
+  const vals=[0.92,0.88,0.85,0.86,0.82,0.78];
+  const n=labels.length;let prog=0,started=false;
+  function draw(){
+    const W=cv.width,H=cv.height,cx=W/2,cy=H/2,r=Math.min(W,H)*0.34;
+    ctx.clearRect(0,0,W,H);
+    prog=Math.min(prog+0.028,1);
+    const ease=1-Math.pow(1-prog,3);
+    for(let i=1;i<=5;i++){ctx.beginPath();for(let j=0;j<n;j++){const a=j/n*Math.PI*2-Math.PI/2,rr=r*i/5;j?ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}ctx.closePath();ctx.strokeStyle=`rgba(78,205,196,${0.05+i*0.025})`;ctx.lineWidth=0.5;ctx.stroke()}
+    for(let j=0;j<n;j++){const a=j/n*Math.PI*2-Math.PI/2;ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);ctx.strokeStyle='rgba(78,205,196,0.1)';ctx.lineWidth=0.5;ctx.stroke()}
+    ctx.beginPath();for(let j=0;j<n;j++){const a=j/n*Math.PI*2-Math.PI/2,rr=r*vals[j]*ease;j?ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr):ctx.moveTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}
+    ctx.closePath();ctx.fillStyle='rgba(78,205,196,0.07)';ctx.fill();ctx.strokeStyle='rgba(78,205,196,0.65)';ctx.lineWidth=1.5;ctx.stroke();
+    for(let j=0;j<n;j++){const a=j/n*Math.PI*2-Math.PI/2,rr=r*vals[j]*ease;ctx.beginPath();ctx.arc(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr,3,0,Math.PI*2);ctx.fillStyle='#4ECDC4';ctx.fill()}
+    ctx.fillStyle='rgba(107,127,142,0.85)';ctx.font='10px Space Grotesk';ctx.textAlign='center';
+    for(let j=0;j<n;j++){const a=j/n*Math.PI*2-Math.PI/2,lr=r+26;ctx.fillText(labels[j],cx+Math.cos(a)*lr,cy+Math.sin(a)*lr+4)}
+    if(prog<1)requestAnimationFrame(draw);
+  }
+  const obs=new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!started){started=true;draw()}},{threshold:0.3});
+  obs.observe(cv);
+})();
+
+// BAR CHART
+(function(){
+  const cv=document.getElementById('bar-canvas'),ctx=cv.getContext('2d');
+  function setup(){cv.width=cv.offsetWidth;cv.height=cv.offsetHeight}
+  setup();
+  const data=[{y:'2022',v:1},{y:'2023',v:2},{y:'2024',v:4},{y:'2025',v:11}];
+  const max=12;let prog=0,started=false;
+  function draw(){
+    const W=cv.width,H=cv.height,pad=40,bw=36;
+    ctx.clearRect(0,0,W,H);
+    prog=Math.min(prog+0.04,1);
+    const ease=1-Math.pow(1-prog,3);
+    const step=(W-pad*2)/data.length;
+    data.forEach((d,i)=>{
+      const bh=((H-pad*1.6)*d.v/max)*ease;
+      const x=pad+i*step+(step-bw)/2,y=H-pad-bh;
+      const g=ctx.createLinearGradient(0,y,0,H-pad);
+      g.addColorStop(0,'rgba(78,205,196,0.75)');g.addColorStop(1,'rgba(78,205,196,0.12)');
+      ctx.fillStyle=g;ctx.fillRect(x,y,bw,bh);
+      ctx.fillStyle='rgba(107,127,142,0.8)';ctx.font='10px Space Grotesk';ctx.textAlign='center';
+      ctx.fillText(d.y,x+bw/2,H-pad+14);
+      if(prog>0.7){ctx.fillStyle='rgba(78,205,196,0.9)';ctx.fillText(d.v,x+bw/2,y-7)}
+    });
+    ctx.beginPath();ctx.moveTo(pad,H-pad);ctx.lineTo(W-pad,H-pad);ctx.strokeStyle='rgba(78,205,196,0.15)';ctx.lineWidth=0.5;ctx.stroke();
+    if(prog<1)requestAnimationFrame(draw);
+  }
+  const obs=new IntersectionObserver(entries=>{if(entries[0].isIntersecting&&!started){started=true;draw()}},{threshold:0.3});
+  obs.observe(cv);
+})();
+
+// PAPER TABS
+function switchTab(id){
+  document.querySelectorAll('.paper-list').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.p-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// SCROLL REVEAL
+const revObs=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>revObs.observe(el));
+
+// PARALLAX
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY;
+  const hc=document.querySelector('.hero-content');
+  if(hc)hc.style.transform=`translateY(${y*0.22}px)`;
+});
+</script>
+</body>
+</html>
