@@ -1,0 +1,2302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yuxuan Cai | Urban AI Researcher</title>
+<meta name="description" content="Yuxuan Cai (蔡雨轩) — PhD student in City & Regional Planning at UNC Chapel Hill. Research on urban AI, urban perception, vision-language models, LLM planning simulation, and urban health.">
+<meta name="author" content="Yuxuan Cai">
+<link rel="canonical" href="https://yuxuancai.com/">
+<meta name="theme-color" content="#05070e">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://yuxuancai.com/">
+<meta property="og:title" content="Yuxuan Cai | Urban AI Researcher">
+<meta property="og:description" content="PhD student in City & Regional Planning at UNC Chapel Hill — urban AI, urban perception, vision-language models, and urban health.">
+<meta property="og:image" content="https://yuxuancai.com/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Yuxuan Cai | Urban AI Researcher">
+<meta name="twitter:description" content="PhD student in City & Regional Planning at UNC Chapel Hill — urban AI, urban perception, vision-language models, and urban health.">
+<meta name="twitter:image" content="https://yuxuancai.com/og.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20fill='%2305070e'/%3E%3Ctext%20x='16'%20y='23'%20font-family='monospace'%20font-size='20'%20fill='%233ee6ff'%20text-anchor='middle'%3EY%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Share+Tech+Mono&family=DotGothic16&display=swap" rel="stylesheet">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Person","name":"Yuxuan Cai","alternateName":"蔡雨轩","url":"https://yuxuancai.com/","jobTitle":"PhD Student","affiliation":{"@type":"CollegeOrUniversity","name":"University of North Carolina at Chapel Hill"},"alumniOf":[{"@type":"CollegeOrUniversity","name":"University of Chicago"},{"@type":"CollegeOrUniversity","name":"University of California, Berkeley"}],"knowsAbout":["Urban planning","Vision-language models","Urban perception","Urban health","Machine learning"],"sameAs":["https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en","https://github.com/YuxuanCaiUrban"]}
+</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0e0714;--bg2:#180b20;--panel:rgba(255,255,255,0.03);--panel2:rgba(255,255,255,0.05);
+  --line:rgba(255,150,200,0.13);--line2:rgba(255,150,200,0.30);
+  --text:#fbe9f3;--muted:#b393ac;--dim:#6f5570;
+  /* sunset / city-pop palette: --accent = primary warm pink; --cyan kept for data-viz contrast */
+  --accent:#ff4d9d;--cyan:#3ee6ff;--magenta:#ff5ca0;--violet:#b07bff;--lime:#5cffb0;--amber:#ffb14d;
+  --display:'DotGothic16','Space Grotesk',system-ui,sans-serif;--body:'Inter',system-ui,sans-serif;
+  --mono:'Share Tech Mono',ui-monospace,monospace;--pixel:'DotGothic16',sans-serif;
+  --maxw:1120px;
+}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--body);line-height:1.6;overflow-x:hidden;
+  background-image:radial-gradient(1200px 600px at 80% -10%,rgba(255,92,160,0.08),transparent 60%),radial-gradient(1000px 600px at 0% 110%,rgba(255,160,70,0.05),transparent 55%);}
+a{color:inherit}
+::selection{background:rgba(255,77,157,0.25);color:#fff}
+
+/* scrollbar */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-thumb{background:rgba(255,150,200,0.18);border-radius:8px}
+::-webkit-scrollbar-track{background:transparent}
+
+.skip-link{position:fixed;left:8px;top:-60px;z-index:10000;background:var(--bg2);color:var(--accent);border:1px solid var(--accent);padding:8px 14px;font-family:var(--mono);font-size:12px;text-decoration:none;transition:top .15s}
+.skip-link:focus{top:8px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent)}
+.eyebrow::before{content:'// '}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+  padding:11px 20px;border-radius:999px;border:1px solid var(--line2);color:var(--text);text-decoration:none;cursor:pointer;background:transparent;
+  transition:border-color .2s,background .2s,transform .2s,box-shadow .2s}
+.btn:hover{border-color:var(--accent);background:rgba(255,77,157,0.08);box-shadow:0 0 24px rgba(255,77,157,0.18);transform:translateY(-1px)}
+.btn-primary{border-color:var(--accent);background:rgba(255,77,157,0.1)}
+.btn-primary:hover{background:rgba(255,77,157,0.18)}
+
+/* ════ HERO / LANDING ════ */
+#city-screen{position:fixed;inset:0;z-index:10;overflow:hidden;background:var(--bg)}
+#city-canvas{position:absolute;inset:0;z-index:1}
+/* fallback ambience behind globe (and if globe fails) */
+#city-screen::before{content:'';position:absolute;inset:0;z-index:0;
+  background:radial-gradient(800px 800px at 72% 50%,rgba(255,92,160,0.10),transparent 60%),radial-gradient(600px 600px at 70% 55%,rgba(255,160,70,0.08),transparent 60%);}
+.hero-grid{position:absolute;inset:0;z-index:0;opacity:.5;
+  background-image:linear-gradient(rgba(255,150,200,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,150,200,0.05) 1px,transparent 1px);
+  background-size:48px 48px;mask-image:radial-gradient(circle at 50% 40%,#000 0%,transparent 75%)}
+.hero-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(120% 90% at 30% 50%,rgba(5,7,14,0.86) 0%,rgba(5,7,14,0.30) 42%,transparent 70%)}
+
+.topbar{position:absolute;top:0;left:0;right:0;z-index:6;height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,4vw,48px);}
+.brand{font-family:var(--pixel);font-size:18px;color:var(--text);letter-spacing:.02em;text-decoration:none}
+.brand b{color:var(--accent);font-weight:400}
+.topnav{display:flex;gap:6px;align-items:center}
+.topnav a{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;
+  padding:8px 12px;border-radius:999px;transition:color .18s,background .18s}
+.topnav a:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.topnav .sep{width:1px;height:18px;background:var(--line);margin:0 6px}
+
+.hero-content{position:absolute;z-index:5;left:clamp(20px,5vw,72px);top:50%;transform:translateY(-50%);max-width:560px}
+.hero-name{font-family:var(--display);font-weight:700;font-size:clamp(42px,6.6vw,82px);line-height:1.02;letter-spacing:.01em;margin:14px 0 0}
+.hero-name .zh{display:block;font-family:var(--pixel);font-size:clamp(15px,1.6vw,18px);color:var(--muted);letter-spacing:.3em;margin-top:14px;font-weight:400}
+.hero-tag{font-family:var(--display);font-weight:500;font-size:clamp(18px,2.2vw,26px);line-height:1.3;margin:22px 0 6px;color:var(--text)}
+.hero-tag em{font-style:normal;color:var(--accent)}
+.hero-sub{color:var(--muted);font-size:15px;max-width:440px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+
+.hero-stats{position:absolute;z-index:5;left:clamp(20px,5vw,72px);bottom:clamp(20px,5vh,56px);display:flex;gap:34px}
+.stat .n{font-family:var(--display);font-weight:700;font-size:30px;color:var(--text);line-height:1}
+.stat .n b{color:var(--accent);font-weight:700}
+.stat .l{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-top:6px}
+
+.globe-legend{position:absolute;z-index:5;right:clamp(20px,4vw,48px);bottom:clamp(20px,5vh,56px);text-align:right;max-width:230px}
+.globe-panel{position:relative;height:clamp(360px,54vh,540px);border-radius:16px;overflow:hidden;border:1px solid var(--line);background:radial-gradient(700px 500px at 60% 50%,rgba(255,77,157,0.06),transparent 60%),var(--bg2);margin-bottom:12px}
+.globe-panel #globe{position:absolute;inset:0;z-index:1;cursor:grab}
+.globe-panel #globe:active{cursor:grabbing}
+.globe-panel .globe-legend{right:18px;bottom:16px}
+.globe-cap{font-family:var(--mono);font-size:11px;color:var(--dim);margin:0 0 34px}
+.globe-legend .gl-t{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);margin-bottom:8px}
+.gl-row{font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;gap:7px;justify-content:flex-end;align-items:center;line-height:1.9}
+.gl-dot{width:7px;height:7px;border-radius:50%;flex:none}
+.scroll-hint{position:absolute;z-index:5;left:50%;bottom:18px;transform:translateX(-50%);font-family:var(--mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--dim);animation:bob 2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateX(-50%) translateY(0);opacity:.6}50%{transform:translateX(-50%) translateY(5px);opacity:1}}
+
+/* ════ SECTIONS ════ */
+#sections{display:none;min-height:100vh}
+.back-nav{position:sticky;top:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;
+  padding:0 clamp(20px,4vw,48px);background:rgba(5,7,14,0.82);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.section-tabs{display:flex;gap:2px}
+.s-tab{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 13px;color:var(--muted);cursor:pointer;
+  background:none;border:0;border-radius:999px;transition:color .18s,background .18s}
+.s-tab:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.s-tab.active{color:#04121a;background:var(--accent);font-weight:600}
+.back-btn{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--accent);cursor:pointer;border:1px solid var(--line2);
+  padding:8px 14px;border-radius:999px;background:transparent;transition:background .18s}
+.back-btn:hover{background:rgba(255,77,157,0.1)}
+
+main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
+.page{display:none;padding:70px 0 90px;min-height:calc(100vh - 64px)}
+.page.active{display:block}
+.s-head{margin-bottom:42px}
+.s-title{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.4vw,52px);letter-spacing:.01em;line-height:1.12;margin-top:10px;outline:none}
+.s-title em{font-style:normal;color:var(--accent)}
+
+/* cards / shared */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;transition:border-color .25s,background .25s,transform .25s}
+.card:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-3px)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);
+  border:1px solid rgba(255,77,157,0.28);padding:3px 9px;border-radius:999px}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:300px 1fr;gap:54px;align-items:start}
+.about-photo{width:100%;aspect-ratio:3/4;border-radius:16px;border:1px solid var(--line);background:
+  linear-gradient(135deg,rgba(255,77,157,0.08),rgba(157,139,255,0.06)),var(--bg2);
+  display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);font-size:11px;position:relative;overflow:hidden}
+.about-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent,rgba(255,77,157,0.04))}
+.lede{font-family:var(--body);font-weight:500;font-size:clamp(20px,2.6vw,30px);line-height:1.35;letter-spacing:-.01em;margin-bottom:22px}
+.lede em{font-style:normal;color:var(--accent)}
+.about-body p{color:var(--muted);font-size:15.5px;margin-bottom:16px}
+.about-body strong{color:var(--text);font-weight:600}
+.meta-table{margin-top:26px;border-top:1px solid var(--line)}
+.meta-r{display:flex;gap:18px;padding:13px 2px;border-bottom:1px solid var(--line);align-items:baseline}
+.meta-k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);min-width:84px}
+.meta-v{font-size:14px}
+.meta-v a{color:var(--accent);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+.meta-v a:hover{border-bottom-color:var(--accent)}
+
+/* RESEARCH */
+.r-card .r-n{font-family:var(--display);font-weight:700;font-size:38px;color:var(--line2);line-height:1;margin-bottom:14px}
+.r-card:hover .r-n{color:var(--accent)}
+.r-card h3{font-family:var(--display);font-weight:600;font-size:18px;margin-bottom:10px;line-height:1.25}
+.r-card p{color:var(--muted);font-size:14px}
+
+/* PAPERS */
+.chart-wrap{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px 24px 16px;margin-bottom:38px}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;flex-wrap:wrap;gap:8px}
+.chart-head h3{font-family:var(--display);font-weight:600;font-size:15px}
+.chart-legend{display:flex;gap:16px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.chart-legend span{display:inline-flex;align-items:center;gap:6px}
+.chart-legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+#pubchart{width:100%;height:200px}
+#pubchart text{font-family:var(--mono);fill:var(--muted)}
+.bar{transition:opacity .2s}
+.bar:hover{opacity:.82}
+
+.paper-tabs{display:flex;gap:2px;margin-bottom:24px;flex-wrap:wrap}
+.p-tab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;padding:8px 14px;color:var(--muted);cursor:pointer;
+  background:none;border:1px solid var(--line);border-radius:999px;transition:all .18s}
+.p-tab.active{color:#04121a;background:var(--accent);border-color:var(--accent);font-weight:600}
+.paper-list{display:none}
+.paper-list.active{display:block}
+.paper-row{display:grid;grid-template-columns:56px 1fr auto;gap:22px;align-items:start;padding:20px 0;border-bottom:1px solid var(--line)}
+.paper-row:first-child{border-top:1px solid var(--line)}
+.p-year{font-family:var(--mono);font-size:13px;color:var(--accent);padding-top:2px}
+.p-title{font-family:var(--body);font-weight:500;font-size:16px;line-height:1.4;margin-bottom:6px}
+.p-venue{font-family:var(--mono);font-size:12px;color:var(--muted);margin-bottom:5px}
+.p-authors{font-size:13px;color:var(--muted)}
+.p-authors strong{color:var(--amber);font-weight:600}
+.p-actions{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.p-btn{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);border:1px solid rgba(255,77,157,0.3);
+  padding:5px 11px;border-radius:999px;text-decoration:none;white-space:nowrap;transition:background .18s}
+.p-btn:hover{background:rgba(255,77,157,0.1)}
+.rev-item{padding:16px 0;border-bottom:1px solid var(--line);font-size:14px;color:var(--muted);display:flex;gap:12px;align-items:center}
+.rev-item:first-child{border-top:1px solid var(--line)}
+.rev-item::before{content:'▸';color:var(--magenta)}
+
+/* PROJECTS */
+.proj-h{font-family:var(--display);font-weight:600;font-size:18px;color:var(--violet);margin:0 0 18px;display:flex;align-items:center;gap:12px}
+.proj-h::before{content:'';width:22px;height:2px;background:var(--violet)}
+.proj-card h3{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:8px}
+.proj-note{color:var(--dim);font-size:13px;font-family:var(--mono);margin-top:26px}
+
+/* AWARDS */
+.aw-cat{margin-bottom:34px}
+.aw-cat-h{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.aw-cat-h::before{content:'';width:18px;height:2px}
+.aw-c1{color:var(--accent)}.aw-c1::before{background:var(--accent)}
+.aw-c2{color:var(--lime)}.aw-c2::before{background:var(--lime)}
+.aw-c3{color:var(--amber)}.aw-c3::before{background:var(--amber)}
+.aw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.aw-item{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 18px;display:flex;gap:14px;align-items:baseline;transition:border-color .2s}
+.aw-item:hover{border-color:var(--line2)}
+.aw-year{font-family:var(--mono);font-size:11px;color:var(--accent);min-width:34px}
+.aw-text strong{color:var(--text);display:block;font-family:var(--display);font-weight:500;font-size:14.5px;margin-bottom:2px}
+.aw-text{font-size:13px;color:var(--muted)}
+.aw-amt{color:var(--dim);font-weight:400;font-size:12px}
+
+/* CONTACT */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px}
+.c-intro{font-family:var(--display);font-weight:500;font-size:clamp(20px,2.4vw,28px);line-height:1.4;color:var(--muted);margin-bottom:26px}
+.c-intro em{font-style:normal;color:var(--amber)}
+.c-link{display:flex;align-items:center;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;transition:padding-left .2s}
+.c-link:first-child{border-top:1px solid var(--line)}
+.c-link:hover{padding-left:6px}
+.c-link:hover .c-arr{color:var(--accent);transform:translate(3px,-3px)}
+.c-icon{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex:none;color:var(--accent)}
+.c-l1{font-family:var(--display);font-weight:500;font-size:14.5px;flex:1}
+.c-l2{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.c-arr{font-family:var(--mono);color:var(--dim);transition:all .2s}
+.c-form{display:flex;flex-direction:column;gap:10px}
+.c-form label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:-4px}
+.c-form input,.c-form textarea{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-family:var(--body);font-size:14px;color:var(--text);outline:none;transition:border-color .18s}
+.c-form input:focus,.c-form textarea:focus{border-color:var(--accent)}
+.c-form textarea{height:120px;resize:vertical}
+.c-form input::placeholder,.c-form textarea::placeholder{color:var(--dim)}
+
+/* BLOG & TUTORIALS */
+.post-list{margin-top:8px}
+.post{padding:22px 0;border-bottom:1px solid var(--line)}
+.post:first-child{border-top:1px solid var(--line)}
+.post-meta{display:flex;gap:12px;align-items:center;margin-bottom:9px}
+.post-date{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.post h3{font-family:var(--body);font-weight:600;font-size:19px;line-height:1.3;margin-bottom:8px;color:var(--text)}
+.post p{color:var(--muted);font-size:14.5px;line-height:1.75;margin-bottom:12px;max-width:70ch}
+.post p em{color:var(--text);font-style:italic}
+.post-links{display:flex;gap:8px;flex-wrap:wrap}
+
+.page-footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.pf-left{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.pf-right a{font-family:var(--mono);font-size:11px;color:var(--muted);text-decoration:none;margin-left:18px}
+.pf-right a:hover{color:var(--accent)}
+
+/* ════ RESPONSIVE ════ */
+@media(max-width:860px){
+  .about-grid{grid-template-columns:1fr;gap:30px}
+  .about-photo{max-width:260px}
+  .contact-grid{grid-template-columns:1fr;gap:36px}
+  .grid-3{grid-template-columns:1fr}
+  .aw-grid{grid-template-columns:1fr}
+  .topnav{display:none}
+  .globe-legend{display:none}
+  .scroll-hint{display:none}
+  .hero-content{top:auto;bottom:64px;transform:none;right:clamp(20px,5vw,72px)}
+  .paper-row{grid-template-columns:46px 1fr;gap:6px 14px}
+  .p-actions{flex-direction:row;grid-column:2;margin-top:8px}
+  .section-tabs{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:64vw}
+  .s-tab{flex:0 0 auto}
+}
+@media(max-width:520px){
+  .hero-name{font-size:clamp(40px,12vw,56px)}
+}
+@media (prefers-reduced-motion: reduce){
+  html{scroll-behavior:auto}
+  .scroll-hint{animation:none}
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+
+/* ════ BOOT OVERLAY ════ */
+#boot-overlay {
+  position: fixed;
+  inset: 0;
+  background: #08040d;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
+}
+#boot-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
+  z-index: 100002;
+  pointer-events: none;
+}
+#boot-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100005;
+  pointer-events: none;
+}
+.boot-fade {
+  opacity: 0 !important;
+  transition: opacity 0.25s ease-out !important;
+}
+.boot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 480px;
+  gap: 28px;
+  z-index: 100001;
+}
+.boot-city-svg {
+  width: 100%;
+  max-height: 160px;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 157, 0.4)) drop-shadow(0 0 1px rgba(62, 230, 255, 0.4));
+  animation: boot-glitch 2s infinite steps(2);
+}
+.boot-skyline {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: boot-draw 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.boot-node {
+  animation: boot-pulse 1.5s infinite alternate;
+}
+.boot-terminal {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--cyan);
+  background: rgba(14, 7, 20, 0.7);
+  border: 1px solid var(--line);
+  padding: 16px 20px;
+  border-radius: 8px;
+  width: 100%;
+  min-height: 125px;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+.boot-line {
+  margin-bottom: 4px;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.boot-line.printed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.boot-line.success {
+  color: var(--lime);
+}
+.boot-line.accent {
+  color: var(--accent);
+}
+.boot-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 13px;
+  background: var(--cyan);
+  margin-left: 4px;
+  animation: boot-blink 0.8s infinite steps(2);
+  vertical-align: middle;
+}
+
+@keyframes boot-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes boot-pulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes boot-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+@keyframes boot-glitch {
+  0%, 95%, 100% { filter: drop-shadow(0 0 6px rgba(255, 77, 157, 0.4)) drop-shadow(0 0 1px rgba(62, 230, 255, 0.4)); transform: translate(0, 0) skewX(0); }
+  96% { filter: drop-shadow(-2px 0 0 rgba(255,0,0,0.6)) drop-shadow(2px 0 0 rgba(0,255,255,0.6)); transform: translate(-1px, 1px) skewX(2deg); }
+  97% { filter: drop-shadow(2px 0 0 rgba(255,0,0,0.6)) drop-shadow(-2px 0 0 rgba(0,255,255,0.6)); transform: translate(1px, -1px) skewX(-2deg); }
+  98% { filter: none; transform: translate(0, 0) skewX(0); }
+}
+</style>
+</head>
+<body>
+<!-- ════ BOOTING CEREMONY ════ -->
+<div id="boot-overlay">
+  <canvas id="boot-canvas"></canvas>
+  <div class="boot-container">
+    <svg class="boot-city-svg" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Neon Glow Filters -->
+        <filter id="neon-glow-pink" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <filter id="neon-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      
+      <!-- BACKGROUND Grid lines representing urban grid -->
+      <g stroke="rgba(62,230,255,0.06)" stroke-width="0.8">
+        <line x1="0" y1="140" x2="400" y2="140" />
+        <line x1="0" y1="145" x2="400" y2="145" />
+        <line x1="0" y1="150" x2="400" y2="150" />
+        <!-- Perspective street grids -->
+        <line x1="200" y1="140" x2="50" y2="160" />
+        <line x1="200" y1="140" x2="110" y2="160" />
+        <line x1="200" y1="140" x2="170" y2="160" />
+        <line x1="200" y1="140" x2="230" y2="160" />
+        <line x1="200" y1="140" x2="290" y2="160" />
+        <line x1="200" y1="140" x2="350" y2="160" />
+      </g>
+
+      <!-- BACKGROUND TOWERS (Low opacity, deep blue/purple) -->
+      <g fill="rgba(176,123,255,0.04)" stroke="rgba(176,123,255,0.12)" stroke-width="1">
+        <rect x="30" y="70" width="35" height="70" />
+        <rect x="95" y="50" width="40" height="90" />
+        <rect x="270" y="60" width="45" height="80" />
+        <rect x="330" y="80" width="30" height="60" />
+      </g>
+
+      <!-- DATA SIGNAL LINES (Connecting city to the cloud) -->
+      <g stroke="rgba(62,230,255,0.22)" stroke-width="1" stroke-dasharray="3 3">
+        <!-- Antennas signals -->
+        <path d="M80 50 L80 15" />
+        <path d="M165 30 L165 10" />
+        <path d="M245 40 L245 20" />
+        <path d="M315 50 L315 25" />
+        <!-- Inter-building networks -->
+        <path d="M80 50 L165 30" />
+        <path d="M165 30 L245 40" />
+        <path d="M245 40 L315 50" />
+      </g>
+      
+      <!-- PULSING SIGNAL NODES -->
+      <g fill="#3ee6ff" filter="url(#neon-glow-cyan)">
+        <circle cx="80" cy="15" r="2.5" class="boot-node"/>
+        <circle cx="165" cy="10" r="3" class="boot-node"/>
+        <circle cx="245" cy="20" r="2.5" class="boot-node"/>
+        <circle cx="315" cy="25" r="2" class="boot-node"/>
+      </g>
+
+      <!-- FOREGROUND BUILDINGS (Detailed vectors, Neon Pink stroke) -->
+      <g fill="none" stroke="#ff4d9d" stroke-width="2" filter="url(#neon-glow-pink)" stroke-linejoin="round">
+        <!-- Left building with slope roof -->
+        <path d="M20 140 L20 80 L55 80 L55 140" class="boot-skyline"/>
+        <!-- Classic skyscraper with double antennas -->
+        <path d="M65 140 L65 50 L95 50 L95 140" class="boot-skyline"/>
+        <!-- Center complex multi-tier building -->
+        <path d="M110 140 L110 100 L125 100 L125 70 L145 70 L145 30 L185 30 L185 70 L205 70 L205 140" class="boot-skyline"/>
+        <!-- High-tech angular diagonal building -->
+        <path d="M220 140 L220 70 L235 40 L255 40 L255 140" class="boot-skyline"/>
+        <!-- Standard tower block -->
+        <path d="M270 140 L270 90 L300 90 L300 140" class="boot-skyline"/>
+        <!-- Right tower with dome/arch -->
+        <path d="M315 140 L315 80 A15 15 0 0 1 345 80 L345 140" class="boot-skyline"/>
+      </g>
+      
+      <!-- BUILDING LIGHTS (Glowing window grids) -->
+      <g fill="rgba(62,230,255,0.75)" filter="url(#neon-glow-cyan)">
+        <!-- Skyscraper 1 windows -->
+        <rect x="73" y="60" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="60" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="72" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="72" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="84" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="84" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="96" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="96" width="3" height="4" rx="0.5"/>
+        
+        <!-- Center tower windows -->
+        <rect x="151" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="161" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="171" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="151" y="54" width="4" height="4" rx="0.5"/>
+        <rect x="161" y="54" width="4" height="4" rx="0.5"/>
+        <rect x="171" y="54" width="4" height="4" rx="0.5"/>
+        
+        <!-- Right curved tower windows -->
+        <rect x="324" y="95" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="334" y="95" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="324" y="110" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="334" y="110" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+      </g>
+    </svg>
+    <div class="boot-terminal" id="boot-terminal-text">
+      <!-- Will be filled by JavaScript sequencing -->
+    </div>
+  </div>
+</div>
+<a href="#content" class="skip-link">Skip to content</a>
+
+<!-- ════ HERO ════ -->
+<div id="city-screen">
+  <div class="hero-grid"></div>
+  <canvas id="city-canvas" aria-hidden="true"></canvas>
+  <div class="hero-vignette"></div>
+
+  <nav class="topbar" aria-label="Primary">
+    <a class="brand" href="#"><b>Y</b>uxuan Cai</a>
+    <div class="topnav">
+      <a href="#about">About</a>
+      <a href="#research">Research</a>
+      <a href="#papers">Papers</a>
+      <a href="#projects">Projects</a>
+      <a href="#awards">Awards</a>
+      <a href="#blog">Blog</a>
+      <span class="sep"></span>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+
+  <div class="hero-content">
+    <div class="eyebrow">PhD · UNC Chapel Hill · City &amp; Regional Planning</div>
+    <h1 class="hero-name">Yuxuan&nbsp;Cai<span class="zh" lang="zh">蔡 雨 轩</span></h1>
+    <p class="hero-tag">Teaching machines to <em>sense</em> the city.</p>
+    <p class="hero-sub">Urban AI · vision-language models for urban perception · LLM multi-agent planning simulation · environmental health &amp; equity.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#papers">View research →</a>
+      <a class="btn" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer">CV (PDF)</a>
+      <a class="btn" href="mailto:yuxuanc@unc.edu">Email</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">▸ Choose a section</div>
+</div>
+
+<!-- ════ SECTIONS ════ -->
+<div id="sections">
+  <header class="back-nav">
+    <a class="brand" href="#" onclick="location.hash='';return false"><b>Y</b>uxuan Cai</a>
+    <nav class="section-tabs" aria-label="Sections">
+      <button class="s-tab" data-page="about"    onclick="location.hash='about'">About</button>
+      <button class="s-tab" data-page="research" onclick="location.hash='research'">Research</button>
+      <button class="s-tab" data-page="papers"   onclick="location.hash='papers'">Papers</button>
+      <button class="s-tab" data-page="projects" onclick="location.hash='projects'">Projects</button>
+      <button class="s-tab" data-page="awards"   onclick="location.hash='awards'">Awards</button>
+      <button class="s-tab" data-page="blog"     onclick="location.hash='blog'">Blog</button>
+      <button class="s-tab" data-page="contact"  onclick="location.hash='contact'">Contact</button>
+    </nav>
+    <button class="back-btn" onclick="location.hash=''">← Home</button>
+  </header>
+
+  <main id="content">
+
+    <!-- ABOUT -->
+    <section class="page" id="page-about">
+      <div class="s-head"><div class="eyebrow">00 · About</div></div>
+      <div class="about-grid">
+        <div class="reveal">
+          <div class="about-photo" aria-hidden="true">
+            <!-- TODO: replace with <img src="headshot.jpg" alt="Yuxuan Cai" style="width:100%;height:100%;object-fit:cover"> -->
+            [ portrait ]
+          </div>
+        </div>
+        <div>
+          <h2 class="s-title reveal" tabindex="-1">Teaching machines<br>to <em>sense</em> the city</h2>
+          <div class="about-body reveal">
+            <p>I am a PhD student in <strong>City and Regional Planning at the University of North Carolina at Chapel Hill</strong>. Previously I completed an MA in Computational Social Science at the <strong>University of Chicago</strong> and studied architecture at <strong>UC Berkeley</strong>.</p>
+            <p>My research sits at the intersection of urban planning, machine perception of the built environment, and public health — using vision-language models to measure how people experience cities, and building LLM multi-agent frameworks that model planning decision-making, behavioral bias, negotiation, and intent alignment in urban contexts.</p>
+          </div>
+          <div class="meta-table reveal">
+            <div class="meta-r"><span class="meta-k">Position</span><span class="meta-v">PhD Student, UNC Chapel Hill</span></div>
+            <div class="meta-r"><span class="meta-k">Email</span><span class="meta-v"><a href="mailto:yuxuanc@unc.edu">yuxuanc@unc.edu</a></span></div>
+            <div class="meta-r"><span class="meta-k">CV</span><span class="meta-v"><a href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer">Download CV (PDF) ↗</a></span></div>
+            <div class="meta-r"><span class="meta-k">Scholar</span><span class="meta-v"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a></span></div>
+            <div class="meta-r"><span class="meta-k">GitHub</span><span class="meta-v"><a href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer">github.com/YuxuanCaiUrban ↗</a></span></div>
+            <!-- TODO: add ORCID when available -->
+          </div>
+        </div>
+      </div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Scholar ↗</a></div></div>
+    </section>
+
+    <!-- RESEARCH -->
+    <section class="page" id="page-research">
+      <div class="s-head"><div class="eyebrow">01 · Research</div><h2 class="s-title reveal" tabindex="-1">Research <em>directions</em></h2></div>
+      <div class="globe-panel reveal">
+        <div id="globe"></div>
+        <div class="globe-legend" aria-hidden="true">
+          <div class="gl-t">Field sites</div>
+          <div class="gl-row"><span>Chapel Hill — base</span><span class="gl-dot" style="background:var(--magenta);box-shadow:0 0 8px var(--magenta)"></span></div>
+          <div class="gl-row"><span>Study cities</span><span class="gl-dot" style="background:var(--cyan);box-shadow:0 0 8px var(--cyan)"></span></div>
+          <div class="gl-row"><span>Alma maters</span><span class="gl-dot" style="background:var(--violet);box-shadow:0 0 8px var(--violet)"></span></div>
+        </div>
+      </div>
+      <p class="globe-cap reveal">Research footprint — field sites mapped from published work. Drag to explore.</p>
+      <div class="grid-3">
+        <div class="card r-card reveal"><div class="r-n">01</div><h3>Urban Perception &amp; Vision-Language Models</h3><p>How people experience urban environments — via crowdsourced data, street-view imagery, and social media — and how AI systems represent those perceptions.</p><div class="tags"><span class="tag">VLM / CLIP</span><span class="tag">Street View</span><span class="tag">NLP</span></div></div>
+        <div class="card r-card reveal"><div class="r-n">02</div><h3>LLM Planning Simulation &amp; Decision-Making</h3><p>LLM multi-agent frameworks that model planning decision processes — behavioral bias, intent understanding, negotiation, and alignment in policy contexts.</p><div class="tags"><span class="tag">Multi-Agent LLM</span><span class="tag">Planning AI</span><span class="tag">Intent</span></div></div>
+        <div class="card r-card reveal"><div class="r-n">03</div><h3>Urban Health &amp; Environmental Justice</h3><p>Long-term environmental exposures — air pollution, heat, green-space inequality — and their disparate effects on health across demographic groups.</p><div class="tags"><span class="tag">Env. Health</span><span class="tag">GIS</span><span class="tag">Equity</span></div></div>
+      </div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div></div>
+    </section>
+
+    <!-- PAPERS -->
+    <section class="page" id="page-papers">
+      <div class="s-head"><div class="eyebrow">02 · Publications</div><h2 class="s-title reveal" tabindex="-1">Selected <em>papers</em></h2></div>
+
+      <div class="chart-wrap reveal">
+        <div class="chart-head">
+          <h3>Publications by year</h3>
+          <div class="chart-legend"><span><i style="background:var(--cyan)"></i>Journal</span><span><i style="background:var(--magenta)"></i>Conference</span></div>
+        </div>
+        <svg id="pubchart" viewBox="0 0 720 200" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Bar chart of publications per year"></svg>
+      </div>
+
+      <div class="paper-tabs">
+        <button class="p-tab active" onclick="switchTab('pub',event)">Published (12)</button>
+        <button class="p-tab" onclick="switchTab('rev',event)">Under Review (3)</button>
+        <button class="p-tab" onclick="switchTab('conf',event)">Conference (4)</button>
+      </div>
+
+      <div class="paper-list active" id="tab-pub">
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Desirable Bikeshare Routes: Nonlinear Impacts of Micro-Level Street Environments</div><div class="p-venue">Transportation Research Part A: Policy and Practice</div><div class="p-authors"><strong>Cai, Y.*</strong>, Song, Q., Cheng, Y., Chen, A., Wang, Y., Li, W., &amp; Qiu, W.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.tra.2026.104962" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Evaluating the Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver: A Social Media and GPS Data Approach</div><div class="p-venue">Land Use Policy</div><div class="p-authors">Huang, Y., Du, J., Chen, M., Lin, Y., Huang, S., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.landusepol.2025.107824" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors"><strong>Cai, Y.*</strong>, Huang, Y., Chen, A., Yang, Z., Chen, M., et al.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128835" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, &amp; Chen, A.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0331788" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Assessing Influence of Urban Scene Characteristics on Urban Heat Island: Interpretable ML in NYC</div><div class="p-venue">Urban Climate</div><div class="p-authors">Li, H., <strong>Cai, Y.*</strong>, Yang, Y., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Long-term PM2.5 Exposure and Mental Health Disparities: A Prospective Analysis of the All of Us Research Program</div><div class="p-venue">Environmental Research</div><div class="p-authors">Burrows, K., Luo, J., <strong>Cai, Y.</strong>, &amp; Aschebrook-Kilfoy, B.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.envres.2025.122691" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Greenery Inequalities in New York and London: Socio-economic and Spatial Dimensions</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Hu, Y., Chen, M., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128939" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Enhancing Sustainable Indoor Air: Potted Plants and ML Models for VOC Mitigation</div><div class="p-venue">Urban Climate</div><div class="p-authors">Shen, X., Sun, Q., Mosey, G., <strong>Cai, Y.</strong>, &amp; Cheng, W.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102497" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Residential Segregation: ML, SHAP Interpretability, and Deep Learning — Las Vegas</div><div class="p-venue">Land</div><div class="p-authors">Liu, J., <strong>Cai, Y.</strong>, &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/land14050957" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census &amp; Social Media</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Chen, M., <strong>Cai, Y.</strong>, Guo, S., Sun, R., Song, Y., &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2024.128289" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Empathy and Redemption: Online Support for Mental Health Before and After COVID-19</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, Wei, E., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0307042" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Urban Amenities and Urban Green Space Transformation in Guangzhou</div><div class="p-venue">ISPRS International Journal of Geo-Information</div><div class="p-authors">Zhang, S., Chen, J., <strong>Cai, Y.</strong>, Wen, Y., Niu, J., &amp; Chen, M.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/ijgi13120452" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+      </div>
+
+      <div class="paper-list" id="tab-rev">
+        <div class="rev-item">Understanding how park and non-park urban nature shape urban vitality — <em>Landscape and Urban Planning</em></div>
+        <div class="rev-item">Urban vitality measurement — multimodal approach</div>
+        <div class="rev-item">Urban inequality &amp; environmental risk</div>
+      </div>
+
+      <div class="paper-list" id="tab-conf">
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">What Do Vision-Language Models Know About Urban Perception? A Mechanistic Investigation</div><div class="p-venue">ACSP 66th Annual Conference</div><div class="p-authors"><strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Nonlinear Impact of Built Environments on Bike-Share Route Discrepancies</div><div class="p-venue">TRB 2025 Annual Meeting</div><div class="p-authors"><strong>Cai, Y.</strong>, Cheng, Y., Chen, A., Qiu, W., &amp; Wang, Y.</div></div><div class="p-actions"></div></div>
+        <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Street-Level Factors and Sexual Crime Using Computer Vision and Big Data — Manhattan</div><div class="p-venue">AESOP 35th Annual Congress — Full Paper Oral</div><div class="p-authors"><strong>Cai, Y.</strong>, Li, H., &amp; Dai, S.*</div></div><div class="p-actions"><a class="p-btn" href="https://hdl.handle.net/20.500.14235/1202" target="_blank" rel="noopener noreferrer">Full Paper ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Human Perceptions to Inform Urban Landscape Design for Biking-Friendliness — Shanghai</div><div class="p-venue">IFLA 2023 Conference — Oral Report</div><div class="p-authors">Li, H., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
+      </div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div><div class="pf-right"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a></div></div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section class="page" id="page-projects">
+      <div class="s-head"><div class="eyebrow">03 · Projects</div><h2 class="s-title reveal" tabindex="-1">Work &amp; <em>projects</em></h2></div>
+      <div class="proj-h">Research Projects</div>
+      <div class="grid-3">
+        <div class="card proj-card reveal"><h3>Urban Perception &amp; VLMs</h3><div class="tags"><span class="tag">VLM</span><span class="tag">Perception</span></div></div>
+        <div class="card proj-card reveal"><h3>LLM Planning Simulation</h3><div class="tags"><span class="tag">Multi-Agent</span><span class="tag">Intent</span></div></div>
+        <div class="card proj-card reveal"><h3>Urban Mobility &amp; Street Environment</h3><div class="tags"><span class="tag">Cycling</span><span class="tag">Street View</span></div></div>
+      </div>
+      <div class="proj-note">// Design &amp; practice portfolios coming soon.</div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div></div>
+    </section>
+
+    <!-- AWARDS -->
+    <section class="page" id="page-awards">
+      <div class="s-head"><div class="eyebrow">04 · Recognition</div><h2 class="s-title reveal" tabindex="-1">Awards &amp; <em>honors</em></h2></div>
+      <div class="aw-cat reveal">
+        <div class="aw-cat-h aw-c1">Fellowships &amp; Scholarships</div>
+        <div class="aw-grid">
+          <div class="aw-item"><span class="aw-year">2024</span><div class="aw-text"><strong>University Scholarship <span class="aw-amt">$30,000</span></strong>University of Chicago</div></div>
+          <div class="aw-item"><span class="aw-year">2023</span><div class="aw-text"><strong>Phoenix Research &amp; Merit Scholarship <span class="aw-amt">$22,000</span></strong>University of Chicago</div></div>
+          <div class="aw-item"><span class="aw-year">2022</span><div class="aw-text"><strong>Karren Architecture Fellowship <span class="aw-amt">$20,000</span></strong>UC Berkeley</div></div>
+          <div class="aw-item"><span class="aw-year">2024</span><div class="aw-text"><strong>Conference Travel Award <span class="aw-amt">$600</span></strong>University of Chicago</div></div>
+        </div>
+      </div>
+      <div class="aw-cat reveal">
+        <div class="aw-cat-h aw-c2">Academic Honors</div>
+        <div class="aw-grid">
+          <div class="aw-item"><span class="aw-year">2025</span><div class="aw-text"><strong>MACSS Outstanding Thesis Award — Nominee</strong>University of Chicago</div></div>
+        </div>
+      </div>
+      <div class="aw-cat reveal">
+        <div class="aw-cat-h aw-c3">Design Awards</div>
+        <div class="aw-grid">
+          <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>iF Design Talent Award</strong></div></div>
+          <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>Architecture Master Prize — Best of Best</strong>Student Landscape Architecture</div></div>
+          <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>World Architecture Award — 36th Cycle</strong></div></div>
+          <div class="aw-item"><span class="aw-year">2022</span><div class="aw-text"><strong>Landscape Institute Award — Innovation &amp; Research Finalist</strong>Landscape Institute, UK</div></div>
+          <div class="aw-item"><span class="aw-year">2023</span><div class="aw-text"><strong>World Landscape Architecture Awards — Student Design Merit</strong></div></div>
+          <div class="aw-item"><span class="aw-year">2021</span><div class="aw-text"><strong>ASLA Student Honor Award — Communications</strong>American Society of Landscape Architects</div></div>
+          <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>Laka Competition — Honorable Mention</strong></div></div>
+          <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>WLA Awards — Student Analysis &amp; Planning Merit + Design Shortlist</strong></div></div>
+        </div>
+      </div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div></div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="page" id="page-contact">
+      <div class="s-head"><div class="eyebrow">06 · Contact</div></div>
+      <div class="contact-grid">
+        <div>
+          <h2 class="s-title reveal" tabindex="-1">Open to<br><em>collaboration</em></h2>
+          <p class="c-intro reveal">Urban AI, visiting opportunities, &amp; research conversations.</p>
+          <div class="reveal">
+            <a class="c-link" href="mailto:yuxuanc@unc.edu"><div class="c-icon">@</div><div style="flex:1"><div class="c-l1">Email</div><div class="c-l2">yuxuanc@unc.edu</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer"><div class="c-icon">↓</div><div style="flex:1"><div class="c-l1">Curriculum Vitae</div><div class="c-l2">Download CV (PDF)</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer"><div class="c-icon">G</div><div style="flex:1"><div class="c-l1">Google Scholar</div><div class="c-l2">View all publications</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer"><div class="c-icon">&lt;/&gt;</div><div style="flex:1"><div class="c-l1">GitHub</div><div class="c-l2">github.com/YuxuanCaiUrban</div></div><div class="c-arr">↗</div></a>
+          </div>
+        </div>
+        <div class="reveal">
+          <p style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:14px;letter-spacing:.1em;text-transform:uppercase">// Send a message — opens your email app</p>
+          <form class="c-form" id="contact-form">
+            <label for="cf-name">Name</label>
+            <input id="cf-name" type="text" name="name" placeholder="Your name" autocomplete="name" required>
+            <label for="cf-email">Email</label>
+            <input id="cf-email" type="email" name="email" placeholder="you@institution.edu" autocomplete="email" required>
+            <label for="cf-subject">Subject</label>
+            <input id="cf-subject" type="text" name="subject" placeholder="Subject">
+            <label for="cf-message">Message</label>
+            <textarea id="cf-message" name="message" placeholder="Message…" required></textarea>
+            <button class="btn btn-primary" type="submit" style="align-self:flex-start;margin-top:6px">Send →</button>
+          </form>
+        </div>
+      </div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="mailto:yuxuanc@unc.edu">Email ↗</a></div></div>
+    </section>
+
+    <!-- BLOG & TUTORIALS -->
+    <section class="page" id="page-blog">
+      <div class="s-head"><div class="eyebrow">05 · Writing</div><h2 class="s-title reveal" tabindex="-1">Blog &amp; <em>tutorials</em></h2></div>
+      <p class="lede reveal" style="font-size:clamp(16px,2vw,21px)">Notes, ideas, and hands-on tutorials on urban AI, urban perception, and computational methods — sharing work in progress and what I learn along the way. Newest first.</p>
+      <div class="proj-h reveal">Blog</div>
+      <div class="post-list reveal">
+
+        <article class="post">
+          <div class="post-meta"><span class="tag">Blog</span><span class="post-date">Jul 2025</span></div>
+          <h3>Urban scene types &amp; heat-island risk in NYC — insights from interpretable ML</h3>
+          <p>A plain-language walkthrough of our <em>Urban Climate</em> paper: which street-level features shape land-surface temperature across New York City. Street greenery beyond roughly 28% canopy, building height, and neighborhood socioeconomic context emerge as the strongest drivers — and heat exposure falls unevenly, with already-vulnerable neighborhoods carrying disproportionate risk.</p>
+          <div class="post-links">
+            <a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank" rel="noopener noreferrer">Paper ↗</a>
+            <a class="p-btn" href="https://natureailab.com/new-paper-measurement-tools-and-senior-2-2/" target="_blank" rel="noopener noreferrer">Original post ↗</a>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="proj-h reveal" style="margin-top:36px">Tutorials</div>
+      <p class="proj-note reveal">// Hands-on tutorials &amp; notebooks — in preparation.</p>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div><div class="pf-right"><a href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer">GitHub ↗</a></div></div>
+    </section>
+
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script>
+const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const HAS_GSAP = ()=>typeof gsap!=='undefined';
+
+// ── DATA ──
+const CITIES=[
+  {name:'Chapel Hill',lat:35.913,lng:-79.056,type:'home'},
+  {name:'Vancouver',lat:49.282,lng:-123.121,type:'study'},
+  {name:'New York',lat:40.713,lng:-74.006,type:'study'},
+  {name:'San Francisco',lat:37.775,lng:-122.419,type:'study'},
+  {name:'Las Vegas',lat:36.169,lng:-115.139,type:'study'},
+  {name:'London',lat:51.507,lng:-0.128,type:'study'},
+  {name:'Guangzhou',lat:23.129,lng:113.264,type:'study'},
+  {name:'Shanghai',lat:31.230,lng:121.474,type:'study'},
+  {name:'Chicago',lat:41.878,lng:-87.629,type:'alma'},
+  {name:'Berkeley',lat:37.872,lng:-122.258,type:'alma'}
+];
+const COL={home:'#ff5ca0',study:'#3ee6ff',alma:'#9d8bff'};
+const HOME=CITIES[0];
+
+// ── PIXEL CITY CANVAS ──
+(function(){
+  const cv=document.getElementById('city-canvas');const ctx=cv&&cv.getContext('2d');
+  if(!cv||!ctx)return;
+  let W,H,t=0,mouse={x:-999,y:-999};
+  const PX=3;
+  let rafId=null,cityRunning=false,lastTs=0;
+
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  resize();window.addEventListener('load',()=>{resize();buildCity();draw();});window.addEventListener('resize',()=>{resize();buildCity();draw()});
+  document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY});
+
+  // Warm + cold mixed palette like reference image
+  const WIN_WARM=['#ffce8a','#ffb066','#ffd9a6','#ffa24d'];
+  const WIN_COLD=['#9fc6ff','#7fa8e6'];
+  const WIN_DIM=['#1a0800','#120600','#0a0400','#1a1000'];
+
+  // Building types: rect, stepped, pagoda-top, setback
+  let buildings=[];
+  let winData=[];
+
+  function buildCity(){
+    buildings=[];winData=[];
+    const gY=H*0.8;
+
+    // FAR layer — thin distant towers
+    for(let i=0;i<32;i++){
+      const xf=i/32+Math.random()*0.015;
+      buildings.push({
+        xf, wf:0.018+Math.random()*0.012, hf:0.2+Math.random()*0.38,
+        col:'#08050f', layer:0, type:'rect',
+        accent:Math.random()<0.6?WIN_WARM[Math.floor(Math.random()*WIN_WARM.length)]:WIN_COLD[Math.floor(Math.random()*WIN_COLD.length)]
+      });
+    }
+
+    // MID layer — varied buildings
+    const midTypes=['rect','rect','rect','stepped','setback','pagoda'];
+    for(let i=0;i<20;i++){
+      const xf=i/20+Math.random()*0.025-0.01;
+      const type=midTypes[Math.floor(Math.random()*midTypes.length)];
+      buildings.push({
+        xf, wf:0.048+Math.random()*0.036, hf:0.30+Math.random()*0.40,
+        col:['#0f0a1a','#100810','#0a0f18','#12080a'][Math.floor(Math.random()*4)],
+        layer:1, type,
+        accent:Math.random()<0.65?WIN_WARM[Math.floor(Math.random()*WIN_WARM.length)]:WIN_COLD[Math.floor(Math.random()*WIN_COLD.length)]
+      });
+    }
+
+    // NEAR layer — large foreground buildings
+    for(let i=0;i<10;i++){
+      const xf=i/10+Math.random()*0.04-0.01;
+      buildings.push({
+        xf, wf:0.055+Math.random()*0.11, hf:0.24+Math.random()*0.32,
+        col:['#050308','#080510','#060408'][Math.floor(Math.random()*3)],
+        layer:2, type:'rect',
+        accent:WIN_WARM[Math.floor(Math.random()*WIN_WARM.length)]
+      });
+    }
+
+    buildings.sort((a,b)=>a.layer-b.layer);
+
+    winData=buildings.map(b=>{
+      const bw=Math.max(PX*4,Math.round(b.wf*W/PX)*PX);
+      const gY2=H*0.8;
+      const bh=Math.round(b.hf*gY2/PX)*PX;
+      const gap=b.layer===0?PX*3:b.layer===1?PX*4:PX*5;
+      const wSize=b.layer===0?PX:b.layer===1?PX*2:PX*2;
+      const cols=Math.max(2,Math.floor((bw-PX*4)/(wSize+gap)));
+      const rows=Math.max(3,Math.floor((bh*0.75)/(wSize+gap)));
+      // mostly warm windows, some cold, some dark
+      const litFloor=Array.from({length:rows},()=>Math.random());
+      const litCol=Array.from({length:cols},()=>Math.random());
+      const darkCut=b.layer===0?0.80:b.layer===1?0.72:0.66;
+      const wins=Array.from({length:cols*rows},(_,wi)=>{
+        const c2=Math.floor(wi/rows), r2=wi%rows;
+        const score=litFloor[r2]*0.6+litCol[c2]*0.4;
+        if(score<darkCut) return null;
+        return Math.random()<0.16?WIN_COLD[Math.floor(Math.random()*WIN_COLD.length)]:WIN_WARM[Math.floor(Math.random()*WIN_WARM.length)];
+      });
+      return{cols,rows,wins,wSize,gap,
+        blinkRate:Array.from({length:cols*rows},()=>Math.random()*0.006+0.001),
+        blinkPhase:Array.from({length:cols*rows},()=>Math.random()*Math.PI*2)};
+    });
+  }
+  buildCity();
+
+  function drawBuilding(b,bi){
+    const gY=H*0.8;
+    const bx=Math.round(b.xf*W/PX)*PX;
+    const bw=Math.max(PX*4,Math.round(b.wf*W/PX)*PX);
+    const bh=Math.round(b.hf*gY/PX)*PX;
+    const by=gY-bh;
+    const alpha=b.layer===0?0.7:b.layer===1?0.88:1;
+
+    ctx.globalAlpha=alpha;
+
+    if(b.type==='pagoda'&&b.layer===1){
+      // Traditional roof style — stepped dark layers
+      ctx.fillStyle=b.col;
+      ctx.fillRect(bx,by,bw,bh);
+      // Roof overhangs
+      const roofH=PX*4;
+      for(let ri=0;ri<3;ri++){
+        const ry=by+ri*(bh/3);
+        const roofW=bw+PX*(3-ri)*4;
+        const rx=bx-(roofW-bw)/2;
+        ctx.fillStyle='#1a0810';
+        ctx.fillRect(rx,ry,roofW,roofH);
+        ctx.fillStyle='#2a1020';
+        ctx.fillRect(rx,ry,roofW,PX);
+        // Eave glow
+        ctx.fillStyle='rgba(255,140,0,0.08)';
+        ctx.fillRect(rx,ry+roofH,roofW,PX*2);
+      }
+    } else if(b.type==='stepped'&&b.layer===1){
+      // Stepped/setback skyscraper
+      ctx.fillStyle=b.col;
+      ctx.fillRect(bx,by,bw,bh);
+      // Step recesses
+      ctx.fillStyle='rgba(0,0,0,0.4)';
+      ctx.fillRect(bx,by,PX*2,bh*0.4);
+      ctx.fillRect(bx+bw-PX*2,by,PX*2,bh*0.4);
+      // Top antenna
+      ctx.fillStyle='#2a1a3a';
+      ctx.fillRect(bx+bw/2-PX,by-PX*6,PX*2,PX*6);
+      ctx.fillStyle=b.accent;
+      ctx.fillRect(bx+bw/2-PX,by-PX*8,PX*2,PX*3);
+    } else if(b.type==='setback'){
+      // Wide base, narrow top
+      ctx.fillStyle=b.col;
+      ctx.fillRect(bx,by+bh*0.5,bw,bh*0.5); // base
+      const topW=bw*0.6, topX=bx+(bw-topW)/2;
+      ctx.fillRect(topX,by,topW,bh*0.52);
+      // Setback ledge glow
+      ctx.fillStyle='rgba(255,120,0,0.1)';
+      ctx.fillRect(bx,by+bh*0.5-PX,bw,PX*3);
+    } else {
+      // Standard rect
+      ctx.fillStyle=b.col;
+      ctx.fillRect(bx,by,bw,bh);
+    }
+
+    // Architectural crown on near foreground buildings — varied tops, not flat slabs
+    if(b.layer>=2) drawBuildingCrown(ctx,bx,by,bw,bh,b.layer,b.accent,t,PX);
+    if(b.layer>=2) drawNearForm(ctx,bx,by,bw,bh,b.layer,b.accent,t,PX);
+
+    // Edge highlights
+    const eCol=b.layer===0?'rgba(100,60,150,0.1)':b.layer===1?'rgba(150,70,200,0.18)':'rgba(80,40,120,0.06)';
+    ctx.fillStyle=eCol;
+    ctx.fillRect(bx,by,PX,bh);
+    ctx.fillRect(bx+bw-PX,by,PX,bh);
+
+    // Roof glow
+    ctx.fillStyle=b.accent+'22';
+    ctx.fillRect(bx,by,bw,PX*2);
+    ctx.globalAlpha=1;
+
+    // Facade detail + rooftop clutter (richer, less "crude" buildings)
+    drawBuildingFacade(ctx,bx,by,bw,bh,b.layer,b.accent,t,PX);
+    drawRooftop(ctx,bx,by,bw,b.layer,b.accent,t,PX);
+
+    // Windows
+    const d=winData[bi];if(!d)return;
+    const startX=bx+PX*2;
+    const startY=by+PX*5;
+    d.wins.forEach((wc,wi)=>{
+      if(!wc)return;
+      const col2=Math.floor(wi/d.rows),row2=wi%d.rows;
+      const wx=startX+col2*(d.wSize+d.gap);
+      const wy=startY+row2*(d.wSize+d.gap);
+      if(wx+d.wSize>bx+bw-PX*2)return;
+      const flk=Math.sin(t*d.blinkRate[wi]+d.blinkPhase[wi]);
+      if(flk>0.97){ctx.fillStyle=WIN_DIM[0];ctx.fillRect(wx,wy,d.wSize,d.wSize);return}
+      ctx.globalAlpha=alpha*(0.85+Math.sin(t*d.blinkRate[wi]*0.3+d.blinkPhase[wi])*0.15);
+      ctx.fillStyle=wc;
+      ctx.fillRect(wx,wy,d.wSize,d.wSize);
+      // (per-window halo removed — cleaner, less noisy facade)
+      ctx.globalAlpha=1;
+    });
+
+    // Ground floor shops (mid/near layer only)
+    if(b.layer>0){
+      const shopH=PX*5;
+      const shopY=gY-shopH;
+      const shopCols=Math.max(1,Math.floor(bw/(PX*10)));
+      for(let si=0;si<shopCols;si++){
+        const sx2=bx+si*(bw/shopCols);
+        const sw=bw/shopCols-PX*2;
+        const _wsh=Math.sin((bx*1.7+si*53.13))*43758.5453;const warmness=(_wsh-Math.floor(_wsh))<0.7;
+        ctx.fillStyle=warmness?'rgba(255,150,30,0.25)':'rgba(0,220,200,0.15)';
+        ctx.fillRect(sx2+PX,shopY,sw-PX,shopH-PX);
+        ctx.fillStyle=warmness?'rgba(255,150,30,0.08)':'rgba(0,220,200,0.05)';
+        ctx.fillRect(sx2+PX,gY,sw-PX,PX*3); // glow on ground
+      }
+    }
+
+    // Reflection
+    if(b.layer>0){
+      ctx.globalAlpha=0.06;
+      ctx.save();ctx.translate(bx,gY*2);ctx.scale(1,-1);
+      ctx.fillStyle=b.col;ctx.fillRect(0,by,bw,Math.min(bh*0.2,H*0.06));
+      ctx.restore();ctx.globalAlpha=1;
+    }
+  }
+
+  // Neon signs — research keywords
+  const SIGNS=[
+    {xf:0.08,yOff:0.48,text:'PERCEPTION',col:'#ff6ec7',size:3},
+    {xf:0.22,yOff:0.32,text:'LLMs',col:'#cc44ff',size:6},
+    {xf:0.38,yOff:0.24,text:'COGNITION',col:'#00ffe5',size:3},
+    {xf:0.54,yOff:0.20,text:'URBAN AI',col:'#ff3a3a',size:4},
+    {xf:0.70,yOff:0.30,text:'EQUITY',col:'#dd55ff',size:4},
+    {xf:0.84,yOff:0.38,text:'HEALTH',col:'#4fc3f7',size:4},
+  ];
+
+  // ════ TOP-TIER SCENE MODULES (synthwave / city-pop) ════
+  function drawRetroSun(ctx, W, H, gY, t, PX) {
+    const snap = v => Math.round(v / PX) * PX;
+    const sunX = snap(W * 0.76);
+    const bob = snap(Math.sin(t * 0.012) * PX * 1.5);
+    const sunY = snap(gY * 0.30) + bob;
+    const R = Math.max(PX * 4, snap(Math.min(W, gY) * 0.17));
+    ctx.save();
+    const glowR = snap(R * 2.1);
+    const halo = ctx.createRadialGradient(sunX, sunY, R * 0.6, sunX, sunY, glowR);
+    halo.addColorStop(0, 'rgba(255,140,90,0.10)');
+    halo.addColorStop(0.5, 'rgba(255,110,135,0.06)');
+    halo.addColorStop(1, 'rgba(255,110,135,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(sunX, sunY, glowR, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    const top = [0xff, 0xe0, 0xa8], mid = [0xff, 0x9e, 0x5c], bot = [0xff, 0x6a, 0x86];
+    const lerp = (a, b, k) => Math.round(a + (b - a) * k);
+    const colAt = f => { let r, g, b; if (f < 0.5) { const k = f / 0.5; r = lerp(top[0], mid[0], k); g = lerp(top[1], mid[1], k); b = lerp(top[2], mid[2], k); } else { const k = (f - 0.5) / 0.5; r = lerp(mid[0], bot[0], k); g = lerp(mid[1], bot[1], k); b = lerp(mid[2], bot[2], k); } return 'rgb(' + r + ',' + g + ',' + b + ')'; };
+    const bandStart = sunY - R + R * 2 * 0.55;
+    const isGap = rowY => { if (rowY < bandStart) return false; const f = (rowY - bandStart) / (sunY + R - bandStart); const gapPx = PX * (1 + Math.floor(f * 3)); const period = PX * 6 + gapPx; const phase = ((rowY - bandStart) % period + period) % period; return phase < gapPx; };
+    ctx.save(); ctx.globalAlpha = 1;
+    for (let y = sunY - R; y <= sunY + R; y += PX) {
+      const ry = snap(y); if (isGap(ry)) continue;
+      const dy = ry - sunY; const inside = R * R - dy * dy; if (inside <= 0) continue;
+      const halfW = snap(Math.sqrt(inside)); if (halfW <= 0) continue;
+      const f = (ry - (sunY - R)) / (2 * R);
+      ctx.fillStyle = colAt(Math.max(0, Math.min(1, f)));
+      const left = sunX - halfW; const fullW = halfW * 2;
+      ctx.fillRect(left, ry, fullW, PX);
+      if (fullW >= PX * 3) { const litW = snap(Math.max(PX, fullW * 0.22)); ctx.fillStyle = 'rgb(' + Math.min(255, top[0]) + ',' + Math.min(255, top[1] + 16) + ',' + Math.min(255, top[2] + 24) + ')'; ctx.globalAlpha = 0.5; ctx.fillRect(left + fullW - litW, ry, litW, PX); ctx.globalAlpha = 1; }
+    }
+    ctx.restore(); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  }
+
+  function drawSkyDither(ctx, W, H, gY, t, PX) {
+    const cell = PX * 2;
+    const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
+    const rnd = i => { const s = Math.sin(i * 127.1 + 71.93) * 43758.5453; return s - Math.floor(s); };
+    const warm = 'rgba(210,135,95,0.07)', dark = '#1c1330', darkAlpha = 0.06;
+    const sunX = Math.round(W * 0.76 / PX) * PX;
+    const skyBottom = Math.round(gY / cell) * cell;
+    ctx.save(); let painted = 0; const maxRects = 360;
+    for (let y = 0; y < skyBottom && painted < maxRects; y += cell) {
+      const row = Math.floor(y / cell); const vy = y / skyBottom;
+      const band = Math.sin(vy * Math.PI * 3.5) * 0.5 + 0.5;
+      const density = (0.10 + vy * 0.22) * (0.45 + band * 0.55);
+      for (let x = 0; x < W && painted < maxRects; x += cell) {
+        const col = Math.floor(x / cell); const bi = (row & 3) * 4 + (col & 3);
+        const threshold = bayer[bi] / 16; const n = rnd(col * 374761 + row * 668265);
+        if (threshold + n * 0.6 > density * 1.6) continue;
+        const lit = 1 - Math.min(1, Math.abs(x - sunX) / W);
+        const isWarm = n < (0.30 + lit * 0.45);
+        if (isWarm) { ctx.fillStyle = warm; ctx.globalAlpha = 1; } else { ctx.fillStyle = dark; ctx.globalAlpha = darkAlpha; }
+        ctx.fillRect(x, y, PX, PX); painted++;
+      }
+    }
+    ctx.globalAlpha = 1; ctx.restore();
+  }
+
+  function drawClouds(ctx, W, H, gY, t, PX) {
+    const snap = v => Math.round(v / PX) * PX;
+    const rnd = i => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+    const N = 5, BODY = '#33223e', LIT = '#ff9e6a', wrapW = W + 200;
+    for (let i = 0; i < N; i++) {
+      const r0 = rnd(i), r1 = rnd(i + 17.3), r2 = rnd(i + 41.9), r3 = rnd(i + 63.2);
+      const yFrac = 0.06 + r0 * 0.39; const cy = snap(yFrac * gY);
+      const parallax = 0.18 + yFrac * 1.0; const speed = (0.12 + r1 * 0.22) * parallax;
+      const baseX = r2 * wrapW; const cx = snap(((baseX + t * speed) % wrapW) - 100);
+      const blocks = 5 + Math.floor(r3 * 4); const seg = snap((6 + r1 * 6) * PX); const rowH = PX * 2; const rows = 3;
+      const baseAlpha = 0.28 + r0 * 0.14 - yFrac * 0.06;
+      for (let b = 0; b < blocks; b++) {
+        const u = b / (blocks - 1); const taper = Math.sin(u * Math.PI);
+        const segRows = Math.max(1, Math.round(taper * rows + 0.2));
+        const jit = snap((rnd(i * 31.7 + b * 7.13) - 0.5) * PX * 3);
+        const segX = snap(cx + b * seg); if (segX > W + PX || segX + seg < -PX) continue;
+        const segTop = snap(cy - segRows * rowH + jit);
+        ctx.globalAlpha = Math.max(0.05, baseAlpha); ctx.fillStyle = BODY;
+        for (let r = 0; r < segRows; r++) { const ry = snap(segTop + r * rowH); ctx.fillRect(segX, ry, seg, rowH); }
+        const litY = snap(segTop + segRows * rowH - PX);
+        ctx.globalAlpha = Math.min(0.6, Math.max(0.1, baseAlpha + 0.18) * taper + 0.04); ctx.fillStyle = LIT;
+        ctx.fillRect(segX, litY, seg, PX);
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawFarHaze(ctx, W, H, gY, t, PX) {
+    const snap = v => Math.round(v / PX) * PX;
+    const x0 = 0, w = snap(W) + PX, sunX = snap(W * 0.76);
+    const pTop = snap(gY * 0.40), pBot = snap(gY * 0.78);
+    const pGrad = ctx.createLinearGradient(0, pTop, 0, pBot);
+    pGrad.addColorStop(0, 'rgba(210,135,95,0)'); pGrad.addColorStop(1, 'rgba(210,135,95,0.05)');
+    ctx.fillStyle = pGrad; ctx.fillRect(x0, pTop, w, pBot - pTop);
+    const yTop = snap(gY * 0.45), yBot = snap(gY);
+    const grad = ctx.createLinearGradient(0, yTop, 0, yBot);
+    grad.addColorStop(0, 'rgba(210,135,95,0)'); grad.addColorStop(1, 'rgba(210,135,95,0.22)');
+    ctx.fillStyle = grad; ctx.fillRect(x0, yTop, w, yBot - yTop);
+    const drift = Math.sin(t * 0.01) * 0.5 + 0.5; const bandY = snap(gY * 0.86); const bandH = snap(gY) - bandY;
+    ctx.fillStyle = 'rgba(210,135,95,1)'; ctx.globalAlpha = 0.04 + drift * 0.03; ctx.fillRect(x0, bandY, w, bandH);
+    const sunW = snap(W) - sunX + PX; ctx.globalAlpha = 0.03 + drift * 0.025; ctx.fillRect(sunX, bandY, sunW, bandH);
+    ctx.globalAlpha = 1;
+  }
+
+  function drawSkyLife(ctx, W, H, gY, t, PX) {
+    const snap = v => Math.round(v / PX) * PX;
+    const rnd = i => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+    const DARK = '#070510';
+    const acY = snap(gY * 0.12); const acSpan = W + 12 * PX; const acX = snap((((t * 0.6) % acSpan) - 6 * PX));
+    ctx.fillStyle = DARK; ctx.fillRect(acX, acY, PX * 3, PX); ctx.fillRect(acX + PX, acY - PX, PX, PX);
+    const blink = Math.floor(t / 15) % 2; ctx.fillStyle = blink === 0 ? '#ff3a3a' : '#ffffff'; ctx.fillRect(acX + PX * 3, acY, PX, PX);
+    ctx.fillStyle = DARK; const birdCount = 3;
+    for (let i = 0; i < birdCount; i++) {
+      const yBase = snap(gY * (0.18 + rnd(i) * 0.28)); const speed = 0.25 + rnd(i + 7) * 0.35; const span = W + 8 * PX; const phase = rnd(i + 3) * span;
+      const bx = snap((((t * speed + phase) % span) - 4 * PX)); const by = snap(yBase + Math.sin(t * 0.05 + i * 2.1) * PX);
+      const flap = Math.floor(t * 0.15 + i * 3) % 2;
+      if (flap === 0) { ctx.fillRect(bx, by, PX, PX); ctx.fillRect(bx + PX, by - PX, PX, PX); ctx.fillRect(bx + PX * 2, by, PX, PX); }
+      else { ctx.fillRect(bx, by - PX, PX, PX); ctx.fillRect(bx + PX, by, PX, PX); ctx.fillRect(bx + PX * 2, by - PX, PX, PX); }
+    }
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  }
+
+  function drawRoadSunStreak(ctx, W, H, gY, t, PX) {
+    const snap = v => Math.round(v / PX) * PX;
+    const sunX = snap(W * 0.76); const sunDiam = snap(W * 0.11);
+    const groundH = H - gY; const rows = Math.max(1, Math.floor(groundH / PX)); const prevAlpha = ctx.globalAlpha;
+    for (let r = 0; r < rows; r++) {
+      const f = r / rows; const y = snap(gY + r * PX); if (y >= H) break;
+      const rowH = PX + snap(f * f * PX * 3); const widen = 1 + f * f * 3.2; const halfW = snap((sunDiam * 0.5) * widen); if (halfW < PX) continue;
+      const gap = (Math.sin(r * 1.7) * 0.5 + 0.5) > (0.18 + f * 0.55); if (!gap) continue;
+      const shimmer = 0.55 + 0.45 * Math.sin(t * 0.05 + r * 0.7); const baseA = (0.32 - f * 0.16) * shimmer; if (baseA <= 0.02) continue;
+      const sway = snap(Math.sin(t * 0.04 + r * 0.5) * (PX * 0.5 + f * PX)); const cx = sunX + sway; const dashColor = (r % 3 === 0) ? '#ff6a86' : '#ff9e5c';
+      const x = snap(cx - halfW); const w = snap(halfW * 2);
+      ctx.globalAlpha = Math.min(0.42, baseA) * prevAlpha; ctx.fillStyle = dashColor; ctx.fillRect(x, y, w, rowH);
+      const coreHalf = snap(halfW * (0.45 - f * 0.18));
+      if (coreHalf >= PX) { ctx.globalAlpha = Math.min(0.5, baseA * 1.4) * prevAlpha; ctx.fillStyle = '#ff9e5c'; ctx.fillRect(snap(cx - coreHalf), y, snap(coreHalf * 2), rowH); }
+    }
+    ctx.globalAlpha = prevAlpha;
+  }
+
+  function drawForeground(ctx, W, H, gY, t, PX) {
+    const SIL = '#070510';
+    const snap = v => Math.round(v / PX) * PX;
+    const rnd = i => { const s = Math.sin(i * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+    ctx.fillStyle = SIL;
+    const palm = (bx, bh, dir, phase) => {
+      const baseY = H; const segs = Math.max(6, Math.round(bh / (PX * 4))); const segH = PX * 4;
+      let cx = snap(bx); let topY = baseY;
+      for (let s = 0; s < segs; s++) { const fr = s / segs; const lean = dir * snap(fr * fr * PX * 7); const x = snap(bx + lean); const w = snap(PX * (3 - fr * 1.4)); const yTop = snap(baseY - (s + 1) * segH); ctx.fillRect(x, yTop, Math.max(PX, w), segH); cx = x + snap(w / 2); topY = yTop; }
+      const crownX = snap(cx); const crownY = snap(topY);
+      ctx.fillRect(crownX - PX, crownY - PX, PX * 2, PX * 2);
+      const nF = 6;
+      for (let f = 0; f < nF; f++) {
+        const spread = (f / (nF - 1)) - 0.5; const ang = spread * Math.PI * 0.95 - Math.PI / 2;
+        const sway = Math.sin(t * 0.04 + f * 1.7 + phase) * PX * 1.2; const len = PX * (7 + Math.round(rnd(f + phase) * 3)); const steps = Math.round(len / PX); const dirX = Math.cos(ang);
+        for (let st = 1; st <= steps; st++) { const fr = st / steps; const hx = dirX * fr * len + sway * fr; const vy = (-Math.sin(ang) * fr * len * 0.45) + (fr * fr * len * 0.7); const x = snap(crownX + hx); const y = snap(crownY - len * 0.25 + vy); const w = fr > 0.7 ? PX : PX * 2; ctx.fillRect(x, y, w, PX); }
+      }
+    };
+    palm(W * 0.07, H * 0.42, 1, 0.0);
+    palm(W * 0.93, H * 0.34, -1, 2.3);
+    const poleY = snap(gY + (H - gY) * 0.18);
+    const pole = (px) => { const x = snap(px); const top = poleY; ctx.fillRect(x, top, PX, snap(H - top)); ctx.fillRect(x - PX * 4, top + PX * 2, PX * 9, PX); ctx.fillRect(x - PX * 3, top + PX * 6, PX * 7, PX); return { x, top }; };
+    pole(W * 0.30); pole(W * 0.66);
+    const WSTEP = PX * 5;
+    const wireY = (y0, sagPx, seed, fr) => { const par = 4 * fr * (1 - fr); const drift = Math.sin(t * 0.02 + seed) * PX * 0.4; return snap(y0 + par * sagPx + drift * par); };
+    const drawWire = (y0, sagPx, seed) => { for (let x = 0; x <= W; x += WSTEP) { const fr = W > 0 ? x / W : 0; const y = wireY(y0, sagPx, seed, fr); ctx.fillRect(snap(x), y, WSTEP, PX); } };
+    const wA = snap(poleY + PX * 2); const wB = snap(poleY + PX * 6); const sagA = snap(H - poleY) * 0.34;
+    drawWire(wA, sagA, 0.0); drawWire(wB, snap(H - poleY) * 0.30, 1.4); drawWire(wA + PX * 1, snap(H - poleY) * 0.40, 2.7);
+    const lx = snap(W * 0.48); const lWireY = wireY(wA, sagA, 0.0, W > 0 ? lx / W : 0); const lSwing = Math.sin(t * 0.05) * PX; const lcx = snap(lx + lSwing);
+    ctx.fillRect(lcx, lWireY, PX, PX * 2);
+    const ly = snap(lWireY + PX * 2);
+    ctx.fillRect(lcx - PX, ly, PX * 3, PX); ctx.fillRect(lcx - PX * 2, ly + PX, PX * 5, PX * 2); ctx.fillRect(lcx - PX, ly + PX * 3, PX * 3, PX); ctx.fillRect(lcx, ly + PX * 4, PX, PX);
+    ctx.globalAlpha = 1; ctx.shadowBlur = 0;
+  }
+
+  // ════ BUILDING DETAIL MODULES ════
+  function drawBuildingFacade(ctx, bx, by, bw, bh, layer, accent, t, PX) {
+    var snap = function (v) { return Math.round(v / PX) * PX; };
+    var rnd = function (s) { var v = Math.sin(s * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+    var seed = bx * 0.913 + by * 1.371;
+    var gB = by + bh;
+    if (bw < PX * 2 || bh < PX * 2) return;
+    ctx.save();
+    var bayCount = layer === 0 ? (2 + Math.floor(rnd(seed * 1.7) * 2)) : (3 + Math.floor(rnd(seed * 1.7) * 3));
+    var mullAlpha = layer === 0 ? 0.18 : 0.25;
+    var mullW = PX; var bayW = bw / bayCount;
+    ctx.fillStyle = 'rgba(0,0,0,' + mullAlpha + ')';
+    for (var i = 1; i < bayCount; i++) { var mx = snap(bx + bayW * i); if (mx > bx && mx < bx + bw - PX) { ctx.fillRect(mx, snap(by), mullW, snap(bh)); } }
+    var bandCount = layer === 0 ? 1 : (1 + Math.floor(rnd(seed * 2.3) * (layer >= 2 ? 3 : 2)));
+    var bandH = Math.max(PX, snap(bh * 0.045));
+    ctx.fillStyle = 'rgba(255,180,90,0.12)';
+    for (var b = 0; b < bandCount; b++) { var fr = 0.15 + rnd(seed * 3.1 + b * 17.3) * 0.7; var byY = snap(by + bh * fr); if (byY > by + PX && byY < gB - bandH - PX) { ctx.fillRect(snap(bx), byY, snap(bw), bandH); } }
+    var edgeW = layer >= 2 ? PX * 2 : PX;
+    ctx.fillStyle = 'rgba(255,200,150,0.18)'; ctx.fillRect(snap(bx + bw - edgeW), snap(by), edgeW, snap(bh));
+    ctx.fillStyle = 'rgba(0,0,0,0.22)'; ctx.fillRect(snap(bx), snap(by), edgeW, snap(bh));
+    if (layer >= 1) { ctx.fillStyle = 'rgba(255,200,150,0.12)'; ctx.fillRect(snap(bx + bw * 0.5), snap(by), snap(bw * 0.5 - edgeW), PX); }
+    if (layer >= 2) {
+      var balCount = 2 + Math.floor(rnd(seed * 4.7) * 3);
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      for (var k = 0; k < balCount; k++) { var lfr = 0.2 + (k + rnd(seed * 5.9 + k * 9.1) * 0.6) / (balCount + 0.4); var ly = snap(by + bh * lfr); if (ly > by + PX && ly < gB - PX) { ctx.fillRect(snap(bx + PX), ly, snap(bw - PX * 2), PX); } }
+      var accentBay = Math.floor(rnd(seed * 6.3) * bayCount); var ax = snap(bx + bayW * accentBay + bayW * 0.5 - PX);
+      var breath = 0.10 + 0.05 * (0.5 + 0.5 * Math.sin(t * 0.08 + seed));
+      ctx.save(); ctx.globalAlpha = breath; ctx.fillStyle = accent; ctx.shadowColor = accent; ctx.shadowBlur = PX * 2;
+      var stripTop = snap(by + bh * 0.12); var stripH = snap(bh * 0.7); ctx.fillRect(ax, stripTop, PX, stripH);
+      ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; ctx.globalAlpha = 1; ctx.restore();
+    }
+    var shH = Math.max(PX * 2, snap(bh * 0.12)); var steps = 4;
+    for (var s = 0; s < steps; s++) { var a = 0.28 * (1 - s / steps); ctx.fillStyle = 'rgba(0,0,0,' + a + ')'; var sy = snap(gB - shH + (shH / steps) * s); ctx.fillRect(snap(bx), sy, snap(bw), Math.ceil(shH / steps)); }
+    ctx.restore();
+  }
+
+  function drawRooftop(ctx, bx, by, bw, layer, accent, t, PX) {
+    var snap = function (v) { return Math.round(v / PX) * PX; };
+    var rnd = function (s) { var v = Math.sin(s * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
+    var seed = bx * 7.13 + by * 3.71;
+    if (layer <= 0) {
+      if (rnd(seed * 0.7 + 4.0) > 0.6) { var amx = snap(bx + bw * (0.3 + rnd(seed + 9) * 0.4)); var amh = snap(Math.min(bw * 0.5, 22 * PX)); ctx.fillStyle = '#1a1426'; ctx.fillRect(amx, snap(by - amh), PX, amh); if (Math.floor(t / 20 + seed) % 2 === 0) { ctx.fillStyle = '#ff3a3a'; ctx.fillRect(amx, snap(by - amh - PX), PX, PX); } }
+      return;
+    }
+    var DARK = '#0a0712'; var STEEL = '#1a1426';
+    var scale = layer >= 2 ? 1.0 : 0.7; var maxItems = layer >= 2 ? 4 : 3; var minItems = 2;
+    var count = minItems + Math.floor(rnd(seed * 1.31 + 2.0) * (maxItems - minItems + 1)); if (count > maxItems) count = maxItems;
+    for (var i = 0; i < count; i++) {
+      var s = seed + i * 53.123; var typ = Math.floor(rnd(s + 1.7) * 6) % 6;
+      var slotW = bw / count; var cx = bx + slotW * (i + 0.5) + (rnd(s + 3.3) - 0.5) * slotW * 0.4;
+      if (typ === 0) {
+        var twT = Math.max(snap(bw * 0.16 * scale), 6 * PX); var th = Math.max(snap(bw * 0.18 * scale), 8 * PX);
+        var tx = snap(cx - twT / 2); if (tx < bx) tx = snap(bx); if (tx + twT > bx + bw) tx = snap(bx + bw - twT);
+        var legH = Math.max(snap(th * 0.28), 2 * PX); var topY = snap(by - legH - th);
+        ctx.fillStyle = STEEL; var legN = layer >= 2 ? 4 : 3;
+        for (var L = 0; L < legN; L++) { var lx = snap(tx + (twT - PX) * (L / (legN - 1))); ctx.fillRect(lx, snap(by - legH), PX, legH); }
+        ctx.fillStyle = DARK; ctx.fillRect(tx, snap(topY + PX), twT, snap(th - PX)); ctx.fillRect(snap(tx + PX), topY, snap(twT - 2 * PX), PX);
+        ctx.fillStyle = 'rgba(255,200,150,0.18)'; ctx.fillRect(snap(tx + twT - PX), snap(topY + PX), PX, snap(th - PX));
+      } else if (typ === 1) {
+        var bn = 1 + Math.floor(rnd(s + 5.1) * (layer >= 2 ? 3 : 2)); ctx.fillStyle = DARK;
+        var boxW = Math.max(snap(bw * 0.07 * scale), 3 * PX); var boxH = Math.max(snap(bw * 0.05 * scale), 3 * PX); var startX = snap(cx - (bn * (boxW + PX)) / 2);
+        for (var bb = 0; bb < bn; bb++) { var hx = snap(startX + bb * (boxW + PX)); if (hx < bx) hx = snap(bx); if (hx + boxW > bx + bw) hx = snap(bx + bw - boxW); ctx.fillStyle = DARK; ctx.fillRect(hx, snap(by - boxH), boxW, boxH); ctx.fillStyle = STEEL; ctx.fillRect(hx, snap(by - boxH), boxW, PX); ctx.fillStyle = 'rgba(255,200,150,0.16)'; ctx.fillRect(snap(hx + boxW - PX), snap(by - boxH), PX, boxH); }
+      } else if (typ === 2) {
+        var mh = Math.max(snap(bw * 0.42 * scale), 14 * PX); var mx2 = snap(cx); if (mx2 < bx + PX) mx2 = snap(bx + PX); if (mx2 > bx + bw - PX) mx2 = snap(bx + bw - PX);
+        var mTop = snap(by - mh); ctx.fillStyle = STEEL; ctx.fillRect(mx2, mTop, PX, mh);
+        var crossY = snap(mTop + mh * 0.18); var armW = Math.max(snap(mh * 0.16), 2 * PX); ctx.fillRect(snap(mx2 - armW), crossY, snap(armW * 2 + PX), PX);
+        var crossY2 = snap(mTop + mh * 0.07); ctx.fillRect(snap(mx2 - armW * 0.6), crossY2, snap(armW * 1.2 + PX), PX);
+        var on = (Math.floor(t / 20 + seed) % 2 === 0);
+        if (on) { ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = '#ff3a3a'; ctx.fillRect(snap(mx2 - PX), snap(mTop - PX), 3 * PX, 3 * PX); ctx.restore(); ctx.fillStyle = '#ff3a3a'; ctx.fillRect(mx2, snap(mTop - PX), PX, PX); } else { ctx.fillStyle = '#12080a'; ctx.fillRect(mx2, snap(mTop - PX), PX, PX); }
+      } else if (typ === 3) {
+        var bbW = Math.max(snap(bw * 0.32 * scale), 10 * PX); var bbH = Math.max(snap(bbW * 0.5), 6 * PX); var bbx = snap(cx - bbW / 2); if (bbx < bx) bbx = snap(bx); if (bbx + bbW > bx + bw) bbx = snap(bx + bw - bbW);
+        var legH2 = Math.max(snap(bbH * 0.4), 2 * PX); var bby = snap(by - legH2 - bbH);
+        ctx.fillStyle = STEEL; ctx.fillRect(snap(bbx + PX), snap(by - legH2), PX, legH2); ctx.fillRect(snap(bbx + bbW - 2 * PX), snap(by - legH2), PX, legH2);
+        ctx.fillStyle = DARK; ctx.fillRect(bbx, bby, bbW, bbH);
+        ctx.save(); ctx.globalAlpha = 0.55; ctx.fillStyle = accent; ctx.fillRect(bbx, bby, bbW, PX); ctx.fillRect(bbx, snap(bby + bbH - PX), bbW, PX); ctx.fillRect(bbx, bby, PX, bbH); ctx.fillRect(snap(bbx + bbW - PX), bby, PX, bbH); ctx.globalAlpha = 0.14; ctx.fillRect(snap(bbx + PX), snap(bby + PX), snap(bbW - 2 * PX), snap(bbH - 2 * PX)); ctx.restore();
+      } else if (typ === 4) {
+        var sbW = Math.max(snap(bw * 0.18 * scale), 6 * PX); var sbH = Math.max(snap(bw * 0.14 * scale), 6 * PX); var sbx = snap(cx - sbW / 2); if (sbx < bx) sbx = snap(bx); if (sbx + sbW > bx + bw) sbx = snap(bx + bw - sbW);
+        var sby = snap(by - sbH); ctx.fillStyle = DARK; ctx.fillRect(sbx, sby, sbW, sbH); ctx.fillStyle = STEEL; ctx.fillRect(sbx, sby, sbW, PX); ctx.fillStyle = 'rgba(255,200,150,0.16)'; ctx.fillRect(snap(sbx + sbW - PX), sby, PX, sbH);
+        if (rnd(s + 6.6) > 0.6) { ctx.fillStyle = 'rgba(255,180,90,0.5)'; ctx.fillRect(snap(sbx + PX), snap(sby + sbH - 3 * PX), PX, snap(2 * PX)); }
+      } else {
+        var dR = Math.max(snap(bw * 0.06 * scale), 3 * PX); var dx = snap(cx); if (dx - dR < bx) dx = snap(bx + dR); if (dx + dR > bx + bw) dx = snap(bx + bw - dR);
+        var stub = Math.max(snap(dR * 0.7), 2 * PX); ctx.fillStyle = STEEL; ctx.fillRect(dx, snap(by - stub), PX, stub);
+        ctx.fillStyle = DARK; var dcy = snap(by - stub);
+        for (var d = 0; d < 3; d++) { var dw = snap(dR - d * PX); ctx.fillRect(snap(dx - PX), snap(dcy - dR + d * PX), dw, PX); }
+        ctx.fillStyle = 'rgba(255,200,150,0.18)'; ctx.fillRect(snap(dx + dR - PX), snap(dcy - dR), PX, PX);
+      }
+    }
+  }
+
+  function drawIzakayaSigns(ctx, W, H, gY, t, PX){
+    var snap=function(v){return Math.round(v/PX)*PX;};
+    var rnd=function(s){var v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+    var NEON=['#ff6ec7','#ff3a3a','#ffd23a','#3ee6ff','#b07bff','#ff8c3c'];
+    var WORDS=['URBAN AI','PERCEPTION','STREET VIEW','LLM AGENTS','URBAN HEALTH','GEOAI','MOBILITY','GREEN SPACE','EQUITY','SENSING','WALKABILITY','VLM','GIS','CLIP','BAR','HOTEL','CAFE','OPEN','24H','DINER','CLUB','METRO'];
+    var SHORT=['BAR','VLM','GIS','24H','OPEN','CAFE','CLIP'];
+    var N=12;
+    function ring(cx,cy,r,col,a,thick){
+      ctx.fillStyle=col;ctx.globalAlpha=a;
+      var steps=Math.max(20,Math.floor(r*0.9));
+      for(var k=0;k<steps;k++){
+        var ang=(k/steps)*Math.PI*2;
+        var px=snap(cx+Math.cos(ang)*r);
+        var py=snap(cy+Math.sin(ang)*r);
+        ctx.fillRect(px,py,PX*(thick||1),PX*(thick||1));
+      }
+    }
+    for(var i=0;i<N;i++){
+      var r0=rnd(i+1.3), r1=rnd(i*2.7+5.1), r2=rnd(i*3.9+9.2), r3=rnd(i*1.7+13.6);
+      var fx;
+      if(i===0){ fx=0.10+r0*0.10; } else if(i===1){ fx=0.16+r1*0.07; } else { fx=0.26+r0*0.70; }
+      if(fx>0.96) fx=0.96; if(fx<0.05) fx=0.05;
+      var x=snap(W*fx);
+      var y=snap(gY*0.42 + r1*(gY*0.48));
+      var col=NEON[Math.floor(r2*NEON.length)%NEON.length];
+      var archetype=i%7;
+      var word=WORDS[(i*5+Math.floor(r0*WORDS.length))%WORDS.length];
+      var ph=r0*6.28;
+      var breathe=0.78+0.22*(0.5+0.5*Math.sin(t*0.05+ph));
+      var baseDim=(rnd(i*7.7+2.0)>0.82)?0.55:1.0;
+      var dim=baseDim*(0.85+0.15*(0.5+0.5*Math.sin(t*0.02+ph*1.7)));
+      var A=breathe*dim;
+      var fontPx=snap(8+Math.floor(r1*6));
+      if(fontPx<PX*2) fontPx=PX*2;
+      ctx.save();
+      ctx.textBaseline='alphabetic';
+      ctx.textAlign='left';
+      if(archetype===0){
+        var bw=snap(fontPx*1.9);
+        var letters=word.replace(/\s/g,'').slice(0,6);
+        var lh=snap(fontPx*1.35);
+        var bh=snap(lh*letters.length+fontPx*0.9);
+        var bx=x, by=y;
+        ctx.fillStyle='#0a0712';ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.shadowColor='rgba(0,0,0,0)';
+        ctx.fillRect(snap(bx-PX*4),snap(by+bh*0.3),PX*4,PX);
+        ctx.fillRect(snap(bx-PX*4),snap(by+bh*0.3),PX,PX*3);
+        ctx.fillStyle='#050308';ctx.globalAlpha=0.95;
+        ctx.fillRect(bx,by,bw,bh);
+        ctx.shadowBlur=8;ctx.shadowColor=col;ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillRect(bx,by,bw,PX);
+        ctx.fillRect(bx,snap(by+bh-PX),bw,PX);
+        ctx.fillRect(bx,by,PX,bh);
+        ctx.fillRect(snap(bx+bw-PX),by,PX,bh);
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.5)';ctx.globalAlpha=0.5*dim;
+        ctx.fillRect(snap(bx+bw),by,PX,bh);
+        ctx.font='bold '+fontPx+'px "Share Tech Mono"';
+        ctx.textAlign='center';ctx.shadowBlur=6;ctx.shadowColor=col;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        for(var li=0;li<letters.length;li++){
+          ctx.fillText(letters[li],snap(bx+bw/2),snap(by+fontPx*0.9+li*lh));
+        }
+      }
+      else if(archetype===1){
+        ctx.font='bold '+fontPx+'px "Share Tech Mono"';
+        var tw=ctx.measureText(word).width;
+        var pad=snap(fontPx*0.8);
+        var bw2=snap(tw+pad*2);
+        var bh2=snap(fontPx+pad*1.4);
+        var bx2=x, by2=y;
+        ctx.fillStyle='#12080a';ctx.globalAlpha=0.95;ctx.shadowBlur=0;ctx.shadowColor='rgba(0,0,0,0)';
+        ctx.fillRect(bx2,by2,bw2,bh2);
+        ctx.shadowBlur=8;ctx.shadowColor=col;ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillRect(bx2,by2,bw2,PX);
+        ctx.fillRect(bx2,snap(by2+bh2-PX),bw2,PX);
+        ctx.fillRect(bx2,by2,PX,bh2);
+        ctx.fillRect(snap(bx2+bw2-PX),by2,PX,bh2);
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.45)';ctx.globalAlpha=0.45*dim;
+        ctx.fillRect(snap(bx2+bw2),by2,PX,bh2);
+        ctx.textAlign='left';ctx.shadowBlur=6;ctx.shadowColor=col;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillText(word,snap(bx2+pad),snap(by2+fontPx+pad*0.2));
+      }
+      else if(archetype===2){
+        ctx.font='bold '+fontPx+'px "Share Tech Mono"';
+        var tw3=ctx.measureText(word).width;
+        ctx.textAlign='left';
+        ctx.shadowBlur=12;ctx.shadowColor=col;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillText(word,x,snap(y+fontPx));
+        ctx.shadowBlur=8;
+        ctx.fillRect(x,snap(y+fontPx+PX*2),snap(tw3),PX);
+      }
+      else if(archetype===3){
+        var rad=snap(fontPx*1.8);
+        var cx=snap(x+rad), cy=snap(y+rad);
+        var sword=(word.length<=4)?word:SHORT[Math.floor(r2*SHORT.length)%SHORT.length];
+        ctx.fillStyle='#0a0712';ctx.globalAlpha=0.85;ctx.shadowBlur=0;ctx.shadowColor='rgba(0,0,0,0)';
+        ctx.fillRect(snap(cx-rad*0.75),snap(cy-rad*0.55),snap(rad*1.5),snap(rad*1.1));
+        ctx.shadowBlur=9;ctx.shadowColor=col;
+        ring(cx,cy,rad,col,A,1);
+        ring(cx,cy,snap(rad-PX*2),col,A*0.6,1);
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.5)';ctx.globalAlpha=0.5*dim;
+        ctx.fillRect(snap(cx+rad),cy,PX,PX*2);
+        var sf=snap(fontPx*0.85);if(sf<PX*2)sf=PX*2;
+        ctx.font='bold '+sf+'px "Share Tech Mono"';
+        ctx.textAlign='center';ctx.shadowBlur=6;ctx.shadowColor=col;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillText(sword,cx,snap(cy+sf*0.35));
+      }
+      else if(archetype===4){
+        ctx.font='bold '+fontPx+'px "Share Tech Mono"';
+        var tw5=ctx.measureText(word).width;
+        var pad5=snap(fontPx*1.0);
+        var bw5=snap(tw5+pad5*2);
+        var bh5=snap(fontPx+pad5*1.3);
+        var bx5=x, by5=y;
+        ctx.fillStyle='#050308';ctx.globalAlpha=0.95;ctx.shadowBlur=0;ctx.shadowColor='rgba(0,0,0,0)';
+        ctx.fillRect(bx5,by5,bw5,bh5);
+        var gap=snap(PX*3);if(gap<PX)gap=PX;
+        var chase=Math.floor(t*0.25);
+        var bi=0;
+        var dot=function(dx,dy){
+          var lit=((bi+chase)%2===0);
+          ctx.globalAlpha=(lit?A:0.3*dim);
+          ctx.shadowBlur=lit?7:0;ctx.shadowColor=col;
+          ctx.fillStyle=lit?col:'#3a2a30';
+          ctx.fillRect(snap(dx),snap(dy),PX*2,PX*2);
+          bi++;
+        };
+        for(var dx5=bx5; dx5<=bx5+bw5; dx5+=gap){ dot(dx5,by5); }
+        for(var dx5b=bx5; dx5b<=bx5+bw5; dx5b+=gap){ dot(dx5b,by5+bh5-PX*2); }
+        for(var dy5=by5+gap; dy5<by5+bh5-gap; dy5+=gap){ dot(bx5,dy5); }
+        for(var dy5b=by5+gap; dy5b<by5+bh5-gap; dy5b+=gap){ dot(bx5+bw5-PX*2,dy5b); }
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.4)';ctx.globalAlpha=0.4*dim;
+        ctx.fillRect(snap(bx5+bw5+PX*2),by5,PX,bh5);
+        ctx.textAlign='left';ctx.shadowBlur=6;ctx.shadowColor=col;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillText(word,snap(bx5+pad5),snap(by5+fontPx+pad5*0.15));
+      }
+      else if(archetype===5){
+        ctx.font='bold '+fontPx+'px "Share Tech Mono"';
+        var tw6=ctx.measureText(word).width;
+        ctx.textAlign='left';
+        ctx.shadowBlur=7;ctx.shadowColor=col;ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillRect(snap(x-PX*3),y,PX,snap(fontPx*1.4));
+        ctx.fillRect(snap(x-PX*3),y,PX*3,PX);
+        ctx.fillRect(snap(x-PX*3),snap(y+fontPx*1.4),PX*3,PX);
+        ctx.fillText(word,x,snap(y+fontPx));
+        ctx.shadowBlur=9;
+        ctx.fillRect(x,snap(y+fontPx+PX*2),snap(tw6),PX*2);
+        var subf=snap(fontPx*0.55);if(subf<PX*2)subf=PX*2;
+        ctx.font='bold '+subf+'px "Share Tech Mono"';
+        ctx.shadowBlur=5;ctx.globalAlpha=A*0.85;
+        ctx.fillText('OPEN',x,snap(y+fontPx+PX*2+subf+PX*3));
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.5)';ctx.globalAlpha=0.5*dim;
+        ctx.fillRect(snap(x+tw6),snap(y+fontPx+PX*2),PX,PX*2);
+      }
+      else {
+        var aw=snap(fontPx*2.2);
+        var ax=x, ay=y;
+        ctx.shadowBlur=9;ctx.shadowColor=col;ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillRect(snap(ax+aw*0.4),ay,PX*2,snap(fontPx*1.4));
+        var headY=snap(ay+fontPx*1.4);
+        var hw=snap(aw*0.5);
+        for(var hk=0;hk<5;hk++){
+          var seg=snap(hw-hk*PX*2);
+          if(seg<PX) break;
+          ctx.fillRect(snap(ax+aw*0.5-seg/2),snap(headY+hk*PX),seg,PX);
+        }
+        var af=snap(fontPx*0.7);if(af<PX*2)af=PX*2;
+        ctx.font='bold '+af+'px "Share Tech Mono"';
+        ctx.textAlign='center';ctx.shadowBlur=6;
+        ctx.fillStyle=col;ctx.globalAlpha=A;
+        ctx.fillText((word.length<=6?word:SHORT[Math.floor(r1*SHORT.length)%SHORT.length]),snap(ax+aw*0.5),snap(ay-PX*2));
+        ctx.shadowBlur=0;ctx.fillStyle='rgba(255,200,150,0.45)';ctx.globalAlpha=0.45*dim;
+        ctx.fillRect(snap(ax+aw*0.4+PX*2),ay,PX,snap(fontPx*1.4));
+      }
+      ctx.restore();
+    }
+    ctx.globalAlpha=1;
+    ctx.shadowBlur=0;
+    ctx.shadowColor='rgba(0,0,0,0)';
+    ctx.textAlign='left';
+    ctx.textBaseline='alphabetic';
+  }
+
+  function drawNearForm(ctx, bx, by, bw, bh, layer, accent, t, PX){
+    var snap=function(v){return Math.round(v/PX)*PX;};
+    var rnd=function(s){var v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+    var s0=bx;
+    var X=snap(bx), W=snap(bw);
+    var Y=snap(by);
+    var gY=snap(by+bh);
+    var H=gY-Y;
+    var R=X+W;
+    if(W<=0||H<=0)return;
+    ctx.save();
+    ctx.shadowBlur=0; ctx.shadowColor='transparent';
+    ctx.textAlign='left'; ctx.textBaseline='alphabetic'; ctx.globalAlpha=1;
+    // corner quoins / edge piers
+    var pierW=snap(Math.max(PX, bw*(0.05+rnd(s0+3.1)*0.03)));
+    if(pierW>=PX){
+      ctx.fillStyle='rgba(0,0,0,0.30)'; ctx.fillRect(X, Y, pierW, H);
+      ctx.fillStyle='rgba(0,0,0,0.22)'; ctx.fillRect(R-pierW, Y, pierW, H);
+      ctx.fillStyle='rgba(255,200,150,0.10)'; ctx.fillRect(R-PX, Y, PX, H);
+      ctx.fillStyle='rgba(255,255,255,0.03)'; ctx.fillRect(X+pierW-PX, Y, PX, H);
+    }
+    // pilasters / structural columns
+    var nPil=2+Math.floor(rnd(s0+7.7)*2);
+    var innerX=X+pierW, innerW=W-pierW*2;
+    if(innerW>PX*4){
+      var ribW=snap(Math.max(PX, bw*0.018));
+      for(var p=1;p<=nPil;p++){
+        var fx=p/(nPil+1);
+        var px0=snap(innerX+innerW*fx - ribW*0.5);
+        if(px0<=innerX||px0+ribW>=innerX+innerW)continue;
+        ctx.fillStyle='rgba(255,255,255,0.04)'; ctx.fillRect(px0, Y, ribW, H);
+        ctx.fillStyle='rgba(255,200,150,0.07)'; ctx.fillRect(px0+ribW-PX, Y, PX, H);
+        ctx.fillStyle='rgba(0,0,0,0.10)'; ctx.fillRect(px0, Y, PX, H);
+      }
+    }
+    // setback ledge(s)
+    var nLedge=1+Math.floor(rnd(s0+13.3)*2);
+    for(var l=0;l<nLedge;l++){
+      var frac=0.30+(l*0.22)+rnd(s0+l*5.5+2.2)*0.12;
+      var ly=snap(Y+H*frac);
+      if(ly<=Y+PX||ly>=gY-H*0.20)continue;
+      var ledgeH=snap(Math.max(PX, bh*0.01));
+      ctx.fillStyle='rgba(255,200,150,0.18)'; ctx.fillRect(innerX, ly, innerW, ledgeH);
+      ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(innerX, ly+ledgeH, innerW, ledgeH);
+      var cutW=snap(W*0.06);
+      if(cutW>=PX){ ctx.fillStyle='rgba(0,0,0,0.18)'; ctx.fillRect(X+pierW, Y, cutW, ly-Y); }
+    }
+    // sign-band niche (optional)
+    if(rnd(s0+21.9)>0.45){
+      var nicheW=snap(Math.max(PX, bw*(0.07+rnd(s0+4.4)*0.04)));
+      var nicheX=snap(X+pierW+innerW*(0.12+rnd(s0+6.6)*0.25));
+      var nicheTop=snap(Y+H*(0.22+rnd(s0+8.8)*0.10));
+      var nicheBot=snap(gY-H*(0.20));
+      var nicheH=nicheBot-nicheTop;
+      if(nicheW>=PX&&nicheH>PX*3&&nicheX+nicheW<R-pierW){
+        ctx.fillStyle='rgba(0,0,0,0.32)'; ctx.fillRect(nicheX, nicheTop, nicheW, nicheH);
+        ctx.globalAlpha=0.22; ctx.fillStyle=accent; ctx.fillRect(nicheX+nicheW-PX, nicheTop, PX, nicheH); ctx.globalAlpha=1;
+        ctx.fillStyle='rgba(255,200,150,0.12)'; ctx.fillRect(nicheX, nicheTop, nicheW, PX);
+      }
+    }
+    // podium / base block + canopy + lobby glow
+    var podFrac=0.12+rnd(s0+17.1)*0.08;
+    var podH=snap(bh*podFrac);
+    var podTop=snap(gY-podH);
+    var wider=(rnd(s0+9.9)>0.5);
+    var podPad=snap(W*0.04);
+    var podX, podW;
+    if(wider){ podX=snap(X-podPad); podW=snap(W+podPad*2); } else { podX=snap(X+podPad); podW=snap(W-podPad*2); }
+    if(podW<PX){podX=X; podW=W;}
+    ctx.fillStyle='rgba(0,0,0,0.20)'; ctx.fillRect(podX, podTop, podW, podH);
+    ctx.fillStyle='rgba(255,200,150,0.12)'; ctx.fillRect(podX+podW-PX, podTop, PX, podH);
+    ctx.fillStyle='rgba(0,0,0,0.16)'; ctx.fillRect(podX, podTop, PX, podH);
+    var canH=snap(Math.max(PX, bh*0.012));
+    ctx.fillStyle='rgba(255,200,150,0.20)'; ctx.fillRect(podX, podTop, podW, canH);
+    ctx.fillStyle='rgba(0,0,0,0.26)'; ctx.fillRect(podX, podTop+canH, podW, canH);
+    var lobbyH=snap(Math.max(PX*2, podH*0.45));
+    var lobbyTop=snap(gY-lobbyH);
+    var lobbyInset=snap(podW*0.14);
+    var lobbyX=snap(podX+lobbyInset);
+    var lobbyW=snap(podW-lobbyInset*2);
+    if(lobbyW>=PX){
+      ctx.fillStyle='rgba(255,180,90,0.5)'; ctx.fillRect(lobbyX, lobbyTop, lobbyW, lobbyH-PX);
+      var nBay=2+Math.floor(rnd(s0+11.2)*3);
+      var bayGap=lobbyW/nBay;
+      ctx.fillStyle='rgba(0,0,0,0.30)';
+      for(var bI=1;bI<nBay;bI++){ var mx=snap(lobbyX+bayGap*bI - PX*0.5); ctx.fillRect(mx, lobbyTop, PX, lobbyH-PX); }
+      var pulse=0.30+0.12*(0.5+0.5*Math.sin(t*0.05+s0));
+      ctx.globalAlpha=pulse; ctx.fillStyle='rgba(255,210,140,1)'; ctx.fillRect(lobbyX+PX, lobbyTop+PX, lobbyW-PX*2, snap(lobbyH*0.4)); ctx.globalAlpha=1;
+      ctx.fillStyle='rgba(0,0,0,0.40)'; ctx.fillRect(lobbyX, gY-PX, lobbyW, PX);
+    }
+    ctx.globalAlpha=1; ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.textAlign='left'; ctx.textBaseline='alphabetic';
+    ctx.restore();
+  }
+
+  function drawBuildingCrown(ctx,bx,by,bw,bh,layer,accent,t,PX){
+    var snap=function(v){return Math.round(v/PX)*PX;};
+    var rnd=function(s){var v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
+    var seed=bx*0.917+by*1.123;
+    var typ=Math.floor(rnd(seed)*3)%3;
+    var DARK='#0a0712', STEEL='#1a1426';
+    var cx=snap(bx+bw/2);
+    // parapet cap across the top (slightly proud) with sun-side rim
+    ctx.fillStyle=DARK; ctx.fillRect(snap(bx-PX), snap(by-PX*2), snap(bw+PX*2), PX*2);
+    ctx.fillStyle='rgba(255,200,150,0.16)'; ctx.fillRect(snap(bx+bw-PX), snap(by-PX*2), PX, PX*2);
+    if(typ===0){
+      // recessed penthouse block + a couple lit penthouse windows
+      var pw=snap(bw*0.6), px=snap(cx-pw/2), ph=snap(Math.max(PX*5, bh*0.10));
+      ctx.fillStyle=DARK; ctx.fillRect(px, snap(by-PX*2-ph), pw, ph);
+      ctx.fillStyle='rgba(255,200,150,0.16)'; ctx.fillRect(snap(px+pw-PX), snap(by-PX*2-ph), PX, ph);
+      ctx.fillStyle='rgba(255,180,90,0.5)'; ctx.fillRect(snap(px+PX*2), snap(by-PX*2-ph+PX*2), PX, PX); ctx.fillRect(snap(px+pw-PX*3), snap(by-PX*2-ph+PX*3), PX, PX);
+    } else if(typ===1){
+      // double setback tiers (stepped skyscraper crown)
+      var t1w=snap(bw*0.7), t1x=snap(cx-t1w/2), t1h=snap(Math.max(PX*6,bh*0.12));
+      var t2w=snap(bw*0.42), t2x=snap(cx-t2w/2), t2h=snap(Math.max(PX*5,bh*0.10));
+      ctx.fillStyle=DARK; ctx.fillRect(t1x, snap(by-PX*2-t1h), t1w, t1h);
+      ctx.fillStyle='rgba(255,200,150,0.14)'; ctx.fillRect(snap(t1x+t1w-PX), snap(by-PX*2-t1h), PX, t1h);
+      ctx.fillStyle=DARK; ctx.fillRect(t2x, snap(by-PX*2-t1h-t2h), t2w, t2h);
+      ctx.fillStyle='rgba(255,200,150,0.14)'; ctx.fillRect(snap(t2x+t2w-PX), snap(by-PX*2-t1h-t2h), PX, t2h);
+    } else {
+      // central tapered spire + blinking beacon
+      var spH=snap(Math.max(PX*10, bh*0.22)); var spTop=snap(by-PX*2-spH);
+      ctx.fillStyle=STEEL; ctx.fillRect(snap(cx-PX), spTop, PX*2, spH);
+      ctx.fillStyle=DARK; ctx.fillRect(snap(cx), spTop, PX, snap(spH*0.5));
+      if(Math.floor(t/18+seed)%2===0){
+        ctx.save(); ctx.globalAlpha=0.5; ctx.fillStyle='#ff3a3a'; ctx.fillRect(snap(cx-PX), snap(spTop-PX*2), PX*3, PX*3); ctx.restore();
+        ctx.fillStyle='#ff3a3a'; ctx.fillRect(snap(cx-PX/2), snap(spTop-PX), PX, PX);
+      }
+    }
+  }
+
+  function draw(excludeSky = false){
+    ctx.clearRect(0,0,W,H);
+    if (!excludeSky) t++;
+    const gY=H*0.8;
+
+    if (!excludeSky) {
+      // SKY
+      const sky=ctx.createLinearGradient(0,0,0,gY);
+      sky.addColorStop(0,'#1c1330');
+      sky.addColorStop(0.42,'#3a2147');
+      sky.addColorStop(0.66,'#6e3a55');
+      sky.addColorStop(0.84,'#a85f50');
+      sky.addColorStop(0.95,'#c87a50');
+      sky.addColorStop(1,'#d68a55');
+      ctx.fillStyle=sky;ctx.fillRect(0,0,W,gY);
+      drawSkyDither(ctx,W,H,gY,t,PX);
+    }
+
+    // Stars
+    for(let i=0;i<80;i++){
+      const sx=((i*173+89)%100)/100*W;
+      const sy=((i*97+23)%40)/100*gY;
+      ctx.globalAlpha=0.1+Math.sin(t*0.02+i)*0.08;
+      ctx.fillStyle='#ffffff';
+      ctx.fillRect(Math.round(sx/PX)*PX,Math.round(sy/PX)*PX,PX,PX);
+    }
+    ctx.globalAlpha=1;
+
+    // Retro sun + drifting clouds + high-sky life (behind skyline)
+    drawRetroSun(ctx,W,H,gY,t,PX);
+    drawClouds(ctx,W,H,gY,t,PX);
+    drawSkyLife(ctx,W,H,gY,t,PX);
+
+    // Horizon warm glow
+    const haze=ctx.createLinearGradient(0,gY*0.65,0,gY);
+    haze.addColorStop(0,'rgba(190,90,60,0)');
+    haze.addColorStop(1,'rgba(190,90,60,0.15)');
+    ctx.fillStyle=haze;ctx.fillRect(0,gY*0.65,W,gY*0.35);
+
+    // PASS 1 — Far
+    buildings.forEach((b,bi)=>{if(b.layer===0)drawBuilding(b,bi)});
+    drawFarHaze(ctx,W,H,gY,t,PX);
+
+    // PASS 2 — Mid
+    buildings.forEach((b,bi)=>{if(b.layer===1)drawBuilding(b,bi)});
+
+    // PASS 3 — Rail + Train
+    const railY2=Math.round(gY*0.52/PX)*PX;
+    for(let px2=0;px2<W;px2+=PX*40){
+      ctx.fillStyle='#1a0f28';
+      ctx.fillRect(px2,railY2+PX*11,PX*3,gY-railY2-PX*11);
+      ctx.fillRect(px2-PX*2,railY2+PX*10,PX*7,PX*3);
+    }
+    ctx.fillStyle='#150d24';ctx.fillRect(0,railY2+PX*9,W,PX*4);
+    ctx.fillStyle='#1e1232';ctx.fillRect(0,railY2+PX*9,W,PX*2);
+    ctx.fillStyle='rgba(140,40,220,0.06)';ctx.fillRect(0,railY2+PX*13,W,PX*8);
+    {
+      const trainX=((t*1.2)%(W+320))-200;
+      const trainY=railY2;
+      ctx.fillStyle='#0d0a18';ctx.fillRect(trainX,trainY,PX*34,PX*9);
+      ctx.fillStyle='#130f22';ctx.fillRect(trainX,trainY,PX*34,PX*3);
+      for(let wi=0;wi<6;wi++){
+        const wglow=Math.sin(t*0.02+wi*0.5)*0.1+0.9;
+        ctx.fillStyle=wi%3===0?`rgba(204,68,255,${wglow})`:`rgba(255,110,199,${wglow})`;
+        ctx.fillRect(trainX+PX*3+wi*PX*5,trainY+PX,PX*3,PX*6);
+      }
+      ctx.fillStyle='rgba(180,60,255,0.12)';ctx.fillRect(trainX,trainY+PX*9,PX*34,PX*4);
+      if(t%8===0){ctx.fillStyle='rgba(255,200,80,0.7)';ctx.fillRect(trainX+PX*Math.floor(Math.random()*30),trainY+PX*9,PX,PX)}
+    }
+
+    // PASS 4 — Near
+    buildings.forEach((b,bi)=>{if(b.layer===2)drawBuilding(b,bi)});
+
+    // Izakaya / BAR neon sign alley (city-pop signature)
+    drawIzakayaSigns(ctx,W,H,gY,t,PX);
+
+    // GROUND
+    const grd=ctx.createLinearGradient(0,gY,0,H);
+    grd.addColorStop(0,'#1a0608');grd.addColorStop(1,'#060205');
+    ctx.fillStyle=grd;ctx.fillRect(0,gY,W,H-gY);
+    // Wet road
+    const road=ctx.createLinearGradient(0,gY,0,H);
+    road.addColorStop(0,'rgba(230,120,70,0.10)');
+    road.addColorStop(0.4,'rgba(180,60,200,0.06)');
+    road.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=road;ctx.fillRect(0,gY,W,H-gY);
+    for(let rx=0;rx<W;rx+=PX*12){
+      ctx.fillStyle=`rgba(255,120,0,${0.06+Math.sin(t*0.02+rx*0.004)*0.03})`;
+      ctx.fillRect(rx,gY+PX,PX*6,PX);
+    }
+    drawRoadSunStreak(ctx,W,H,gY,t,PX);
+
+    // NEON SIGNS
+    SIGNS.forEach((s,si)=>{
+      const signX=s.xf*W,signY=s.yOff*gY;
+      const breathe=Math.sin(t*0.025+si*1.1)*0.15+0.85;
+      const signFlicker=(t+si*17)%90<86;
+      if(!signFlicker)return;
+      ctx.font=`bold ${PX*s.size}px "Share Tech Mono"`;
+      ctx.textAlign='center';
+      ctx.globalAlpha=breathe;
+      ctx.fillStyle=s.col;
+      ctx.shadowColor=s.col;ctx.shadowBlur=PX*s.size*0.8;
+      ctx.fillText(s.text,signX,signY);
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+    });
+
+    // STREET SCENE
+    {
+      const sceneX=Math.round(W*0.80/PX)*PX;
+      const sceneY=gY;
+
+      // Lamppost
+      const lampX=sceneX+PX*4,lampBaseY=sceneY+PX*2;
+      ctx.fillStyle='#1a1a2e';
+      ctx.fillRect(lampX,lampBaseY-PX*22,PX*2,PX*22);
+      ctx.fillRect(lampX-PX*4,lampBaseY-PX*22,PX*6,PX*2);
+      ctx.fillStyle='#c8eeff';ctx.fillRect(lampX-PX*4,lampBaseY-PX*25,PX*6,PX*3);
+      ctx.fillStyle='#e8f8ff';ctx.fillRect(lampX-PX*3,lampBaseY-PX*24,PX*4,PX*2);
+      ctx.fillStyle='rgba(160,220,255,0.18)';ctx.fillRect(lampX-PX*6,lampBaseY-PX*22,PX*10,PX*8);
+      ctx.fillStyle='rgba(160,220,255,0.08)';ctx.fillRect(lampX-PX*10,lampBaseY-PX*14,PX*18,PX*10);
+      ctx.fillStyle='rgba(140,200,255,0.07)';ctx.fillRect(lampX-PX*8,lampBaseY,PX*14,PX*4);
+      const lampFlicker=Math.sin(t*0.04+1.2)>0.96;
+      if(!lampFlicker){ctx.fillStyle='rgba(180,230,255,0.35)';ctx.fillRect(lampX-PX*3,lampBaseY-PX*24,PX*4,PX*2)}
+
+      // Phone booth
+      const pbX=sceneX+PX*18,pbY=sceneY-PX*16;
+      ctx.fillStyle='#cc44ff';ctx.fillRect(pbX,pbY,PX*8,PX*16);
+      ctx.fillStyle='#0a0614';ctx.fillRect(pbX+PX,pbY+PX*2,PX*6,PX*8);
+      ctx.fillStyle='rgba(180,80,255,0.3)';ctx.fillRect(pbX+PX,pbY+PX*2,PX*6,PX*8);
+      ctx.fillStyle='#9933cc';ctx.fillRect(pbX,pbY,PX*8,PX*2);
+      ctx.fillRect(pbX,pbY+PX*14,PX*8,PX*2);
+      ctx.fillStyle='rgba(180,80,255,0.08)';ctx.fillRect(pbX-PX*3,pbY-PX*2,PX*14,PX*22);
+
+      // Bench
+      const bchX=sceneX+PX*30,bchY=sceneY-PX*5;
+      ctx.fillStyle='#2a1a2a';
+      ctx.fillRect(bchX,bchY,PX*14,PX*2);
+      ctx.fillRect(bchX,bchY-PX*4,PX*14,PX*2);
+      ctx.fillRect(bchX+PX,bchY,PX*2,PX*5);
+      ctx.fillRect(bchX+PX*11,bchY,PX*2,PX*5);
+      ctx.fillRect(bchX+PX,bchY-PX*4,PX*2,PX*4);
+      ctx.fillRect(bchX+PX*11,bchY-PX*4,PX*2,PX*4);
+
+      // Person
+      const pX=bchX+PX*4,pY=bchY,U=PX;
+      ctx.fillStyle='#1a0c30';
+      ctx.fillRect(pX,pY,U*2,U*5);ctx.fillRect(pX+U*4,pY,U*2,U*5);
+      ctx.fillStyle='#0a0518';
+      ctx.fillRect(pX-U,pY+U*5,U*3,U*2);ctx.fillRect(pX+U*4,pY+U*5,U*3,U*2);
+      ctx.fillStyle='#1a0f2e';ctx.fillRect(pX-U,pY-U*6,U*8,U*6);
+      ctx.fillStyle='#ff6ec7';
+      ctx.fillRect(pX,pY-U*6,U,U*3);ctx.fillRect(pX+U*5,pY-U*6,U,U*3);
+      ctx.fillStyle='#f0c898';
+      ctx.fillRect(pX+U*3,pY-U*7,U*2,U*2);
+      ctx.fillRect(pX+U*2,pY-U*11,U*4,U*4);
+      ctx.fillStyle='#120820';
+      ctx.fillRect(pX+U*2,pY-U*12,U*4,U*2);ctx.fillRect(pX+U,pY-U*11,U,U*2);
+      ctx.fillStyle='#1a0f2e';ctx.fillRect(pX+U*7,pY-U*5,U*2,U*5);ctx.fillRect(pX+U*8,pY-U*8,U*2,U*4);
+      ctx.fillStyle='#222233';ctx.fillRect(pX+U*9,pY-U*11,U*3,U*5);
+      const phoneGlow=Math.sin(t*0.03)*0.15+0.85;
+      ctx.fillStyle=`rgba(100,200,255,${phoneGlow})`;ctx.fillRect(pX+U*9+1,pY-U*11+1,U*3-2,U*5-2);
+      ctx.fillStyle='rgba(100,200,255,0.12)';ctx.fillRect(pX,pY-U*13,U*10,U*7);
+      ctx.fillStyle='#1a0f2e';ctx.fillRect(pX-U*3,pY-U*5,U*2,U*4);
+      ctx.fillStyle='#bbbbbb';ctx.fillRect(pX-U*4,pY-U*5,U*3,U);
+      ctx.fillStyle='#cc1100';ctx.fillRect(pX-U*4,pY-U*4,U*3,U*5);
+      ctx.fillStyle='#ff3300';ctx.fillRect(pX-U*4,pY-U*3,U*3,U*2);
+      ctx.fillStyle='#bbbbbb';ctx.fillRect(pX-U*4,pY+U,U*3,U);
+      ctx.fillStyle='rgba(200,20,0,0.1)';ctx.fillRect(pX-U*6,pY-U*5,U*5,U*8);
+
+      // Puddle reflections
+      ctx.fillStyle='rgba(204,68,255,0.08)';ctx.fillRect(pbX-PX*2,sceneY+PX*2,PX*14,PX*4);
+      ctx.fillStyle='rgba(160,220,255,0.06)';ctx.fillRect(lampX-PX*6,sceneY+PX,PX*14,PX*3);
+    } // end street scene
+
+    // Foreground silhouettes — palms, power lines, lantern (depth framing)
+    drawForeground(ctx,W,H,gY,t,PX);
+
+    // Mouse glow
+    if(mouse.x>0&&document.getElementById('city-screen').style.display!=='none'){
+      const mg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,220);
+      mg.addColorStop(0,'rgba(255,100,180,0.04)');mg.addColorStop(1,'rgba(0,0,0,0)');
+      ctx.fillStyle=mg;ctx.fillRect(0,0,W,H);
+    }
+
+  }
+  function loop(ts){if(!cityRunning)return;rafId=requestAnimationFrame(loop);if(ts-lastTs<33)return;lastTs=ts;draw();}
+  function startCity(){if(cityRunning)return;if(REDUCE_MOTION){draw();return;}cityRunning=true;lastTs=0;rafId=requestAnimationFrame(loop);}
+  function stopCity(){cityRunning=false;if(rafId)cancelAnimationFrame(rafId);rafId=null;}
+  window.cityStart=startCity;window.cityStop=stopCity;
+  window.getCityPixels = function(step = 4) {
+    const wasRunning = cityRunning;
+    if (wasRunning) stopCity();
+    const savedData = ctx.getImageData(0, 0, W, H);
+    draw(true);
+    const imgData = ctx.getImageData(0, 0, W, H);
+    const data = imgData.data;
+    const targets = [];
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const idx = (y * W + x) * 4;
+        if (data[idx + 3] > 30) {
+          targets.push({
+            x: x,
+            y: y,
+            r: data[idx],
+            g: data[idx + 1],
+            b: data[idx + 2],
+            a: data[idx + 3] / 255
+          });
+        }
+      }
+    }
+    ctx.putImageData(savedData, 0, 0);
+    if (wasRunning) startCity();
+    return targets;
+  };
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCity();else if(document.getElementById('city-screen').style.display!=='none')startCity();});
+  startCity();
+})();
+
+
+// ── RESEARCH GLOBE (data-viz inside the site, lazy-loaded on first visit) ──
+let rGlobe=null, rGlobeReady=false;
+function fitResearchGlobe(){ const el=document.getElementById('globe'); if(rGlobe&&el&&el.clientWidth){ rGlobe.width(el.clientWidth).height(el.clientHeight); } }
+function initResearchGlobe(){
+  if(rGlobeReady) return;
+  const el=document.getElementById('globe');
+  if(!el || typeof Globe==='undefined') return;
+  try{
+    rGlobe=Globe()(el)
+      .backgroundColor('rgba(0,0,0,0)')
+      .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
+      .showAtmosphere(true).atmosphereColor('#3ee6ff').atmosphereAltitude(0.16)
+      .pointsData(CITIES).pointLat('lat').pointLng('lng').pointColor(d=>COL[d.type]).pointAltitude(0.012).pointRadius(d=>d.type==='home'?0.5:0.34).pointLabel('name')
+      .ringsData(CITIES.filter(c=>c.type!=='alma')).ringColor(d=>(tt=>`rgba(${d.type==='home'?'255,92,160':'62,230,255'},${1-tt})`)).ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(1400)
+      .arcsData(CITIES.filter(c=>c.type==='study').map(c=>({sLat:HOME.lat,sLng:HOME.lng,eLat:c.lat,eLng:c.lng}))).arcStartLat('sLat').arcStartLng('sLng').arcEndLat('eLat').arcEndLng('eLng').arcColor(()=>['rgba(255,92,160,0.55)','rgba(62,230,255,0.55)']).arcDashLength(0.45).arcDashGap(0.25).arcDashAnimateTime(2600).arcStroke(0.42).arcAltitudeAutoScale(0.42);
+    fitResearchGlobe(); window.addEventListener('resize',fitResearchGlobe);
+    rGlobe.pointOfView({lat:24,lng:-52,altitude:2.3},0);
+    const c=rGlobe.controls(); c.enableZoom=false; c.autoRotate=!REDUCE_MOTION; c.autoRotateSpeed=0.55;
+    rGlobeReady=true; if(REDUCE_MOTION) rGlobe.pauseAnimation();
+  }catch(e){}
+}
+function startResearchGlobe(){ if(rGlobe){ fitResearchGlobe(); if(!REDUCE_MOTION) rGlobe.resumeAnimation(); } }
+function stopResearchGlobe(){ if(rGlobe) rGlobe.pauseAnimation(); }
+document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopResearchGlobe(); else if(document.querySelector('#page-research.active')) startResearchGlobe(); });
+
+// ── PUBLICATION CHART ──
+const PUBS=[{y:'2023',j:0,c:2},{y:'2024',j:3,c:0},{y:'2025',j:7,c:1},{y:'2026',j:2,c:1}];
+function drawChart(animate){
+  const svg=document.getElementById('pubchart'); if(!svg) return;
+  const W=720,H=200,padL=24,padB=34,padT=14,padR=14;
+  const max=Math.max(...PUBS.map(d=>d.j+d.c));
+  const plotH=H-padB-padT, plotW=W-padL-padR;
+  const bw=plotW/PUBS.length, barW=Math.min(64,bw*0.5);
+  const ns='http://www.w3.org/2000/svg';
+  svg.innerHTML='';
+  // baseline
+  const base=document.createElementNS(ns,'line');
+  base.setAttribute('x1',padL);base.setAttribute('x2',W-padR);base.setAttribute('y1',H-padB);base.setAttribute('y2',H-padB);
+  base.setAttribute('stroke','rgba(255,150,200,0.18)');svg.appendChild(base);
+  PUBS.forEach((d,i)=>{
+    const cx=padL+bw*i+bw/2, total=d.j+d.c;
+    const hJ=(d.j/max)*plotH, hC=(d.c/max)*plotH, fullH=(total/max)*plotH;
+    // journal (bottom)
+    const segs=[{h:hJ,col:'#3ee6ff'},{h:hC,col:'#ff5ca0'}];
+    let yCur=H-padB;
+    segs.forEach(s=>{
+      if(s.h<=0) return;
+      const r=document.createElementNS(ns,'rect');
+      r.setAttribute('class','bar');
+      r.setAttribute('x',cx-barW/2);r.setAttribute('width',barW);
+      r.setAttribute('rx',4);r.setAttribute('fill',s.col);r.setAttribute('opacity','0.92');
+      if(animate && !REDUCE_MOTION){
+        r.setAttribute('y',H-padB);r.setAttribute('height',0);
+        svg.appendChild(r);
+        requestAnimationFrame(()=>{r.style.transition='y .7s cubic-bezier(.2,.7,.2,1) '+(i*0.06)+'s,height .7s cubic-bezier(.2,.7,.2,1) '+(i*0.06)+'s';
+          r.setAttribute('y',yCur-s.h);r.setAttribute('height',s.h);});
+      }else{
+        r.setAttribute('y',yCur-s.h);r.setAttribute('height',s.h);
+        svg.appendChild(r);
+      }
+      yCur-=s.h;
+    });
+    // total label
+    const t=document.createElementNS(ns,'text');
+    t.setAttribute('x',cx);t.setAttribute('y',H-padB-fullH-8);t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-size','13');t.setAttribute('fill','#eaeefb');t.textContent=total;svg.appendChild(t);
+    // year
+    const yr=document.createElementNS(ns,'text');
+    yr.setAttribute('x',cx);yr.setAttribute('y',H-12);yr.setAttribute('text-anchor','middle');
+    yr.setAttribute('font-size','12');yr.textContent=d.y;svg.appendChild(yr);
+  });
+}
+
+// ── NAVIGATION (hash-routed) ──
+const PAGES=['about','research','papers','projects','awards','blog','contact'];
+let chartDrawn=false;
+function revealPage(id){
+  if(!HAS_GSAP()||REDUCE_MOTION) return;
+  const els=document.querySelectorAll('#page-'+id+' .reveal');
+  gsap.killTweensOf(els);
+  gsap.fromTo(els,{opacity:0,y:22},{opacity:1,y:0,duration:.55,ease:'power2.out',stagger:.07,overwrite:true});
+}
+function showPage(id){
+  document.getElementById('city-screen').style.display='none';
+  document.getElementById('sections').style.display='block';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+id); if(pg)pg.classList.add('active');
+  document.querySelectorAll('.s-tab').forEach(t=>{const on=t.dataset.page===id;t.classList.toggle('active',on);t.setAttribute('aria-current',on?'page':'false');});
+  if(window.cityStop) window.cityStop();
+  if(id==='papers'){ drawChart(!chartDrawn); chartDrawn=true; }
+  if(id==='research'){ initResearchGlobe(); startResearchGlobe(); } else { stopResearchGlobe(); }
+  revealPage(id);
+  const h=pg&&pg.querySelector('.s-title'); if(h){try{h.focus({preventScroll:true});}catch(_){}}
+  window.scrollTo(0,0);
+}
+function showCity(){
+  document.getElementById('sections').style.display='none';
+  document.getElementById('city-screen').style.display='block';
+  if(window.cityStart) window.cityStart();
+  stopResearchGlobe();
+  window.scrollTo(0,0);
+}
+function route(){const id=location.hash.slice(1); if(PAGES.indexOf(id)>=0) showPage(id); else showCity();}
+window.addEventListener('hashchange',route);
+function openPage(id){location.hash=id;}
+function goBack(){location.hash='';}
+
+// ── PAPER TABS ──
+function switchTab(id,event){
+  document.querySelectorAll('.paper-list').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.p-tab').forEach(el=>{el.classList.remove('active');el.setAttribute('aria-selected','false');});
+  document.getElementById('tab-'+id).classList.add('active');
+  const b=event.currentTarget||event.target; b.classList.add('active'); b.setAttribute('aria-selected','true');
+}
+
+// ── HERO ENTRANCE ──
+function heroIntro(){
+  if(!HAS_GSAP()||REDUCE_MOTION) return;
+  gsap.from('.hero-content > *',{opacity:0,y:26,duration:.7,ease:'power3.out',stagger:.1,delay:.15});
+}
+
+// ── CONTACT via mailto (no backend) ──
+(function(){
+  const f=document.getElementById('contact-form'); if(!f) return;
+  f.addEventListener('submit',e=>{
+    e.preventDefault();
+    const g=n=>{const el=f.querySelector('[name="'+n+'"]'); return el?el.value:'';};
+    const subj=encodeURIComponent(g('subject')||'Hello from yuxuancai.com');
+    const body=encodeURIComponent('From: '+g('name')+' <'+g('email')+'>\n\n'+g('message'));
+    window.location.href='mailto:yuxuanc@unc.edu?subject='+subj+'&body='+body;
+  });
+})();
+
+// ── BOOTING CEREMONY SEQUENCER ──
+function runBootCeremony(onComplete) {
+  const terminal = document.getElementById('boot-terminal-text');
+  const overlay = document.getElementById('boot-overlay');
+  if (!terminal || !overlay) {
+    if (onComplete) onComplete();
+    return;
+  }
+
+  // Only run loader on the homepage, skip on inner pages like #papers
+  const isHomepage = !location.hash || location.hash === '#';
+  if (!isHomepage) {
+    overlay.style.display = 'none';
+    if (onComplete) onComplete();
+    return;
+  }
+
+  const lines = [
+    { text: "> SYSTEM BOOT: URBAN.PLANNING.AGENT_v2.6", class: "" },
+    { text: "> CONNECTING TO LOCAL NODE NETWORK... [OK]", class: "success" },
+    { text: "> SCANNING CITY DATABASES: Chapel Hill, Chicago, Berkeley... [OK]", class: "success" },
+    { text: "> LOAD ALGORITHM: VISION-LANGUAGE URBAN PERCEPTION... [OK]", class: "success" },
+    { text: "> IDENTITY: CAI, YUXUAN (URBAN AI RESEARCHER)... [RESOLVED]", class: "accent" },
+    { text: "> ESTABLISHING SECURE PROTOCOL... [ACCESS GRANTED]", class: "success" }
+  ];
+
+  let currentLine = 0;
+  
+  function printLine() {
+    if (currentLine < lines.length) {
+      const lineData = lines[currentLine];
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'boot-line' + (lineData.class ? ' ' + lineData.class : '');
+      lineDiv.textContent = lineData.text;
+      
+      // Remove cursor from previous line if any
+      const oldCursor = terminal.querySelector('.boot-cursor');
+      if (oldCursor) oldCursor.remove();
+      
+      // Append line and new cursor
+      terminal.appendChild(lineDiv);
+      const cursor = document.createElement('span');
+      cursor.className = 'boot-cursor';
+      terminal.appendChild(cursor);
+      
+      // Trigger CSS fade/slide in
+      setTimeout(() => {
+        lineDiv.classList.add('printed');
+      }, 10);
+      
+      currentLine++;
+      // Random delay to make it look like a live terminal loading
+      const delay = 150 + Math.random() * 200;
+      setTimeout(printLine, delay);
+    } else {
+      // Completed typing, trigger particle dissolve & reassembly reveal
+      setTimeout(() => {
+        const canvas = document.getElementById('boot-canvas');
+        const ctx = canvas.getContext('2d');
+        const rect = overlay.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        const svgEl = document.querySelector('.boot-city-svg');
+        const termEl = document.getElementById('boot-terminal-text');
+        
+        if (!svgEl || !termEl) {
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (onComplete) onComplete();
+          }, 500);
+          return;
+        }
+
+        const svgRect = svgEl.getBoundingClientRect();
+        const termRect = termEl.getBoundingClientRect();
+
+        const scaleX = (x) => (svgRect.left - rect.left) + (x / 400) * svgRect.width;
+        const scaleY = (y) => (svgRect.top - rect.top) + (y / 160) * svgRect.height;
+
+        // 1. Draw SVG outline paths onto boot-canvas
+        ctx.strokeStyle = '#ff4d9d';
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = '#ff4d9d';
+
+        const paths = [
+          [[20, 140], [20, 80], [55, 80], [55, 140]],
+          [[65, 140], [65, 50], [95, 50], [95, 140]],
+          [[110, 140], [110, 100], [125, 100], [125, 70], [145, 70], [145, 30], [185, 30], [185, 70], [205, 70], [205, 140]],
+          [[220, 140], [220, 70], [235, 40], [255, 40], [255, 140]],
+          [[270, 140], [270, 90], [300, 90], [300, 140]],
+          [[315, 140], [315, 80], 'arc', [345, 80], [345, 140]]
+        ];
+
+        paths.forEach(p => {
+          ctx.beginPath();
+          let first = true;
+          for (let i = 0; i < p.length; i++) {
+            if (p[i] === 'arc') {
+              const cx = scaleX(330);
+              const cy = scaleY(80);
+              const r = (scaleX(345) - scaleX(315)) / 2;
+              ctx.arc(cx, cy, r, Math.PI, 0, false);
+              i++;
+            } else {
+              const x = scaleX(p[i][0]);
+              const y = scaleY(p[i][1]);
+              if (first) {
+                ctx.moveTo(x, y);
+                first = false;
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+          }
+          ctx.stroke();
+        });
+
+        // Draw background towers in low opacity
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(176, 123, 255, 0.1)';
+        ctx.strokeStyle = 'rgba(176, 123, 255, 0.2)';
+        ctx.lineWidth = 1;
+        const bgRects = [[30, 70, 35, 70], [95, 50, 40, 90], [270, 60, 45, 80], [330, 80, 30, 60]];
+        bgRects.forEach(r => {
+          const rx = scaleX(r[0]);
+          const ry = scaleY(r[1]);
+          const rw = (r[2] / 400) * svgRect.width;
+          const rh = (r[3] / 160) * svgRect.height;
+          ctx.fillRect(rx, ry, rw, rh);
+          ctx.strokeRect(rx, ry, rw, rh);
+        });
+
+        // Draw window lights
+        ctx.fillStyle = 'rgba(62, 230, 255, 0.8)';
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = '#3ee6ff';
+        const wins = [
+          [73, 60], [83, 60], [73, 72], [83, 72], [73, 84], [83, 84], [73, 96], [83, 96],
+          [151, 42], [161, 42], [171, 42], [151, 54], [161, 54], [171, 54]
+        ];
+        wins.forEach(w => {
+          const wx = scaleX(w[0]);
+          const wy = scaleY(w[1]);
+          const wSize = (3 / 400) * svgRect.width;
+          ctx.fillRect(wx, wy, wSize, wSize);
+        });
+
+        // Right tower windows (pink)
+        ctx.fillStyle = 'rgba(255, 92, 160, 0.8)';
+        ctx.shadowColor = '#ff4d9d';
+        const rWins = [[324, 95], [334, 95], [324, 110], [334, 110]];
+        rWins.forEach(w => {
+          const wx = scaleX(w[0]);
+          const wy = scaleY(w[1]);
+          const wSize = (2 / 400) * svgRect.width;
+          const wH = (6 / 160) * svgRect.height;
+          ctx.fillRect(wx, wy, wSize, wH);
+        });
+
+        // 2. Draw terminal text lines onto boot-canvas
+        ctx.shadowBlur = 0;
+        ctx.textBaseline = 'top';
+        ctx.font = window.getComputedStyle(termEl).font || '12px "Share Tech Mono"';
+        
+        const linesEl = termEl.querySelectorAll('.boot-line');
+        linesEl.forEach(lineEl => {
+          const lRect = lineEl.getBoundingClientRect();
+          const lx = lRect.left - rect.left;
+          const ly = lRect.top - rect.top;
+          
+          if (lineEl.classList.contains('success')) {
+            ctx.fillStyle = '#5cffb0'; // lime
+          } else if (lineEl.classList.contains('accent')) {
+            ctx.fillStyle = '#ff4d9d'; // accent
+          } else {
+            ctx.fillStyle = '#3ee6ff'; // cyan
+          }
+          ctx.fillText(lineEl.textContent, lx, ly);
+        });
+
+        // Calculate steps dynamically based on screen area to ensure smooth performance
+        const area = canvas.width * canvas.height;
+        const targetStep = Math.max(4, Math.floor(Math.sqrt(area / 30000)));
+        const sourceStep = Math.max(3, Math.floor(Math.sqrt(area / 100000)));
+
+        // 3. Scan the canvas for pixels to create source particles
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const srcParticles = [];
+
+        for (let y = 0; y < canvas.height; y += sourceStep) {
+          for (let x = 0; x < canvas.width; x += sourceStep) {
+            const idx = (y * canvas.width + x) * 4;
+            const alpha = data[idx + 3];
+            if (alpha > 40) {
+              const r = data[idx];
+              const g = data[idx + 1];
+              const b = data[idx + 2];
+              srcParticles.push({
+                x: x,
+                y: y,
+                originX: x,
+                originY: y,
+                r: r,
+                g: g,
+                b: b,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12 - 4, // explode upwards
+                size: Math.random() * 1.5 + 1.2
+              });
+            }
+          }
+        }
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Hide HTML elements
+        document.querySelector('.boot-container').classList.add('boot-fade');
+
+        // 4. Get target pixel art city pixels
+        const tgtPixels = (window.getCityPixels ? window.getCityPixels(targetStep) : []);
+
+        // 5. Match source particles to target positions
+        const particles = [];
+        const count = Math.max(srcParticles.length, tgtPixels.length);
+
+        for (let i = 0; i < count; i++) {
+          const src = srcParticles[i % srcParticles.length];
+          const hasTarget = i < tgtPixels.length;
+
+          const p = {
+            x: src.x,
+            y: src.y,
+            vx: src.vx,
+            vy: src.vy,
+            alpha: 1.0,
+            size: src.size,
+            r: src.r,
+            g: src.g,
+            b: src.b,
+            hasTarget: hasTarget,
+            phase1X: 0,
+            phase1Y: 0
+          };
+
+          if (hasTarget) {
+            const tgt = tgtPixels[i];
+            p.targetX = tgt.x;
+            p.targetY = tgt.y;
+            p.tr = tgt.r;
+            p.tg = tgt.g;
+            p.tb = tgt.b;
+            p.ta = tgt.a;
+          } else {
+            // Excess source particles: explode, drift and fade out
+            p.targetX = src.x + (Math.random() - 0.5) * 300;
+            p.targetY = canvas.height + 100;
+            p.tr = src.r;
+            p.tg = src.g;
+            p.tb = src.b;
+            p.ta = 0;
+          }
+
+          particles.push(p);
+        }
+
+        // 6. Animate particles
+        let frame = 0;
+        const totalFrames = 100;
+
+        function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let active = false;
+
+          const easeProgress = (frame - 25) / 40;
+          const ease = easeProgress <= 0 ? 0 : easeProgress >= 1 ? 1 : (easeProgress < 0.5 ? 4 * easeProgress * easeProgress * easeProgress : 1 - Math.pow(-2 * easeProgress + 2, 3) / 2);
+
+          particles.forEach(p => {
+            if (p.alpha <= 0) return;
+            active = true;
+
+            if (frame < 25) {
+              // Phase 1: Explode and drift
+              p.x += p.vx;
+              p.y += p.vy;
+              p.vx *= 0.93;
+              p.vy *= 0.93;
+              
+              // Record Phase 1 end position
+              p.phase1X = p.x;
+              p.phase1Y = p.y;
+
+              ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.alpha})`;
+            } else {
+              // Phase 2: Morph/assemble to target positions with organic wave motion
+              const waveX = Math.sin(frame * 0.15 + p.targetY * 0.02) * 20 * (1 - ease) * ease;
+              const waveY = Math.cos(frame * 0.15 + p.targetX * 0.02) * 20 * (1 - ease) * ease;
+
+              p.x = p.phase1X + (p.targetX - p.phase1X) * ease + waveX;
+              p.y = p.phase1Y + (p.targetY - p.phase1Y) * ease + waveY;
+
+              // Color lerping
+              const curR = Math.round(p.r + (p.tr - p.r) * ease);
+              const curG = Math.round(p.g + (p.tg - p.g) * ease);
+              const curB = Math.round(p.b + (p.tb - p.b) * ease);
+              
+              // Easing alpha
+              let curA = 1.0;
+              if (!p.hasTarget) {
+                // Fade out excess particles
+                curA = 1.0 * (1 - ease);
+                p.alpha = curA;
+              } else {
+                curA = 1.0 * (1 - ease) + p.ta * ease;
+              }
+
+              ctx.fillStyle = `rgba(${curR},${curG},${curB},${curA})`;
+            }
+
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+          });
+
+          frame++;
+
+          if (frame === 50) {
+            // Smoothly fade overlay and reveal background page
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.02)';
+            if (onComplete) onComplete();
+          }
+
+          if (frame < totalFrames && active) {
+            requestAnimationFrame(animate);
+          } else {
+            overlay.style.display = 'none';
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }, 500);
+    }
+  }
+  
+  // Start printing lines after a short initial delay (SVG draw time)
+  setTimeout(printLine, 400);
+}
+
+// ── INIT ──
+document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullYear();});
+runBootCeremony(() => {
+  heroIntro();
+});
+route();
+</script>
+</body>
+</html>
