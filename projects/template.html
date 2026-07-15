@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Details Template — Yuxuan Cai</title>
+  <style>
+    /* Dark Cyberpunk Theme variables matching index.html */
+    :root {
+      --bg: #05070e;
+      --panel: #0b0f19;
+      --text: #f4f5f6;
+      --muted: #8892b0;
+      --accent: #3ee6ff; /* Neon cyan */
+      --accent-pink: #ff4d9d; /* Neon pink */
+      --line: rgba(255, 255, 255, 0.08);
+      --font-mono: 'Share Tech Mono', 'Courier New', monospace;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      line-height: 1.6;
+      padding: clamp(20px, 5vw, 80px) clamp(20px, 4vw, 40px);
+      min-height: 100vh;
+    }
+
+    /* Grid background overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    /* Main layout container */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* Navigation header */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: clamp(40px, 6vh, 60px);
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 20px;
+    }
+
+    .back-btn {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-decoration: none;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: 8px 16px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.02);
+      transition: all 0.25s ease;
+    }
+
+    .back-btn:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(62, 230, 255, 0.04);
+      box-shadow: 0 0 10px rgba(62, 230, 255, 0.1);
+    }
+
+    .hud-info {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent-pink);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* Project Hero Section */
+    .project-header {
+      margin-bottom: 40px;
+    }
+
+    .project-venue {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .project-title {
+      font-size: clamp(24px, 4.5vw, 40px);
+      font-weight: 300;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      color: #fff;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--line);
+      color: var(--muted);
+      padding: 4px 10px;
+      border-radius: 3px;
+    }
+
+    /* Main Showcase Visual (Images, Video, or Interactive Iframe) */
+    .showcase-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 40px;
+    }
+
+    .showcase-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      gap: 12px;
+    }
+
+    /* ThreeJS / Mapbox / D3 interactive container */
+    #interactive-visualization {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Project description layout */
+    .project-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: clamp(30px, 5vw, 60px);
+      border-top: 1px solid var(--line);
+      padding-top: 40px;
+    }
+
+    @media (max-width: 768px) {
+      .project-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .main-text h3 {
+      font-size: 20px;
+      font-weight: 400;
+      color: #fff;
+      margin-bottom: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    .main-text p {
+      color: var(--muted);
+      margin-bottom: 24px;
+      font-size: 16px;
+    }
+
+    .sidebar-panel {
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 24px;
+      height: fit-content;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 8px;
+    }
+
+    .meta-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .meta-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .meta-value {
+      font-size: 14px;
+      color: var(--text);
+    }
+
+    .project-link-btn {
+      display: inline-block;
+      width: 100%;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-decoration: none;
+      color: #05070e;
+      background: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 10px 16px;
+      border-radius: 4px;
+      margin-top: 12px;
+      transition: all 0.25s ease;
+      font-weight: bold;
+    }
+
+    .project-link-btn:hover {
+      background: transparent;
+      color: var(--accent);
+      box-shadow: 0 0 15px rgba(62, 230, 255, 0.2);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <a href="../index.html" class="back-btn">← Back to Portfolio</a>
+      <div class="hud-info">SYS: PROJECT_DETAIL // ONLINE</div>
+    </header>
+
+    <main>
+      <!-- Title & Tags -->
+      <section class="project-header">
+        <div class="project-venue">VENUE / CONFERENCE / JOURNAL</div>
+        <h1 class="project-title">Insert Project Title Here</h1>
+        <div class="tags">
+          <span class="tag">Tag 1</span>
+          <span class="tag">Tag 2</span>
+          <span class="tag">Tag 3</span>
+        </div>
+      </section>
+
+      <!-- Showcase Visual Area -->
+      <section class="showcase-container">
+        <!-- 
+          For interactive visualizers (Three.js, Mapbox, D3):
+          <div id="interactive-visualization"></div> 
+        -->
+        <div class="showcase-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+          <span>Visual Showcase Area (Image, Video, or Interactive WebGL Container)</span>
+        </div>
+      </section>
+
+      <!-- Details & Description -->
+      <section class="project-content">
+        <div class="main-text">
+          <h3>Project Abstract</h3>
+          <p>
+            This is where you write the detailed abstract or description of the project. Explain the background, the methodology used (e.g. computer vision models, GIS analysis, LLMs, or participatory design), and the core findings/contributions.
+          </p>
+
+          <h3>Methodology & Workflow</h3>
+          <p>
+            Detail the workflow, data processing, and technical frameworks implemented in this project. You can write paragraphs here, include lists, or add additional diagrams/images.
+          </p>
+        </div>
+
+        <div class="sidebar-panel">
+          <h4 class="sidebar-title">Project Info</h4>
+          <div class="meta-list">
+            <div class="meta-item">
+              <span class="meta-label">Role</span>
+              <span class="meta-value">Lead Researcher</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Timeline</span>
+              <span class="meta-value">2025 — 2026</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Technologies</span>
+              <span class="meta-value">Python, PyTorch, CLIP, QGIS</span>
+            </div>
+          </div>
+          
+          <a href="https://doi.org/..." target="_blank" rel="noopener noreferrer" class="project-link-btn">Read Full Paper ↗</a>
+        </div>
+      </section>
+    </main>
+  </div>
+
+</body>
+</html>

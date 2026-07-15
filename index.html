@@ -63,6 +63,17 @@ a{color:inherit}
 /* ════ HERO / LANDING ════ */
 #city-screen{position:fixed;inset:0;z-index:10;overflow:hidden;background:var(--bg)}
 #city-canvas{position:absolute;inset:0;z-index:1}
+/* Elegant CRT scanline overlay effect for high-fidelity screen blending */
+#city-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(rgba(18, 16, 25, 0) 50%, rgba(0, 0, 0, 0.22) 50%);
+  background-size: 100% 4px;
+  opacity: 0.65;
+}
 /* fallback ambience behind globe (and if globe fails) */
 #city-screen::before{content:'';position:absolute;inset:0;z-index:0;
   background:radial-gradient(800px 800px at 72% 50%,rgba(255,92,160,0.10),transparent 60%),radial-gradient(600px 600px at 70% 55%,rgba(255,160,70,0.08),transparent 60%);}
@@ -128,9 +139,63 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 .s-title{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.4vw,52px);letter-spacing:.01em;line-height:1.12;margin-top:10px;outline:none}
 .s-title em{font-style:normal;color:var(--accent)}
 
-/* cards / shared */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:26px;transition:border-color .25s,background .25s,transform .25s}
-.card:hover{border-color:var(--line2);background:var(--panel2);transform:translateY(-3px)}
+/* cards / shared with Spotlight Hover */
+.card, .chart-wrap, .aw-item {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--line) !important;
+  z-index: 1;
+  overflow: hidden;
+}
+.card::after, .chart-wrap::after, .aw-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle 120px at var(--mouse-x, -999px) var(--mouse-y, -999px), var(--spotlight-bg, rgba(255, 77, 157, 0.05)), transparent 100%);
+  z-index: -2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card::before, .chart-wrap::before, .aw-item::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(circle 100px at var(--mouse-x, -999px) var(--mouse-y, -999px), var(--spotlight-border, rgba(255, 77, 157, 0.38)), transparent 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.card:hover::before, .card:hover::after,
+.chart-wrap:hover::before, .chart-wrap:hover::after,
+.aw-item:hover::before, .aw-item:hover::after {
+  opacity: 1;
+}
+
+/* Specific color themes for Research grid cards */
+.grid-3 .card:nth-child(1) {
+  --spotlight-border: rgba(255, 77, 157, 0.45);
+  --spotlight-bg: rgba(255, 77, 157, 0.08);
+}
+.grid-3 .card:nth-child(2) {
+  --spotlight-border: rgba(176, 123, 255, 0.45);
+  --spotlight-bg: rgba(176, 123, 255, 0.08);
+}
+.grid-3 .card:nth-child(3) {
+  --spotlight-border: rgba(62, 230, 255, 0.45);
+  --spotlight-bg: rgba(62, 230, 255, 0.08);
+}
+
+/* Specific card adjustments */
+.card{transition:border-color .25s,background .25s,transform .25s}
+.card:hover{border-color:transparent !important;background:var(--panel2);transform:translateY(-3px)}
+.chart-wrap:hover, .aw-item:hover { border-color:transparent !important; }
 .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);
   border:1px solid rgba(255,77,157,0.28);padding:3px 9px;border-radius:999px}
@@ -272,9 +337,639 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   .scroll-hint{animation:none}
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
 }
+
+/* ════ PROJECTS VISUAL DIARY GRID ════ */
+.proj-cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 24px;
+  perspective: 1200px; /* 3D depth perspective */
+}
+.proj-cat-card {
+  position: relative;
+  height: 420px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 30px 24px;
+  transition: border-color 0.3s, transform 0.3s;
+  transform-style: preserve-3d; /* Support 3D child rotations */
+}
+@media (min-width: 861px) {
+  .proj-cat-grid > div:nth-child(2) {
+    transform: translateY(20px);
+  }
+  .proj-cat-grid {
+    padding-bottom: 20px;
+  }
+}
+.proj-cat-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-4px);
+}
+@media (min-width: 861px) {
+  .proj-cat-grid > div:nth-child(2):hover {
+    transform: translateY(16px);
+  }
+}
+.proj-cat-img-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.proj-cat-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.35;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s;
+}
+.proj-cat-card:hover .proj-cat-img-wrap img {
+  transform: scale(1.08);
+  opacity: 0.5;
+}
+.proj-cat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(8, 4, 13, 0.92) 0%, rgba(8, 4, 13, 0.5) 45%, transparent 100%);
+  z-index: 1;
+}
+.proj-cat-meta {
+  position: relative;
+  z-index: 2;
+}
+.proj-cat-num {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.proj-cat-card:nth-child(2) .proj-cat-num {
+  color: var(--violet);
+}
+.proj-cat-card:nth-child(3) .proj-cat-num {
+  color: var(--cyan);
+}
+.proj-cat-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.proj-cat-desc {
+  font-size: 13.5px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.proj-back-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  color: var(--accent);
+  cursor: pointer;
+  border: 1px solid var(--line2);
+  padding: 10px 22px;
+  border-radius: 999px;
+  background: rgba(14, 7, 20, 0.6);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+.proj-back-btn:hover {
+  background: rgba(255, 77, 157, 0.1);
+  box-shadow: 0 0 15px rgba(255, 77, 157, 0.15);
+}
+/* Projects Tab Selector */
+.proj-tabs {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  margin-bottom: 28px;
+}
+.proj-tab {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 8px 16px;
+  color: var(--muted);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  transition: all .18s;
+}
+.proj-tab:hover {
+  color: var(--text);
+  border-color: var(--line2);
+}
+.proj-tab.active {
+  color: #04121a;
+  background: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(255, 77, 157, 0.25);
+}
+
+/* ════ PROJECTS SPLIT-SCREEN LAYOUT ════ */
+.proj-split-container {
+  display: flex;
+  gap: 40px;
+  margin-top: 32px;
+  align-items: flex-start;
+  min-height: 700px;
+}
+.proj-split-left {
+  flex: 0 0 46%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+/* Staggering offsets for Left list cards on desktop */
+@media (min-width: 861px) {
+  .proj-split-left .proj-list-card:nth-child(even) {
+    transform: translateY(20px);
+  }
+  .proj-split-container {
+    padding-bottom: 40px;
+  }
+}
+.proj-split-right {
+  flex: 0 0 50%;
+  position: sticky;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+/* Left List Card Styles */
+.proj-list-card {
+  position: relative;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+}
+.proj-list-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: transparent;
+  transition: background-color 0.3s;
+}
+.proj-list-card.active {
+  border-color: var(--accent);
+  background: rgba(255, 77, 157, 0.04);
+  box-shadow: 0 8px 30px rgba(255, 77, 157, 0.08);
+}
+.proj-list-card.active::before {
+  background-color: var(--accent);
+}
+.proj-list-card:hover:not(.active) {
+  border-color: var(--line2);
+  background: rgba(255, 255, 255, 0.02);
+}
+.proj-list-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.proj-list-card-num {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--muted);
+}
+.proj-list-card.active .proj-list-card-num {
+  color: var(--accent);
+}
+.proj-list-card-title {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 1.35;
+  color: var(--text);
+  margin-bottom: 6px;
+  transition: color 0.3s;
+}
+.proj-list-card.active .proj-list-card-title {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 77, 157, 0.3);
+}
+.proj-list-card-venue {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+/* Right Sticky Detail Panel Styles */
+.proj-sticky-panel {
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+.proj-sticky-panel:hover {
+  border-color: var(--line2);
+}
+.proj-sticky-img-wrap {
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--line);
+  background: #000;
+}
+.proj-sticky-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.proj-sticky-panel:hover .proj-sticky-img {
+  transform: scale(1.03);
+}
+.proj-sticky-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.proj-sticky-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.3;
+  color: var(--text);
+  margin: 0;
+}
+.proj-sticky-venue {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-top: -6px;
+}
+.proj-sticky-desc {
+  font-size: 14.5px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin: 0;
+}
+.proj-sticky-links {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+.proj-sticky-link-btn {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text);
+  border: 1px solid var(--line2);
+  padding: 8px 18px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.02);
+}
+.proj-sticky-link-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(255, 77, 157, 0.08);
+  box-shadow: 0 0 12px rgba(255, 77, 157, 0.15);
+}
+/* Detail View Layout Header */
+.proj-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.proj-detail-header h3 {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: clamp(24px, 4vw, 36px);
+  color: var(--text);
+  margin: 0;
+}
+/* Mobile Fallback: stacked layout */
+@media (max-width: 860px) {
+  .proj-split-container {
+    flex-direction: column;
+    gap: 24px;
+    min-height: auto;
+  }
+  .proj-split-left {
+    flex: 1 1 100%;
+    width: 100%;
+    gap: 16px;
+  }
+  .proj-split-right {
+    display: none !important;
+  }
+  .proj-list-card {
+    cursor: default;
+  }
+  .proj-list-card::before {
+    display: none;
+  }
+  .proj-list-card.active {
+    background: var(--bg2);
+    border-color: var(--line);
+    box-shadow: none;
+  }
+  .proj-list-card-mobile-content {
+    display: block !important;
+    margin-top: 16px;
+  }
+  .proj-list-card-mobile-img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    border: 1px solid var(--line);
+  }
+  .proj-list-card-mobile-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .proj-cat-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .proj-cat-card {
+    height: 260px;
+  }
+}
+@media (min-width: 861px) {
+  .proj-list-card-mobile-content {
+    display: none !important;
+  }
+}
+
+/* ════ BOOT OVERLAY ════ */
+#boot-overlay {
+  position: fixed;
+  inset: 0;
+  background: #08040d;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.6s cubic-bezier(0.25, 1, 0.5, 1), transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  overflow: hidden;
+}
+#boot-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  background-size: 100% 4px, 6px 100%;
+  z-index: 100002;
+  pointer-events: none;
+}
+#boot-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100000; /* Behind boot-container (100001) during typing */
+  pointer-events: none;
+}
+.boot-fade {
+  opacity: 0 !important;
+  transition: opacity 0.25s ease-out !important;
+}
+.boot-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+  max-width: 480px;
+  gap: 28px;
+  z-index: 100001;
+}
+.boot-city-svg {
+  width: 100%;
+  max-height: 160px;
+  filter: drop-shadow(0 0 6px rgba(255, 77, 157, 0.4)) drop-shadow(0 0 1px rgba(62, 230, 255, 0.4));
+  animation: boot-glitch 2s infinite steps(2);
+}
+.boot-skyline {
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: boot-draw 1.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.boot-node {
+  animation: boot-pulse 1.5s infinite alternate;
+}
+.boot-terminal {
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--cyan);
+  background: rgba(14, 7, 20, 0.7);
+  border: 1px solid var(--line);
+  padding: 16px 20px;
+  border-radius: 8px;
+  width: 100%;
+  min-height: 125px;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+.boot-line {
+  margin-bottom: 4px;
+  opacity: 0;
+  transform: translateY(2px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+.boot-line.printed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.boot-line.success {
+  color: var(--lime);
+}
+.boot-line.accent {
+  color: var(--accent);
+}
+.boot-cursor {
+  display: inline-block;
+  width: 8px;
+  height: 13px;
+  background: var(--cyan);
+  margin-left: 4px;
+  animation: boot-blink 0.8s infinite steps(2);
+  vertical-align: middle;
+}
+
+@keyframes boot-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes boot-pulse {
+  0% { transform: scale(0.9); opacity: 0.5; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+@keyframes boot-blink {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+@keyframes boot-glitch {
+  0%, 95%, 100% { filter: drop-shadow(0 0 6px rgba(255, 77, 157, 0.4)) drop-shadow(0 0 1px rgba(62, 230, 255, 0.4)); transform: translate(0, 0) skewX(0); }
+  96% { filter: drop-shadow(-2px 0 0 rgba(255,0,0,0.6)) drop-shadow(2px 0 0 rgba(0,255,255,0.6)); transform: translate(-1px, 1px) skewX(2deg); }
+  97% { filter: drop-shadow(2px 0 0 rgba(255,0,0,0.6)) drop-shadow(-2px 0 0 rgba(0,255,255,0.6)); transform: translate(1px, -1px) skewX(-2deg); }
+  98% { filter: none; transform: translate(0, 0) skewX(0); }
+}
 </style>
 </head>
 <body>
+<!-- ════ BOOTING CEREMONY ════ -->
+<div id="boot-overlay">
+  <canvas id="boot-canvas"></canvas>
+  <div class="boot-container">
+    <svg class="boot-city-svg" viewBox="0 0 400 160" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <!-- Neon Glow Filters -->
+        <filter id="neon-glow-pink" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+        <filter id="neon-glow-cyan" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+      
+      <!-- BACKGROUND Grid lines representing urban grid -->
+      <g stroke="rgba(62,230,255,0.06)" stroke-width="0.8">
+        <line x1="0" y1="140" x2="400" y2="140" />
+        <line x1="0" y1="145" x2="400" y2="145" />
+        <line x1="0" y1="150" x2="400" y2="150" />
+        <!-- Perspective street grids -->
+        <line x1="200" y1="140" x2="50" y2="160" />
+        <line x1="200" y1="140" x2="110" y2="160" />
+        <line x1="200" y1="140" x2="170" y2="160" />
+        <line x1="200" y1="140" x2="230" y2="160" />
+        <line x1="200" y1="140" x2="290" y2="160" />
+        <line x1="200" y1="140" x2="350" y2="160" />
+      </g>
+
+      <!-- BACKGROUND TOWERS (Low opacity, deep blue/purple) -->
+      <g fill="rgba(176,123,255,0.04)" stroke="rgba(176,123,255,0.12)" stroke-width="1">
+        <rect x="30" y="70" width="35" height="70" />
+        <rect x="95" y="50" width="40" height="90" />
+        <rect x="270" y="60" width="45" height="80" />
+        <rect x="330" y="80" width="30" height="60" />
+      </g>
+
+      <!-- DATA SIGNAL LINES (Connecting city to the cloud) -->
+      <g stroke="rgba(62,230,255,0.22)" stroke-width="1" stroke-dasharray="3 3">
+        <!-- Antennas signals -->
+        <path d="M80 50 L80 15" />
+        <path d="M165 30 L165 10" />
+        <path d="M245 40 L245 20" />
+        <path d="M315 50 L315 25" />
+        <!-- Inter-building networks -->
+        <path d="M80 50 L165 30" />
+        <path d="M165 30 L245 40" />
+        <path d="M245 40 L315 50" />
+      </g>
+      
+      <!-- PULSING SIGNAL NODES -->
+      <g fill="#3ee6ff" filter="url(#neon-glow-cyan)">
+        <circle cx="80" cy="15" r="2.5" class="boot-node"/>
+        <circle cx="165" cy="10" r="3" class="boot-node"/>
+        <circle cx="245" cy="20" r="2.5" class="boot-node"/>
+        <circle cx="315" cy="25" r="2" class="boot-node"/>
+      </g>
+
+      <!-- FOREGROUND BUILDINGS (Detailed vectors, Neon Pink stroke) -->
+      <g fill="none" stroke="#ff4d9d" stroke-width="2" filter="url(#neon-glow-pink)" stroke-linejoin="round">
+        <!-- Left building with slope roof -->
+        <path d="M20 140 L20 80 L55 80 L55 140" class="boot-skyline"/>
+        <!-- Classic skyscraper with double antennas -->
+        <path d="M65 140 L65 50 L95 50 L95 140" class="boot-skyline"/>
+        <!-- Center complex multi-tier building -->
+        <path d="M110 140 L110 100 L125 100 L125 70 L145 70 L145 30 L185 30 L185 70 L205 70 L205 140" class="boot-skyline"/>
+        <!-- High-tech angular diagonal building -->
+        <path d="M220 140 L220 70 L235 40 L255 40 L255 140" class="boot-skyline"/>
+        <!-- Standard tower block -->
+        <path d="M270 140 L270 90 L300 90 L300 140" class="boot-skyline"/>
+        <!-- Right tower with dome/arch -->
+        <path d="M315 140 L315 80 A15 15 0 0 1 345 80 L345 140" class="boot-skyline"/>
+      </g>
+      
+      <!-- BUILDING LIGHTS (Glowing window grids) -->
+      <g fill="rgba(62,230,255,0.75)" filter="url(#neon-glow-cyan)">
+        <!-- Skyscraper 1 windows -->
+        <rect x="73" y="60" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="60" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="72" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="72" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="84" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="84" width="3" height="4" rx="0.5"/>
+        <rect x="73" y="96" width="3" height="4" rx="0.5"/>
+        <rect x="83" y="96" width="3" height="4" rx="0.5"/>
+        
+        <!-- Center tower windows -->
+        <rect x="151" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="161" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="171" y="42" width="4" height="4" rx="0.5"/>
+        <rect x="151" y="54" width="4" height="4" rx="0.5"/>
+        <rect x="161" y="54" width="4" height="4" rx="0.5"/>
+        <rect x="171" y="54" width="4" height="4" rx="0.5"/>
+        
+        <!-- Right curved tower windows -->
+        <rect x="324" y="95" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="334" y="95" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="324" y="110" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+        <rect x="334" y="110" width="2" height="6" rx="0.5" fill="#ff5ca0" filter="url(#neon-glow-pink)"/>
+      </g>
+    </svg>
+    <div class="boot-terminal" id="boot-terminal-text">
+      <!-- Will be filled by JavaScript sequencing -->
+    </div>
+  </div>
+</div>
 <a href="#content" class="skip-link">Skip to content</a>
 
 <!-- ════ HERO ════ -->
@@ -304,8 +999,8 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     <p class="hero-sub">Urban AI · vision-language models for urban perception · LLM multi-agent planning simulation · environmental health &amp; equity.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#papers">View research →</a>
-      <a class="btn" href="Yuxuan_Cai_CV.pdf" target="_blank" rel="noopener noreferrer">CV (PDF)</a>
-      <a class="btn" href="mailto:yuxuancai@unc.edu">Email</a>
+      <a class="btn" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer">CV (PDF)</a>
+      <a class="btn" href="mailto:yuxuanc@unc.edu">Email</a>
     </div>
   </div>
 
@@ -348,8 +1043,8 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
           </div>
           <div class="meta-table reveal">
             <div class="meta-r"><span class="meta-k">Position</span><span class="meta-v">PhD Student, UNC Chapel Hill</span></div>
-            <div class="meta-r"><span class="meta-k">Email</span><span class="meta-v"><a href="mailto:yuxuancai@unc.edu">yuxuancai@unc.edu</a></span></div>
-            <div class="meta-r"><span class="meta-k">CV</span><span class="meta-v"><a href="Yuxuan_Cai_CV.pdf" target="_blank" rel="noopener noreferrer">Download CV (PDF) ↗</a></span></div>
+            <div class="meta-r"><span class="meta-k">Email</span><span class="meta-v"><a href="mailto:yuxuanc@unc.edu">yuxuanc@unc.edu</a></span></div>
+            <div class="meta-r"><span class="meta-k">CV</span><span class="meta-v"><a href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer">Download CV (PDF) ↗</a></span></div>
             <div class="meta-r"><span class="meta-k">Scholar</span><span class="meta-v"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a></span></div>
             <div class="meta-r"><span class="meta-k">GitHub</span><span class="meta-v"><a href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer">github.com/YuxuanCaiUrban ↗</a></span></div>
             <!-- TODO: add ORCID when available -->
@@ -393,12 +1088,13 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
       </div>
 
       <div class="paper-tabs">
-        <button class="p-tab active" onclick="switchTab('pub',event)">Published (11)</button>
-        <button class="p-tab" onclick="switchTab('rev',event)">Under Review (4)</button>
-        <button class="p-tab" onclick="switchTab('conf',event)">Conference (3)</button>
+        <button class="p-tab active" onclick="switchTab('pub',event)">Published (12)</button>
+        <button class="p-tab" onclick="switchTab('rev',event)">Under Review (3)</button>
+        <button class="p-tab" onclick="switchTab('conf',event)">Conference (4)</button>
       </div>
 
       <div class="paper-list active" id="tab-pub">
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Desirable Bikeshare Routes: Nonlinear Impacts of Micro-Level Street Environments</div><div class="p-venue">Transportation Research Part A: Policy and Practice</div><div class="p-authors"><strong>Cai, Y.*</strong>, Song, Q., Cheng, Y., Chen, A., Wang, Y., Li, W., &amp; Qiu, W.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.tra.2026.104962" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
         <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Evaluating the Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver: A Social Media and GPS Data Approach</div><div class="p-venue">Land Use Policy</div><div class="p-authors">Huang, Y., Du, J., Chen, M., Lin, Y., Huang, S., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.landusepol.2025.107824" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
         <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors"><strong>Cai, Y.*</strong>, Huang, Y., Chen, A., Yang, Z., Chen, M., et al.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128835" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
         <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, &amp; Chen, A.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0331788" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
@@ -413,13 +1109,13 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
       </div>
 
       <div class="paper-list" id="tab-rev">
-        <div class="rev-item">Urban cycling &amp; bikeshare route behavior</div>
-        <div class="rev-item">Urban nature vitality &amp; spatial transformation</div>
+        <div class="rev-item">Understanding how park and non-park urban nature shape urban vitality — <em>Landscape and Urban Planning</em></div>
         <div class="rev-item">Urban vitality measurement — multimodal approach</div>
         <div class="rev-item">Urban inequality &amp; environmental risk</div>
       </div>
 
       <div class="paper-list" id="tab-conf">
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">What Do Vision-Language Models Know About Urban Perception? A Mechanistic Investigation</div><div class="p-venue">ACSP 66th Annual Conference</div><div class="p-authors"><strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
         <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Nonlinear Impact of Built Environments on Bike-Share Route Discrepancies</div><div class="p-venue">TRB 2025 Annual Meeting</div><div class="p-authors"><strong>Cai, Y.</strong>, Cheng, Y., Chen, A., Qiu, W., &amp; Wang, Y.</div></div><div class="p-actions"></div></div>
         <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Street-Level Factors and Sexual Crime Using Computer Vision and Big Data — Manhattan</div><div class="p-venue">AESOP 35th Annual Congress — Full Paper Oral</div><div class="p-authors"><strong>Cai, Y.</strong>, Li, H., &amp; Dai, S.*</div></div><div class="p-actions"><a class="p-btn" href="https://hdl.handle.net/20.500.14235/1202" target="_blank" rel="noopener noreferrer">Full Paper ↗</a></div></div>
         <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Human Perceptions to Inform Urban Landscape Design for Biking-Friendliness — Shanghai</div><div class="p-venue">IFLA 2023 Conference — Oral Report</div><div class="p-authors">Li, H., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
@@ -430,13 +1126,68 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     <!-- PROJECTS -->
     <section class="page" id="page-projects">
       <div class="s-head"><div class="eyebrow">03 · Projects</div><h2 class="s-title reveal" tabindex="-1">Work &amp; <em>projects</em></h2></div>
-      <div class="proj-h">Research Projects</div>
-      <div class="grid-3">
-        <div class="card proj-card reveal"><h3>Urban Perception &amp; VLMs</h3><div class="tags"><span class="tag">VLM</span><span class="tag">Perception</span></div></div>
-        <div class="card proj-card reveal"><h3>LLM Planning Simulation</h3><div class="tags"><span class="tag">Multi-Agent</span><span class="tag">Intent</span></div></div>
-        <div class="card proj-card reveal"><h3>Urban Mobility &amp; Street Environment</h3><div class="tags"><span class="tag">Cycling</span><span class="tag">Street View</span></div></div>
+      
+      <!-- Projects Tab Selector -->
+      <div class="proj-tabs reveal" style="margin-top: 16px; margin-bottom: 24px;">
+        <button class="proj-tab active" id="proj-tab-research" onclick="switchProjectsTab('research')">Research</button>
+        <button class="proj-tab" id="proj-tab-design" onclick="switchProjectsTab('design')">Design &amp; Practice</button>
       </div>
-      <div class="proj-note">// Design &amp; practice portfolios coming soon.</div>
+      
+      <!-- Category Grid View (Level 1) -->
+      <div id="proj-categories-view">
+        <div class="proj-cat-grid">
+          <div class="proj-cat-card reveal" onclick="openProjectCategory('vlm')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/urban_perception_vlm.jpg" alt="Urban Perception & VLMs" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num">01 // VLM</div>
+              <h3 class="proj-cat-title">Urban Perception &amp; VLMs</h3>
+              <p class="proj-cat-desc">Visual representations, street-view segmentation, and multi-modal alignment models of urban space.</p>
+            </div>
+          </div>
+          
+          <div class="proj-cat-card reveal" onclick="openProjectCategory('llm')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/llm_planning_simulation.jpg" alt="LLM Planning Simulation" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num">02 // SIMULATION</div>
+              <h3 class="proj-cat-title">LLM Planning Simulation</h3>
+              <p class="proj-cat-desc">Modeling policy negotiations, stakeholder intentions, and behavioral agents inside cities.</p>
+            </div>
+          </div>
+          
+          <div class="proj-cat-card reveal" onclick="openProjectCategory('mobility')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/urban_mobility_streets.jpg" alt="Urban Mobility & Streets" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num">03 // MOBILITY</div>
+              <h3 class="proj-cat-title">Urban Mobility &amp; Streets</h3>
+              <p class="proj-cat-desc">Micro-level built environments, bikeshare route desirability, and heat exposures.</p>
+            </div>
+          </div>
+        </div>
+        <div class="proj-note">// Click a category to view detailed research projects. Design &amp; practice portfolios coming soon.</div>
+      </div>
+
+      <!-- Detailed Projects View (Level 2) -->
+      <div id="proj-details-view" style="display: none;">
+        <div class="proj-detail-header">
+          <h3 id="proj-detail-title-text">Category Projects</h3>
+          <button class="proj-back-btn" onclick="backToCategories()">← Back to Categories</button>
+        </div>
+        <div class="proj-split-container">
+          <div id="proj-split-left" class="proj-split-left">
+            <!-- Left-side vertical card list -->
+          </div>
+          <div id="proj-split-right" class="proj-split-right">
+            <!-- Right-side sticky detail panel -->
+          </div>
+        </div>
+      </div>
+
       <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div></div>
     </section>
 
@@ -482,14 +1233,15 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
           <h2 class="s-title reveal" tabindex="-1">Open to<br><em>collaboration</em></h2>
           <p class="c-intro reveal">Urban AI, visiting opportunities, &amp; research conversations.</p>
           <div class="reveal">
-            <a class="c-link" href="mailto:yuxuancai@unc.edu"><div class="c-icon">@</div><div style="flex:1"><div class="c-l1">Email</div><div class="c-l2">yuxuancai@unc.edu</div></div><div class="c-arr">↗</div></a>
-            <a class="c-link" href="Yuxuan_Cai_CV.pdf" target="_blank" rel="noopener noreferrer"><div class="c-icon">↓</div><div style="flex:1"><div class="c-l1">Curriculum Vitae</div><div class="c-l2">Download CV (PDF)</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="mailto:yuxuanc@unc.edu"><div class="c-icon">@</div><div style="flex:1"><div class="c-l1">Email</div><div class="c-l2">yuxuanc@unc.edu</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer"><div class="c-icon">↓</div><div style="flex:1"><div class="c-l1">Curriculum Vitae</div><div class="c-l2">Download CV (PDF)</div></div><div class="c-arr">↗</div></a>
             <a class="c-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer"><div class="c-icon">G</div><div style="flex:1"><div class="c-l1">Google Scholar</div><div class="c-l2">View all publications</div></div><div class="c-arr">↗</div></a>
             <a class="c-link" href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer"><div class="c-icon">&lt;/&gt;</div><div style="flex:1"><div class="c-l1">GitHub</div><div class="c-l2">github.com/YuxuanCaiUrban</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://issuu.com/yuxuancai/docs/a5_" target="_blank" rel="noopener noreferrer"><div class="c-icon">P</div><div style="flex:1"><div class="c-l1">Design Portfolio (Issuu)</div><div class="c-l2">issuu.com/yuxuancai/docs/a5_</div></div><div class="c-arr">↗</div></a>
           </div>
         </div>
         <div class="reveal">
-          <p style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:14px;letter-spacing:.1em;text-transform:uppercase">// Send a message — opens your email app</p>
+          <p id="contact-form-hint" style="font-family:var(--mono);font-size:10px;color:var(--dim);margin-bottom:14px;letter-spacing:.1em;text-transform:uppercase">// Send a message — opens your email app</p>
           <form class="c-form" id="contact-form">
             <label for="cf-name">Name</label>
             <input id="cf-name" type="text" name="name" placeholder="Your name" autocomplete="name" required>
@@ -501,9 +1253,25 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
             <textarea id="cf-message" name="message" placeholder="Message…" required></textarea>
             <button class="btn btn-primary" type="submit" style="align-self:flex-start;margin-top:6px">Send →</button>
           </form>
+
+          <!-- Contact Success Panel -->
+          <div class="c-success-panel" id="contact-success" style="display:none; flex-direction:column; gap:16px; background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:24px; box-shadow:0 0 24px rgba(255,77,157,0.04)">
+            <div style="font-family:var(--mono); font-size:10px; color:var(--accent); text-transform:uppercase; letter-spacing:0.1em">// Message Ready</div>
+            <h3 style="font-family:var(--display); font-size:18px; font-weight:600; color:var(--text); margin-top:-2px">Redirecting to Mail Client...</h3>
+            <p style="font-size:13px; color:var(--muted); line-height:1.5">If your email application did not open automatically, you can send it manually or copy the text below:</p>
+            
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button class="btn btn-primary" id="success-open-btn" style="text-align:center; justify-content:center">Open Mail App ↗</button>
+              <button class="btn" id="success-copy-btn" style="text-align:center; justify-content:center">Copy to Clipboard</button>
+            </div>
+            
+            <div style="font-size:11px; color:var(--dim); font-family:var(--mono); margin-top:8px; border-top:1px solid var(--line); padding-top:12px; text-transform:uppercase; cursor:pointer" id="success-back-btn">
+              ← Write another message
+            </div>
+          </div>
         </div>
       </div>
-      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="mailto:yuxuancai@unc.edu">Email ↗</a></div></div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="mailto:yuxuanc@unc.edu">Email ↗</a></div></div>
     </section>
 
     <!-- BLOG & TUTORIALS -->
@@ -560,7 +1328,8 @@ const HOME=CITIES[0];
   const cv=document.getElementById('city-canvas');const ctx=cv&&cv.getContext('2d');
   if(!cv||!ctx)return;
   let W,H,t=0,mouse={x:-999,y:-999};
-  const PX=3;
+  let glowX=-999,glowY=-999;
+  const PX=2;
   let rafId=null,cityRunning=false,lastTs=0;
 
   function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
@@ -575,6 +1344,7 @@ const HOME=CITIES[0];
   // Building types: rect, stepped, pagoda-top, setback
   let buildings=[];
   let winData=[];
+  let traffic=[];
 
   function buildCity(){
     buildings=[];winData=[];
@@ -615,6 +1385,18 @@ const HOME=CITIES[0];
     }
 
     buildings.sort((a,b)=>a.layer-b.layer);
+
+    // Initialize traffic
+    traffic = [];
+    const numCars = Math.max(10, Math.floor(W / 40));
+    for (let i = 0; i < numCars; i++) {
+      traffic.push({
+        x: Math.random() * W,
+        lane: Math.floor(Math.random() * 2),
+        speed: (0.4 + Math.random() * 0.6) * (Math.random() < 0.5 ? 1 : -1),
+        color: Math.random() < 0.55 ? '#ff3a3a' : '#ffea9f'
+      });
+    }
 
     winData=buildings.map(b=>{
       const bw=Math.max(PX*4,Math.round(b.wf*W/PX)*PX);
@@ -671,7 +1453,10 @@ const HOME=CITIES[0];
       }
     } else if(b.type==='stepped'&&b.layer===1){
       // Stepped/setback skyscraper
-      ctx.fillStyle=b.col;
+      const buildingGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+      buildingGrad.addColorStop(0, b.col);
+      buildingGrad.addColorStop(1, '#1a0928');
+      ctx.fillStyle=buildingGrad;
       ctx.fillRect(bx,by,bw,bh);
       // Step recesses
       ctx.fillStyle='rgba(0,0,0,0.4)';
@@ -684,16 +1469,35 @@ const HOME=CITIES[0];
       ctx.fillRect(bx+bw/2-PX,by-PX*8,PX*2,PX*3);
     } else if(b.type==='setback'){
       // Wide base, narrow top
-      ctx.fillStyle=b.col;
+      const baseGrad = ctx.createLinearGradient(bx, by + bh*0.5, bx, by + bh);
+      baseGrad.addColorStop(0, b.col);
+      baseGrad.addColorStop(1, '#1a0928');
+      ctx.fillStyle=baseGrad;
       ctx.fillRect(bx,by+bh*0.5,bw,bh*0.5); // base
+      
       const topW=bw*0.6, topX=bx+(bw-topW)/2;
+      const topGrad = ctx.createLinearGradient(topX, by, topX, by + bh*0.5);
+      topGrad.addColorStop(0, b.col);
+      topGrad.addColorStop(1, '#130720');
+      ctx.fillStyle=topGrad;
       ctx.fillRect(topX,by,topW,bh*0.52);
       // Setback ledge glow
       ctx.fillStyle='rgba(255,120,0,0.1)';
       ctx.fillRect(bx,by+bh*0.5-PX,bw,PX*3);
     } else {
       // Standard rect
-      ctx.fillStyle=b.col;
+      const buildingGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+      if (b.layer === 0) {
+        buildingGrad.addColorStop(0, '#090518');
+        buildingGrad.addColorStop(1, '#140b2a');
+      } else if (b.layer === 1) {
+        buildingGrad.addColorStop(0, b.col);
+        buildingGrad.addColorStop(1, '#1a0928');
+      } else {
+        buildingGrad.addColorStop(0, b.col);
+        buildingGrad.addColorStop(1, '#0e031a');
+      }
+      ctx.fillStyle=buildingGrad;
       ctx.fillRect(bx,by,bw,bh);
     }
 
@@ -780,13 +1584,13 @@ const HOME=CITIES[0];
     ctx.save();
     const glowR = snap(R * 2.1);
     const halo = ctx.createRadialGradient(sunX, sunY, R * 0.6, sunX, sunY, glowR);
-    halo.addColorStop(0, 'rgba(255,140,90,0.10)');
-    halo.addColorStop(0.5, 'rgba(255,110,135,0.06)');
-    halo.addColorStop(1, 'rgba(255,110,135,0)');
+    halo.addColorStop(0, 'rgba(255, 77, 157, 0.15)');
+    halo.addColorStop(0.5, 'rgba(62, 230, 255, 0.08)');
+    halo.addColorStop(1, 'rgba(62, 230, 255, 0)');
     ctx.globalAlpha = 1; ctx.fillStyle = halo;
     ctx.beginPath(); ctx.arc(sunX, sunY, glowR, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    const top = [0xff, 0xe0, 0xa8], mid = [0xff, 0x9e, 0x5c], bot = [0xff, 0x6a, 0x86];
+    const top = [255, 245, 180], mid = [255, 110, 160], bot = [255, 20, 120];
     const lerp = (a, b, k) => Math.round(a + (b - a) * k);
     const colAt = f => { let r, g, b; if (f < 0.5) { const k = f / 0.5; r = lerp(top[0], mid[0], k); g = lerp(top[1], mid[1], k); b = lerp(top[2], mid[2], k); } else { const k = (f - 0.5) / 0.5; r = lerp(mid[0], bot[0], k); g = lerp(mid[1], bot[1], k); b = lerp(mid[2], bot[2], k); } return 'rgb(' + r + ',' + g + ',' + b + ')'; };
     const bandStart = sunY - R + R * 2 * 0.55;
@@ -809,7 +1613,7 @@ const HOME=CITIES[0];
     const cell = PX * 2;
     const bayer = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
     const rnd = i => { const s = Math.sin(i * 127.1 + 71.93) * 43758.5453; return s - Math.floor(s); };
-    const warm = 'rgba(210,135,95,0.07)', dark = '#1c1330', darkAlpha = 0.06;
+    const warm = 'rgba(255,110,199,0.08)', dark = '#040212', darkAlpha = 0.06;
     const sunX = Math.round(W * 0.76 / PX) * PX;
     const skyBottom = Math.round(gY / cell) * cell;
     ctx.save(); let painted = 0; const maxRects = 360;
@@ -1012,6 +1816,17 @@ const HOME=CITIES[0];
         var mTop = snap(by - mh); ctx.fillStyle = STEEL; ctx.fillRect(mx2, mTop, PX, mh);
         var crossY = snap(mTop + mh * 0.18); var armW = Math.max(snap(mh * 0.16), 2 * PX); ctx.fillRect(snap(mx2 - armW), crossY, snap(armW * 2 + PX), PX);
         var crossY2 = snap(mTop + mh * 0.07); ctx.fillRect(snap(mx2 - armW * 0.6), crossY2, snap(armW * 1.2 + PX), PX);
+        
+        // Add guy wire support lines for higher visual detail
+        ctx.strokeStyle = 'rgba(26,20,38,0.45)';
+        ctx.lineWidth = PX;
+        ctx.beginPath();
+        ctx.moveTo(mx2, snap(mTop + mh * 0.45));
+        ctx.lineTo(snap(mx2 - armW * 2), by);
+        ctx.moveTo(mx2, snap(mTop + mh * 0.45));
+        ctx.lineTo(snap(mx2 + armW * 2 + PX), by);
+        ctx.stroke();
+        
         var on = (Math.floor(t / 20 + seed) % 2 === 0);
         if (on) { ctx.save(); ctx.globalAlpha = 0.35; ctx.fillStyle = '#ff3a3a'; ctx.fillRect(snap(mx2 - PX), snap(mTop - PX), 3 * PX, 3 * PX); ctx.restore(); ctx.fillStyle = '#ff3a3a'; ctx.fillRect(mx2, snap(mTop - PX), PX, PX); } else { ctx.fillStyle = '#12080a'; ctx.fillRect(mx2, snap(mTop - PX), PX, PX); }
       } else if (typ === 3) {
@@ -1340,9 +2155,20 @@ const HOME=CITIES[0];
       ctx.fillStyle='rgba(255,200,150,0.14)'; ctx.fillRect(snap(t2x+t2w-PX), snap(by-PX*2-t1h-t2h), PX, t2h);
     } else {
       // central tapered spire + blinking beacon
-      var spH=snap(Math.max(PX*10, bh*0.22)); var spTop=snap(by-PX*2-spH);
+      var spH=snap(Math.max(PX*12, bh*0.25)); var spTop=snap(by-PX*2-spH);
       ctx.fillStyle=STEEL; ctx.fillRect(snap(cx-PX), spTop, PX*2, spH);
       ctx.fillStyle=DARK; ctx.fillRect(snap(cx), spTop, PX, snap(spH*0.5));
+      
+      // Add guy wires for spires on foreground skyline
+      ctx.strokeStyle = 'rgba(26,20,38,0.5)';
+      ctx.lineWidth = PX;
+      ctx.beginPath();
+      ctx.moveTo(cx, snap(spTop + spH * 0.4));
+      ctx.lineTo(snap(cx - bw * 0.25), by);
+      ctx.moveTo(cx, snap(spTop + spH * 0.4));
+      ctx.lineTo(snap(cx + bw * 0.25), by);
+      ctx.stroke();
+      
       if(Math.floor(t/18+seed)%2===0){
         ctx.save(); ctx.globalAlpha=0.5; ctx.fillStyle='#ff3a3a'; ctx.fillRect(snap(cx-PX), snap(spTop-PX*2), PX*3, PX*3); ctx.restore();
         ctx.fillStyle='#ff3a3a'; ctx.fillRect(snap(cx-PX/2), snap(spTop-PX), PX, PX);
@@ -1350,31 +2176,64 @@ const HOME=CITIES[0];
     }
   }
 
-  function draw(){
+  function draw(excludeSky = false){
     ctx.clearRect(0,0,W,H);
-    t++;
+    if (!excludeSky) t++;
     const gY=H*0.8;
 
-    // SKY
-    const sky=ctx.createLinearGradient(0,0,0,gY);
-    sky.addColorStop(0,'#1c1330');
-    sky.addColorStop(0.42,'#3a2147');
-    sky.addColorStop(0.66,'#6e3a55');
-    sky.addColorStop(0.84,'#a85f50');
-    sky.addColorStop(0.95,'#c87a50');
-    sky.addColorStop(1,'#d68a55');
-    ctx.fillStyle=sky;ctx.fillRect(0,0,W,gY);
-    drawSkyDither(ctx,W,H,gY,t,PX);
+    if (!excludeSky) {
+      // SKY (Vibrant Cyberpunk Synthwave Sunset Gradient)
+      const sky=ctx.createLinearGradient(0,0,0,gY);
+      sky.addColorStop(0,'#040212');    // deep space indigo-black
+      sky.addColorStop(0.35,'#10062a'); // dark navy-purple
+      sky.addColorStop(0.60,'#270b4c'); // electric purple
+      sky.addColorStop(0.80,'#500c56'); // deep magenta
+      sky.addColorStop(0.92,'#851260'); // neon pink-purple
+      sky.addColorStop(1,'#c83050');    // hot pink-red sunset
+      ctx.fillStyle=sky;ctx.fillRect(0,0,W,gY);
+      drawSkyDither(ctx,W,H,gY,t,PX);
+    }
 
     // Stars
     for(let i=0;i<80;i++){
       const sx=((i*173+89)%100)/100*W;
       const sy=((i*97+23)%40)/100*gY;
       ctx.globalAlpha=0.1+Math.sin(t*0.02+i)*0.08;
-      ctx.fillStyle='#ffffff';
+      const starCol = i % 8 === 0 ? '#3ee6ff' : i % 11 === 0 ? '#ff6ec7' : '#ffffff';
+      ctx.fillStyle=starCol;
       ctx.fillRect(Math.round(sx/PX)*PX,Math.round(sy/PX)*PX,PX,PX);
     }
     ctx.globalAlpha=1;
+
+    // Sweeping ambient searchlights in the distant sky
+    ctx.save();
+    const numSearchlights = 2;
+    for (let s = 0; s < numSearchlights; s++) {
+      const phase = s * 2.3;
+      const baseX = W * (0.3 + s * 0.4) + Math.sin(t * 0.003 + phase) * W * 0.06;
+      const baseY = gY;
+      const angle = -Math.PI / 2 + Math.sin(t * 0.008 + phase) * 0.28;
+      const len = gY * 0.85;
+      
+      const topX1 = baseX + Math.cos(angle - 0.035) * len;
+      const topY1 = baseY + Math.sin(angle - 0.035) * len;
+      const topX2 = baseX + Math.cos(angle + 0.035) * len;
+      const topY2 = baseY + Math.sin(angle + 0.035) * len;
+
+      const grad = ctx.createLinearGradient(baseX, baseY, (topX1 + topX2)/2, (topY1 + topY2)/2);
+      grad.addColorStop(0, 'rgba(62, 230, 255, 0.08)');
+      grad.addColorStop(0.5, 'rgba(62, 230, 255, 0.03)');
+      grad.addColorStop(1, 'rgba(62, 230, 255, 0)');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(baseX, baseY);
+      ctx.lineTo(topX1, topY1);
+      ctx.lineTo(topX2, topY2);
+      ctx.closePath();
+      ctx.fill();
+    }
+    ctx.restore();
 
     // Retro sun + drifting clouds + high-sky life (behind skyline)
     drawRetroSun(ctx,W,H,gY,t,PX);
@@ -1418,6 +2277,33 @@ const HOME=CITIES[0];
       if(t%8===0){ctx.fillStyle='rgba(255,200,80,0.7)';ctx.fillRect(trainX+PX*Math.floor(Math.random()*30),trainY+PX*9,PX,PX)}
     }
 
+    // Lerp Bi-color Neon Ambient Glow (drawn behind Near buildings)
+    if (mouse.x > 0) {
+      if (glowX === -999) {
+        glowX = mouse.x;
+        glowY = mouse.y;
+      } else {
+        glowX += (mouse.x - glowX) * 0.07;
+        glowY += (mouse.y - glowY) * 0.07;
+      }
+    }
+    if (glowX > 0 && document.getElementById('city-screen').style.display !== 'none') {
+      ctx.save();
+      const radius = Math.max(W * 0.25, 280);
+      const rG = ctx.createRadialGradient(glowX, glowY, 0, glowX, glowY, radius);
+      const ratio = Math.max(0, Math.min(1, glowX / W));
+      const r = Math.round(255 * (1 - ratio) + 62 * ratio);
+      const g = Math.round(77 * (1 - ratio) + 230 * ratio);
+      const b = Math.round(157 * (1 - ratio) + 255 * ratio);
+      const opacity = 0.15;
+      rG.addColorStop(0, `rgba(${r}, ${g}, ${b}, ${opacity})`);
+      rG.addColorStop(0.3, `rgba(${r}, ${g}, ${b}, ${opacity * 0.4})`);
+      rG.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = rG;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+
     // PASS 4 — Near
     buildings.forEach((b,bi)=>{if(b.layer===2)drawBuilding(b,bi)});
 
@@ -1439,6 +2325,34 @@ const HOME=CITIES[0];
       ctx.fillRect(rx,gY+PX,PX*6,PX);
     }
     drawRoadSunStreak(ctx,W,H,gY,t,PX);
+
+    // Draw active highway traffic flow on ground
+    if (traffic.length > 0) {
+      traffic.forEach(car => {
+        car.x += car.speed * PX * 0.8;
+        if (car.speed > 0 && car.x > W + PX * 6) car.x = -PX * 6;
+        if (car.speed < 0 && car.x < -PX * 6) car.x = W + PX * 6;
+
+        const carY = gY + PX * 2 + car.lane * PX * 3.5;
+        const snapX = Math.round(car.x / PX) * PX;
+        const snapY = Math.round(carY / PX) * PX;
+        ctx.fillStyle = car.color;
+
+        if (car.speed > 0) {
+          ctx.fillRect(snapX, snapY, PX * 2, PX);
+          if (car.color !== '#ff3a3a') {
+            ctx.fillStyle = 'rgba(255,234,159,0.12)';
+            ctx.fillRect(snapX + PX * 2, snapY, PX * 5, PX);
+          }
+        } else {
+          ctx.fillRect(snapX, snapY, PX * 2, PX);
+          if (car.color !== '#ff3a3a') {
+            ctx.fillStyle = 'rgba(255,234,159,0.12)';
+            ctx.fillRect(snapX - PX * 5, snapY, PX * 5, PX);
+          }
+        }
+      });
+    }
 
     // NEON SIGNS
     SIGNS.forEach((s,si)=>{
@@ -1526,18 +2440,38 @@ const HOME=CITIES[0];
     // Foreground silhouettes — palms, power lines, lantern (depth framing)
     drawForeground(ctx,W,H,gY,t,PX);
 
-    // Mouse glow
-    if(mouse.x>0&&document.getElementById('city-screen').style.display!=='none'){
-      const mg=ctx.createRadialGradient(mouse.x,mouse.y,0,mouse.x,mouse.y,220);
-      mg.addColorStop(0,'rgba(255,100,180,0.04)');mg.addColorStop(1,'rgba(0,0,0,0)');
-      ctx.fillStyle=mg;ctx.fillRect(0,0,W,H);
-    }
-
   }
   function loop(ts){if(!cityRunning)return;rafId=requestAnimationFrame(loop);if(ts-lastTs<33)return;lastTs=ts;draw();}
   function startCity(){if(cityRunning)return;if(REDUCE_MOTION){draw();return;}cityRunning=true;lastTs=0;rafId=requestAnimationFrame(loop);}
   function stopCity(){cityRunning=false;if(rafId)cancelAnimationFrame(rafId);rafId=null;}
   window.cityStart=startCity;window.cityStop=stopCity;
+  window.getCityPixels = function(step = 4) {
+    const wasRunning = cityRunning;
+    if (wasRunning) stopCity();
+    const savedData = ctx.getImageData(0, 0, W, H);
+    draw(true);
+    const imgData = ctx.getImageData(0, 0, W, H);
+    const data = imgData.data;
+    const targets = [];
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const idx = (y * W + x) * 4;
+        if (data[idx + 3] > 30) {
+          targets.push({
+            x: x,
+            y: y,
+            r: data[idx],
+            g: data[idx + 1],
+            b: data[idx + 2],
+            a: data[idx + 3] / 255
+          });
+        }
+      }
+    }
+    ctx.putImageData(savedData, 0, 0);
+    if (wasRunning) startCity();
+    return targets;
+  };
   document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCity();else if(document.getElementById('city-screen').style.display!=='none')startCity();});
   startCity();
 })();
@@ -1569,7 +2503,7 @@ function stopResearchGlobe(){ if(rGlobe) rGlobe.pauseAnimation(); }
 document.addEventListener('visibilitychange',()=>{ if(document.hidden) stopResearchGlobe(); else if(document.querySelector('#page-research.active')) startResearchGlobe(); });
 
 // ── PUBLICATION CHART ──
-const PUBS=[{y:'2023',j:0,c:2},{y:'2024',j:3,c:0},{y:'2025',j:7,c:1},{y:'2026',j:1,c:0}];
+const PUBS=[{y:'2023',j:0,c:2},{y:'2024',j:3,c:0},{y:'2025',j:7,c:1},{y:'2026',j:2,c:1}];
 function drawChart(animate){
   const svg=document.getElementById('pubchart'); if(!svg) return;
   const W=720,H=200,padL=24,padB=34,padT=14,padR=14;
@@ -1634,6 +2568,41 @@ function showPage(id){
   if(window.cityStop) window.cityStop();
   if(id==='papers'){ drawChart(!chartDrawn); chartDrawn=true; }
   if(id==='research'){ initResearchGlobe(); startResearchGlobe(); } else { stopResearchGlobe(); }
+  if(id==='projects'){
+    // Reset active tab button to research
+    document.querySelectorAll('.proj-tab').forEach(btn => btn.classList.remove('active'));
+    const researchBtn = document.getElementById('proj-tab-research');
+    if (researchBtn) researchBtn.classList.add('active');
+
+    const catView = document.getElementById('proj-categories-view');
+    const detView = document.getElementById('proj-details-view');
+    if(catView && detView){
+      catView.style.display = 'block';
+      detView.style.display = 'none';
+      const catCards = catView.querySelectorAll('.proj-cat-card');
+      const catMeta = catView.querySelectorAll('.proj-cat-meta');
+      if(typeof gsap !== 'undefined'){
+        gsap.set(catMeta, { opacity: 1, y: 0 });
+        catCards.forEach(c => c.classList.add('no-transition'));
+        gsap.fromTo(catCards, 
+          { 
+            opacity: 0, 
+            y: (idx) => (idx === 1 ? 50 : 30)
+          },
+          { 
+            opacity: 1, 
+            y: (idx) => (idx === 1 ? 20 : 0), 
+            duration: 0.6, 
+            ease: 'power2.out', 
+            stagger: 0.08,
+            onComplete: () => {
+              catCards.forEach(c => c.classList.remove('no-transition'));
+            }
+          }
+        );
+      }
+    }
+  }
   revealPage(id);
   const h=pg&&pg.querySelector('.s-title'); if(h){try{h.focus({preventScroll:true});}catch(_){}}
   window.scrollTo(0,0);
@@ -1658,27 +2627,1199 @@ function switchTab(id,event){
   const b=event.currentTarget||event.target; b.classList.add('active'); b.setAttribute('aria-selected','true');
 }
 
+// ── PROJECTS DATABASE & CONTROLLERS ──
+const PROJECTS_DATA = [
+  {
+    id: "proj-vlm-1",
+    category: "vlm",
+    title: "Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?",
+    venue: "Urban Forestry & Urban Greening, 2025",
+    desc: "Leveraged computer vision (CLIP/VLM) to measure subjective urban perception metrics (safety, beauty, depression) and compared their impacts on human visitation rates against physical GIS features.",
+    tags: ["VLM", "Urban Perception", "CLIP", "Computer Vision"],
+    img: "assets/images/research/proj_vlm_visitation.jpg",
+    links: { paper: "https://doi.org/10.1016/j.ufug.2025.128835" }
+  },
+  {
+    id: "proj-vlm-2",
+    category: "vlm",
+    title: "What Do Vision-Language Models Know About Urban Perception? A Mechanistic Investigation",
+    venue: "ACSP 66th Annual Conference, 2026",
+    desc: "Investigated internal neuron activations of VLMs to reveal how representations of urban safety, walkability, and gentrification emerge within large multi-modal networks.",
+    tags: ["VLMs", "Interpretability", "Urban Perception"],
+    img: "assets/images/research/proj_vlm_mechanistic.jpg",
+    links: {}
+  },
+  {
+    id: "proj-llm-1",
+    category: "llm",
+    title: "Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis",
+    venue: "PLOS ONE, 2025",
+    desc: "Designed a framework combining spatial GIS analysis with LLM reasoning agents to contextualize crime data and local media reports, simulating automated crime reporting dynamics.",
+    tags: ["LLM Reasoning", "GIS", "Urban Safety"],
+    img: "assets/images/research/proj_llm_crime.jpg",
+    links: { paper: "https://doi.org/10.1371/journal.pone.0331788" }
+  },
+  {
+    id: "proj-llm-2",
+    category: "llm",
+    title: "Multi-Agent LLM Simulation of Urban Planning Policy Negotiations",
+    venue: "Working Paper, 2026",
+    desc: "Developed a sandbox environment where multiple LLM agents (representing planners, citizens, and developers) negotiate zoning policies, simulating NIMBY dynamics and policy compromise.",
+    tags: ["Multi-Agent", "Zoning Simulation", "NIMBY"],
+    img: "assets/images/research/proj_llm_negotiation.jpg",
+    links: {}
+  },
+  {
+    id: "proj-mobility-1",
+    category: "mobility",
+    title: "Desirable Bikeshare Routes: Nonlinear Impacts of Micro-Level Street Environments",
+    venue: "Transportation Research Part A: Policy and Practice, 2026",
+    desc: "Modeled nonlinear relationships between micro-level street designs (via computer vision street-view segmentation) and bikeshare route selection using XGBoost and SHAP.",
+    tags: ["Bikeshare Route", "Street View", "XGBoost", "SHAP"],
+    img: "assets/images/research/proj_mobility_bikeshare.jpg",
+    links: { paper: "https://doi.org/10.1016/j.tra.2026.104962" }
+  },
+  {
+    id: "proj-mobility-2",
+    category: "mobility",
+    title: "Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census & Social Media",
+    venue: "Urban Forestry & Urban Greening, 2024",
+    desc: "Used street view imagery, social media check-ins, and census data to measure how urban greenery layout increases local community vitality and walkability.",
+    tags: ["Greenery", "Street View", "Community Vitality"],
+    img: "assets/images/research/proj_mobility_greenery.jpg",
+    links: { paper: "https://doi.org/10.1016/j.ufug.2024.128289" }
+  },
+  // Design & Practice Projects
+  {
+    id: "proj-design-1",
+    category: "design",
+    title: "Magical Foodscape: A Guidebook for Re-planning the Cities Based on the Culture, Food and the Built Environment",
+    venue: "ASLA Student Honor Award, Communications, 2021",
+    desc: "Formulated a participatory urban design framework that integrates local street food cultures, informal vendors, and community gardens to design inclusive public spaces.",
+    tags: ["Urban Design", "Communications", "Participatory Planning"],
+    img: "assets/images/design/design_foodscape.png",
+    links: { demo: "https://www.magicalfoodscape.net", award: "https://www.asla.org/awards-events-main-landing/honors-awards/pro-student-awards/2021-student-awards/3468" }
+  },
+  {
+    id: "proj-design-2",
+    category: "design",
+    title: "Indonesia Mine Restoration Plan: Healing the Scars of Resource Extraction",
+    venue: "WLA Student Merit Award, Analysis & Planning, 2020",
+    desc: "Designed an ecological landscape regeneration master plan for coal mine pits in Indonesia, incorporating bioremediation terraces, phytoremediation lakes, and community ecotourism hubs.",
+    tags: ["Mine Restoration", "Phytoremediation", "Landscape Planning"],
+    img: "assets/images/design/design_mine.png",
+    links: { award: "https://worldlandscapearchitecture.com/student-project-indonesia-mine-restoration-plan/?v=0b3b97fa6688" }
+  },
+  {
+    id: "proj-design-3",
+    category: "design",
+    title: "Death As Life: Alternative Cemeteries and Ecological Afterlives",
+    venue: "WLA Awards Featured Project, 2020",
+    desc: "Explored landscape architecture interventions that re-imagine traditional urban cemeteries as green lungs, public parks, and vital biodiversity reservoirs.",
+    tags: ["Green Infrastructure", "Cemetery Design", "Speculative Landscape"],
+    img: "assets/images/design/design_death.png",
+    links: { award: "https://worldlandscapearchitecture.com/student-project-death-as-life/?v=0b3b97fa6688" }
+  },
+  {
+    id: "proj-design-4",
+    category: "design",
+    title: "The Rebirth of Karez: Ecological Restoration of Ancient Underground Aqueducts",
+    venue: "iF Design Talent Award & Laka Competition Honorable Mention, 2020",
+    desc: "Proposed an ecological restoration and condensation-water collection strategy for the drying Karez systems in arid Turpan, revitalizing ancient underground aqueducts as sustainable agricultural oases.",
+    tags: ["Ecological Restoration", "Karez System", "Condensation Collection"],
+    img: "assets/images/design/design_karez.png",
+    links: { award: "https://ifdesign.com/en/winner-ranking/project/the-rebirth-of-karez/298431" }
+  },
+  {
+    id: "proj-design-5",
+    category: "design",
+    title: "Continuance: An Island World Continues to Rise with the Sea Levels",
+    venue: "World Architecture Award 36th Cycle & Architecture MasterPrize Best of Best, 2020",
+    desc: "Designed a floating, modular self-assembling urban island network for coastal areas threatened by rising sea levels, combining ecological mariculture, adaptive architecture, and floating community nodes.",
+    tags: ["Floating City", "Sea Level Rise", "Modular Architecture", "Speculative Design"],
+    img: "assets/images/design/design_continuance.png",
+    links: { award: "https://worldarchitecture.org/architecture-projects/hfnfv/continuance---an-island-world-continues-to-rise-with-the-sea-levels-project-pages.html" }
+  },
+  {
+    id: "proj-design-6",
+    category: "design",
+    title: "Plant to Plants: Transforming Abandoned Industrial Land into Green Public Space",
+    venue: "Architecture MasterPrize Student Honorable Mention, 2022",
+    desc: "Redesigned the 1959 Xishan Power Plant on Xishan Island using ecological landscaping, transforming the abandoned industrial site into an active public space.",
+    tags: ["Industrial Reuse", "Brownfield", "Public Space"],
+    img: "assets/images/design/design_plants.png",
+    links: { award: "https://architectureprize.com/winners/winner.php?id=6100&mode=hm&compID=12798" }
+  },
+  {
+    id: "proj-design-7",
+    category: "design",
+    title: "Campus Fight! A Guidebook for Campus Transformation",
+    venue: "Landscape Institute Award Finalist & WLA Student Design Merit, 2022/2023",
+    desc: "Formulated a guidebook and guidelines for linear campus transformations under highways, advocating for student empowerment and public engagement.",
+    tags: ["Campus Design", "Infrastructure Reuse", "Public Engagement"],
+    img: "assets/images/design/design_campus_fight.png",
+    links: { demo: "https://issuu.com/yuxuancai/docs/campusfight0521" }
+  }
+];
+
+function switchProjectsTab(tabId) {
+  document.querySelectorAll('.proj-tab').forEach(btn => btn.classList.remove('active'));
+  const activeBtn = document.getElementById('proj-tab-' + tabId);
+  if (activeBtn) activeBtn.classList.add('active');
+  
+  const catView = document.getElementById('proj-categories-view');
+  const detView = document.getElementById('proj-details-view');
+  
+  if (!catView || !detView) return;
+  
+  if (tabId === 'research') {
+    // Fade out details view if open, show categories
+    if (detView.style.display === 'block') {
+      if (typeof gsap !== 'undefined' && !REDUCE_MOTION) {
+        const leftCards = detView.querySelectorAll('.proj-list-card');
+        const rightPanel = detView.querySelector('.proj-sticky-panel');
+        gsap.killTweensOf([leftCards, rightPanel]);
+        
+        gsap.timeline({
+          onComplete: () => {
+            detView.style.display = 'none';
+            catView.style.display = 'block';
+            
+            const catCards = catView.querySelectorAll('.proj-cat-card');
+            const catMeta = catView.querySelectorAll('.proj-cat-meta');
+            gsap.set(catMeta, { opacity: 1, y: 0 });
+            catCards.forEach(c => c.classList.add('no-transition'));
+            
+            gsap.fromTo(catCards, 
+              { opacity: 0, y: (idx) => (idx === 1 ? 50 : 30) },
+              { 
+                opacity: 1, 
+                y: (idx) => (idx === 1 ? 20 : 0), 
+                duration: 0.6, 
+                ease: 'power2.out', 
+                stagger: 0.08,
+                onComplete: () => {
+                  catCards.forEach(c => c.classList.remove('no-transition'));
+                }
+              }
+            );
+          }
+        }).to([leftCards, rightPanel], { opacity: 0, scale: 0.95, y: 20, duration: 0.25 });
+      } else {
+        detView.style.display = 'none';
+        catView.style.display = 'block';
+      }
+    } else {
+      catView.style.display = 'block';
+      detView.style.display = 'none';
+    }
+  } else if (tabId === 'design') {
+    // Fade out categories if open, show design projects
+    if (catView.style.display !== 'none') {
+      if (typeof gsap !== 'undefined' && !REDUCE_MOTION) {
+        const catCards = catView.querySelectorAll('.proj-cat-card');
+        gsap.killTweensOf(catCards);
+        gsap.to(catCards, {
+          opacity: 0,
+          scale: 0.95,
+          y: 20,
+          duration: 0.25,
+          stagger: 0.03,
+          onComplete: () => {
+            openDesignProjects();
+          }
+        });
+      } else {
+        openDesignProjects();
+      }
+    } else {
+      openDesignProjects();
+    }
+  }
+}
+
+function openDesignProjects() {
+  const catView = document.getElementById('proj-categories-view');
+  const detView = document.getElementById('proj-details-view');
+  const leftEl = document.getElementById('proj-split-left');
+  const rightEl = document.getElementById('proj-split-right');
+  const titleEl = document.getElementById('proj-detail-title-text');
+  
+  if(!catView || !detView || !leftEl || !rightEl) return;
+  
+  titleEl.textContent = "Design & Practice Portfolio";
+  
+  const backBtn = detView.querySelector('.proj-back-btn');
+  if (backBtn) backBtn.style.display = 'none';
+  
+  const filtered = PROJECTS_DATA.filter(p => p.category === 'design');
+  leftEl.innerHTML = '';
+  
+  rightEl.innerHTML = `
+    <div class="proj-sticky-panel">
+      <div class="proj-sticky-img-wrap">
+        <img id="proj-sticky-image" class="proj-sticky-img" src="" alt="" loading="lazy">
+      </div>
+      <div class="proj-sticky-content">
+        <div id="proj-sticky-venue" class="proj-sticky-venue">VENUE</div>
+        <h3 id="proj-sticky-title" class="proj-sticky-title">Title</h3>
+        <p id="proj-sticky-desc" class="proj-sticky-desc">Description</p>
+        <div id="proj-sticky-tags" class="tags" style="margin-top: 4px;"></div>
+        <div id="proj-sticky-links" class="proj-sticky-links"></div>
+      </div>
+    </div>
+  `;
+  
+  filtered.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'proj-list-card';
+    card.setAttribute('data-id', p.id);
+    
+    const num = String(idx + 1).padStart(2, '0');
+    const tagsHtml = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    let linksHtml = '';
+    if(p.links.paper) linksHtml += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
+    if(p.links.github) linksHtml += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
+    if(p.links.award) linksHtml += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
+    if(p.links.demo) linksHtml += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+    
+    card.innerHTML = `
+      <div class="proj-list-card-header">
+        <span class="proj-list-card-num">${num}</span>
+        <span class="proj-list-card-venue">${p.venue}</span>
+      </div>
+      <h4 class="proj-list-card-title">${p.title}</h4>
+      
+      <!-- Mobile-only content -->
+      <div class="proj-list-card-mobile-content">
+        <div class="proj-list-card-mobile-img">
+          <img src="${p.img}" alt="${p.title}" loading="lazy">
+        </div>
+        <p class="proj-sticky-desc">${p.desc}</p>
+        <div class="tags" style="margin-top: 10px;">${tagsHtml}</div>
+        ${linksHtml ? `<div class="proj-sticky-links" style="margin-top: 12px;">${linksHtml}</div>` : ''}
+      </div>
+    `;
+    
+    card.addEventListener('mouseenter', () => {
+      if (window.innerWidth > 860) {
+        selectProjectDetail(p.id);
+      }
+    });
+    
+    leftEl.appendChild(card);
+  });
+  
+  if (filtered.length > 0) {
+    selectProjectDetail(filtered[0].id, true);
+  }
+  
+  catView.style.display = 'none';
+  detView.style.display = 'block';
+  
+  const leftCards = detView.querySelectorAll('.proj-list-card');
+  const rightPanel = detView.querySelector('.proj-sticky-panel');
+  
+  if (typeof gsap !== 'undefined' && !REDUCE_MOTION) {
+    leftCards.forEach(c => c.classList.add('no-transition'));
+    if(rightPanel) rightPanel.classList.add('no-transition');
+    
+    gsap.fromTo(leftCards,
+      {
+        opacity: 0,
+        scale: 0.1,
+        rotationX: () => gsap.utils.random(-35, 35),
+        rotationY: () => gsap.utils.random(-35, 35),
+        rotationZ: () => gsap.utils.random(-15, 15),
+        x: () => gsap.utils.random(-600, 600),
+        y: () => gsap.utils.random(400, 800)
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        rotationX: 0,
+        rotationY: 0,
+        rotationZ: 0,
+        x: 0,
+        y: (idx) => (window.innerWidth > 860 && idx % 2 === 1 ? 20 : 0),
+        duration: 1.0,
+        ease: 'power3.out',
+        stagger: 0.08,
+        onComplete: () => {
+          leftCards.forEach(c => {
+            c.classList.remove('no-transition');
+            c.style.setProperty('--mouse-x', '-999px');
+            c.style.setProperty('--mouse-y', '-999px');
+          });
+        }
+      }
+    );
+    
+    if (rightPanel) {
+      gsap.fromTo(rightPanel,
+        {
+          opacity: 0,
+          x: 250,
+          rotationY: 20,
+          scale: 0.95
+        },
+        {
+          opacity: 1,
+          x: 0,
+          rotationY: 0,
+          scale: 1,
+          duration: 0.95,
+          ease: 'power3.out',
+          onComplete: () => {
+            rightPanel.classList.remove('no-transition');
+          }
+        }
+      );
+    }
+  }
+}
+
+function openProjectCategory(catId) {
+  const catView = document.getElementById('proj-categories-view');
+  const detView = document.getElementById('proj-details-view');
+  const leftEl = document.getElementById('proj-split-left');
+  const rightEl = document.getElementById('proj-split-right');
+  const titleEl = document.getElementById('proj-detail-title-text');
+  
+  if(!catView || !detView || !leftEl || !rightEl) return;
+  
+  const categoryNames = {
+    vlm: "Urban Perception & VLMs",
+    llm: "LLM Planning Simulation",
+    mobility: "Urban Mobility & Streets"
+  };
+  titleEl.textContent = categoryNames[catId] || "Category Projects";
+  
+  const backBtn = detView.querySelector('.proj-back-btn');
+  if (backBtn) backBtn.style.display = 'block';
+  
+  const filtered = PROJECTS_DATA.filter(p => p.category === catId);
+  leftEl.innerHTML = '';
+  
+  rightEl.innerHTML = `
+    <div class="proj-sticky-panel">
+      <div class="proj-sticky-img-wrap">
+        <img id="proj-sticky-image" class="proj-sticky-img" src="" alt="" loading="lazy">
+      </div>
+      <div class="proj-sticky-content">
+        <div id="proj-sticky-venue" class="proj-sticky-venue">VENUE</div>
+        <h3 id="proj-sticky-title" class="proj-sticky-title">Title</h3>
+        <p id="proj-sticky-desc" class="proj-sticky-desc">Description</p>
+        <div id="proj-sticky-tags" class="tags" style="margin-top: 4px;"></div>
+        <div id="proj-sticky-links" class="proj-sticky-links"></div>
+      </div>
+    </div>
+  `;
+  
+  filtered.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'proj-list-card';
+    card.setAttribute('data-id', p.id);
+    
+    const num = String(idx + 1).padStart(2, '0');
+    const tagsHtml = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    let linksHtml = '';
+    if(p.links.paper) linksHtml += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
+    if(p.links.github) linksHtml += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
+    if(p.links.award) linksHtml += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
+    if(p.links.demo) linksHtml += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Live Demo ↗</a>`;
+    
+    card.innerHTML = `
+      <div class="proj-list-card-header">
+        <span class="proj-list-card-num">${num}</span>
+        <span class="proj-list-card-venue">${p.venue}</span>
+      </div>
+      <h4 class="proj-list-card-title">${p.title}</h4>
+      
+      <!-- Mobile-only content -->
+      <div class="proj-list-card-mobile-content">
+        <div class="proj-list-card-mobile-img">
+          <img src="${p.img}" alt="${p.title}" loading="lazy">
+        </div>
+        <p class="proj-sticky-desc">${p.desc}</p>
+        <div class="tags" style="margin-top: 10px;">${tagsHtml}</div>
+        ${linksHtml ? `<div class="proj-sticky-links" style="margin-top: 12px;">${linksHtml}</div>` : ''}
+      </div>
+    `;
+    
+    card.addEventListener('mouseenter', () => {
+      if (window.innerWidth > 860) {
+        selectProjectDetail(p.id);
+      }
+    });
+    
+    leftEl.appendChild(card);
+  });
+  
+  if (filtered.length > 0) {
+    selectProjectDetail(filtered[0].id, true);
+  }
+  
+  const playEntranceAnimation = () => {
+    catView.style.display = 'none';
+    detView.style.display = 'block';
+    
+    const leftCards = detView.querySelectorAll('.proj-list-card');
+    const rightPanel = detView.querySelector('.proj-sticky-panel');
+    
+    if (typeof gsap !== 'undefined' && !REDUCE_MOTION) {
+      leftCards.forEach(c => c.classList.add('no-transition'));
+      if(rightPanel) rightPanel.classList.add('no-transition');
+      
+      gsap.fromTo(leftCards,
+        {
+          opacity: 0,
+          scale: 0.1,
+          rotationX: () => gsap.utils.random(-35, 35),
+          rotationY: () => gsap.utils.random(-35, 35),
+          rotationZ: () => gsap.utils.random(-15, 15),
+          x: () => gsap.utils.random(-600, 600),
+          y: () => gsap.utils.random(400, 800)
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          rotationY: 0,
+          rotationZ: 0,
+          x: 0,
+          y: (idx) => (window.innerWidth > 860 && idx % 2 === 1 ? 20 : 0),
+          duration: 1.0,
+          ease: 'power3.out',
+          stagger: 0.08,
+          onComplete: () => {
+            leftCards.forEach(c => {
+              c.classList.remove('no-transition');
+              c.style.setProperty('--mouse-x', '-999px');
+              c.style.setProperty('--mouse-y', '-999px');
+            });
+          }
+        }
+      );
+      
+      if (rightPanel) {
+        gsap.fromTo(rightPanel,
+          {
+            opacity: 0,
+            x: 250,
+            rotationY: 20,
+            scale: 0.95
+          },
+          {
+            opacity: 1,
+            x: 0,
+            rotationY: 0,
+            scale: 1,
+            duration: 0.95,
+            ease: 'power3.out',
+            onComplete: () => {
+              rightPanel.classList.remove('no-transition');
+            }
+          }
+        );
+      }
+    }
+  };
+  
+  if(typeof gsap !== 'undefined' && !REDUCE_MOTION){
+    const catCards = catView.querySelectorAll('.proj-cat-card');
+    const clickedCard = Array.from(catCards).find(c => {
+      const onclickAttr = c.getAttribute('onclick') || '';
+      return onclickAttr.includes(`'${catId}'`) || onclickAttr.includes(`"${catId}"`);
+    });
+    
+    gsap.killTweensOf([catCards, detView, '#proj-split-left .proj-list-card', '.proj-sticky-panel']);
+    
+    catCards.forEach(c => {
+      if (c !== clickedCard) {
+        gsap.to(c, { opacity: 0, scale: 0.8, y: 30, duration: 0.35, ease: 'power2.in' });
+      }
+    });
+    
+    if (clickedCard) {
+      gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.25 });
+      gsap.to(clickedCard, {
+        opacity: 0,
+        scale: 1.06,
+        duration: 0.4,
+        ease: 'power2.out',
+        onComplete: playEntranceAnimation
+      });
+    } else {
+      playEntranceAnimation();
+    }
+  } else {
+    catView.style.display = 'none';
+    detView.style.display = 'block';
+  }
+}
+
+function selectProjectDetail(projId, force = false) {
+  const card = document.querySelector(`.proj-list-card[data-id="${projId}"]`);
+  if (!card) return;
+  
+  if (card.classList.contains('active') && !force) return;
+  
+  document.querySelectorAll('.proj-list-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  
+  const p = PROJECTS_DATA.find(item => item.id === projId);
+  if (!p) return;
+  
+  const panel = document.querySelector('.proj-sticky-panel');
+  if (!panel) return;
+  
+  if (typeof gsap === 'undefined' || REDUCE_MOTION || window.innerWidth <= 860) {
+    const imgEl = document.getElementById('proj-sticky-image');
+    if (imgEl) {
+      imgEl.src = p.img;
+      imgEl.alt = p.title;
+    }
+    const venEl = document.getElementById('proj-sticky-venue');
+    if (venEl) venEl.textContent = p.venue;
+    const titEl = document.getElementById('proj-sticky-title');
+    if (titEl) titEl.textContent = p.title;
+    const descEl = document.getElementById('proj-sticky-desc');
+    if (descEl) descEl.textContent = p.desc;
+    
+    const tagsEl = document.getElementById('proj-sticky-tags');
+    if (tagsEl) tagsEl.innerHTML = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    
+    const linksEl = document.getElementById('proj-sticky-links');
+    if (linksEl) {
+      linksEl.innerHTML = '';
+      if (p.links.paper) linksEl.innerHTML += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
+      if (p.links.github) linksEl.innerHTML += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
+      if (p.links.award) linksEl.innerHTML += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
+      if (p.links.demo) linksEl.innerHTML += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+    }
+    return;
+  }
+  
+  gsap.killTweensOf(['.proj-sticky-img', '.proj-sticky-content > *']);
+  
+  gsap.timeline()
+    .to(['.proj-sticky-img', '.proj-sticky-content > *'], {
+      opacity: 0,
+      scale: 0.98,
+      duration: 0.15,
+      ease: 'power1.in',
+      onComplete: () => {
+        const imgEl = document.getElementById('proj-sticky-image');
+        if (imgEl) {
+          imgEl.src = p.img;
+          imgEl.alt = p.title;
+        }
+        const venEl = document.getElementById('proj-sticky-venue');
+        if (venEl) venEl.textContent = p.venue;
+        const titEl = document.getElementById('proj-sticky-title');
+        if (titEl) titEl.textContent = p.title;
+        const descEl = document.getElementById('proj-sticky-desc');
+        if (descEl) descEl.textContent = p.desc;
+        
+        const tagsEl = document.getElementById('proj-sticky-tags');
+        if (tagsEl) tagsEl.innerHTML = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
+        
+        const linksEl = document.getElementById('proj-sticky-links');
+        if (linksEl) {
+          linksEl.innerHTML = '';
+          if (p.links.paper) linksEl.innerHTML += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
+          if (p.links.github) linksEl.innerHTML += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
+          if (p.links.award) linksEl.innerHTML += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
+          if (p.links.demo) linksEl.innerHTML += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+        }
+      }
+    })
+    .to('.proj-sticky-img', {
+      opacity: 0.9,
+      scale: 1,
+      duration: 0.35,
+      ease: 'power2.out'
+    })
+    .to('.proj-sticky-content > *', {
+      opacity: 1,
+      scale: 1,
+      duration: 0.3,
+      ease: 'power2.out',
+      stagger: 0.03
+    }, '-=0.25');
+}
+
+function backToCategories() {
+  const catView = document.getElementById('proj-categories-view');
+  const detView = document.getElementById('proj-details-view');
+  
+  if(!catView || !detView) return;
+  
+  // Reset active tab button to research
+  document.querySelectorAll('.proj-tab').forEach(btn => btn.classList.remove('active'));
+  const researchBtn = document.getElementById('proj-tab-research');
+  if (researchBtn) researchBtn.classList.add('active');
+  
+  if(typeof gsap !== 'undefined' && !REDUCE_MOTION){
+    const leftCards = detView.querySelectorAll('.proj-list-card');
+    const rightPanel = detView.querySelector('.proj-sticky-panel');
+    
+    gsap.killTweensOf([leftCards, rightPanel, catView, '#proj-categories-view .proj-cat-card', '#proj-categories-view .proj-cat-meta']);
+    
+    const tl = gsap.timeline({
+      onComplete: () => {
+        detView.style.display = 'none';
+        catView.style.display = 'block';
+        
+        const catCards = catView.querySelectorAll('.proj-cat-card');
+        gsap.set(catView.querySelectorAll('.proj-cat-meta'), { opacity: 1, y: 0 });
+        catCards.forEach(c => c.classList.add('no-transition'));
+        
+        gsap.fromTo(catCards, 
+          { 
+            opacity: 0, 
+            y: (idx) => (idx === 1 ? 50 : 30)
+          },
+          { 
+            opacity: 1, 
+            y: (idx) => (idx === 1 ? 20 : 0), 
+            duration: 0.6, 
+            ease: 'power2.out', 
+            stagger: 0.08,
+            onComplete: () => {
+              catCards.forEach(c => c.classList.remove('no-transition'));
+            }
+          }
+        );
+      }
+    });
+    
+    tl.to(leftCards, {
+      opacity: 0,
+      x: -150,
+      duration: 0.3,
+      stagger: 0.04,
+      ease: 'power2.in'
+    });
+    
+    if (rightPanel) {
+      tl.to(rightPanel, {
+        opacity: 0,
+        x: 150,
+        scale: 0.95,
+        duration: 0.35,
+        ease: 'power2.in'
+      }, 0);
+    }
+  } else {
+    detView.style.display = 'none';
+    catView.style.display = 'block';
+  }
+}
+
 // ── HERO ENTRANCE ──
 function heroIntro(){
   if(!HAS_GSAP()||REDUCE_MOTION) return;
   gsap.from('.hero-content > *',{opacity:0,y:26,duration:.7,ease:'power3.out',stagger:.1,delay:.15});
 }
 
-// ── CONTACT via mailto (no backend) ──
+// ── CONTACT via mailto & fallback copy handler ──
 (function(){
-  const f=document.getElementById('contact-form'); if(!f) return;
+  const f=document.getElementById('contact-form');
+  const s=document.getElementById('contact-success');
+  const hint=document.getElementById('contact-form-hint');
+  if(!f || !s) return;
+  
+  let mailtoUrl = '';
+  let formattedText = '';
+  
   f.addEventListener('submit',e=>{
     e.preventDefault();
     const g=n=>{const el=f.querySelector('[name="'+n+'"]'); return el?el.value:'';};
-    const subj=encodeURIComponent(g('subject')||'Hello from yuxuancai.com');
-    const body=encodeURIComponent('From: '+g('name')+' <'+g('email')+'>\n\n'+g('message'));
-    window.location.href='mailto:yuxuancai@unc.edu?subject='+subj+'&body='+body;
+    const name = g('name');
+    const email = g('email');
+    const subject = g('subject') || 'Hello from yuxuancai.com';
+    const message = g('message');
+    
+    formattedText = `From: ${name} <${email}>\nSubject: ${subject}\n\nMessage:\n${message}`;
+    const subjEncoded = encodeURIComponent(subject);
+    const bodyEncoded = encodeURIComponent(`From: ${name} <${email}>\n\n${message}`);
+    mailtoUrl = `mailto:yuxuanc@unc.edu?subject=${subjEncoded}&body=${bodyEncoded}`;
+    
+    // 1. Attempt to redirect to mailto
+    window.location.href = mailtoUrl;
+    
+    // 2. Hide form, show success panel
+    f.style.display = 'none';
+    if(hint) hint.style.display = 'none';
+    s.style.display = 'flex';
+    
+    // 3. Reset copy button text if it was previously clicked
+    const copyBtn = document.getElementById('success-copy-btn');
+    if (copyBtn) copyBtn.textContent = 'Copy to Clipboard';
   });
+  
+  const openBtn = document.getElementById('success-open-btn');
+  if (openBtn) {
+    openBtn.addEventListener('click', () => {
+      if (mailtoUrl) window.location.href = mailtoUrl;
+    });
+  }
+  
+  const copyBtn = document.getElementById('success-copy-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      if (formattedText) {
+        navigator.clipboard.writeText(formattedText).then(() => {
+          copyBtn.textContent = 'Copied! ✓';
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy to Clipboard';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+          copyBtn.textContent = 'Failed to copy';
+        });
+      }
+    });
+  }
+  
+  const backBtn = document.getElementById('success-back-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      s.style.display = 'none';
+      f.style.display = 'flex';
+      if(hint) hint.style.display = 'block';
+      f.reset();
+    });
+  }
 })();
+
+// ── BOOTING CEREMONY SEQUENCER ──
+function runBootCeremony(onComplete) {
+  const terminal = document.getElementById('boot-terminal-text');
+  const overlay = document.getElementById('boot-overlay');
+  if (!terminal || !overlay) {
+    if (onComplete) onComplete();
+    return;
+  }
+
+  // Only run loader on the homepage, skip on inner pages like #papers
+  const isHomepage = !location.hash || location.hash === '#';
+  if (!isHomepage) {
+    overlay.style.display = 'none';
+    if (onComplete) onComplete();
+    return;
+  }
+
+  // --- MATRIX RAIN SETUP ---
+  const canvas = document.getElementById('boot-canvas');
+  const ctx = canvas.getContext('2d');
+  const rect = overlay.getBoundingClientRect();
+  canvas.width = rect.width;
+  canvas.height = rect.height;
+
+  let matrixActive = true;
+  let matrixRequestId = null;
+  const fontSize = 14;
+  const columns = Math.floor(canvas.width / fontSize) + 1;
+  const yPositions = Array(columns).fill(0).map(() => Math.random() * -canvas.height);
+  const colors = ['#ff4d9d', '#3ee6ff'];
+  const columnColors = Array(columns).fill(0).map(() => colors[Math.floor(Math.random() * colors.length)]);
+  const chars = "01010101UAIGPCY0101";
+
+  let lastTime = 0;
+  const fps = 20;
+  const interval = 1000 / fps;
+
+  function drawMatrix(timestamp) {
+    if (!matrixActive) return;
+    if (!lastTime) lastTime = timestamp;
+    const elapsed = timestamp - lastTime;
+    
+    if (elapsed > interval) {
+      lastTime = timestamp - (elapsed % interval);
+      ctx.fillStyle = 'rgba(8, 4, 13, 0.15)'; // trails fade into #08040d
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      ctx.font = `bold ${fontSize}px var(--mono)`;
+      for (let i = 0; i < yPositions.length; i++) {
+        const char = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        const y = yPositions[i];
+        
+        ctx.fillStyle = columnColors[i];
+        if (Math.random() < 0.05) {
+          ctx.fillStyle = '#ffffff';
+        }
+        ctx.fillText(char, x, y);
+        
+        if (y > canvas.height && Math.random() > 0.96) {
+          yPositions[i] = -fontSize;
+        } else {
+          yPositions[i] += fontSize;
+        }
+      }
+    }
+    matrixRequestId = requestAnimationFrame(drawMatrix);
+  }
+  matrixRequestId = requestAnimationFrame(drawMatrix);
+  // --- END MATRIX RAIN SETUP ---
+
+  const lines = [
+    { text: "> SYSTEM BOOT: URBAN.PLANNING.AGENT_v2.6 ... [OK]", class: "success" },
+    { text: "> IDENTITY: CAI, YUXUAN (URBAN AI RESEARCHER) ... [RESOLVED]", class: "accent" },
+    { text: "> ACCESS GRANTED. CONNECTING TO NODE NETWORK...", class: "success" }
+  ];
+
+  let currentLine = 0;
+  
+  function printLine() {
+    if (currentLine < lines.length) {
+      const lineData = lines[currentLine];
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'boot-line' + (lineData.class ? ' ' + lineData.class : '');
+      lineDiv.textContent = lineData.text;
+      
+      // Remove cursor from previous line if any
+      const oldCursor = terminal.querySelector('.boot-cursor');
+      if (oldCursor) oldCursor.remove();
+      
+      // Append line and new cursor
+      terminal.appendChild(lineDiv);
+      const cursor = document.createElement('span');
+      cursor.className = 'boot-cursor';
+      terminal.appendChild(cursor);
+      
+      // Trigger CSS fade/slide in
+      setTimeout(() => {
+        lineDiv.classList.add('printed');
+      }, 10);
+      
+      currentLine++;
+      // Random delay to make it look like a live terminal loading
+      const delay = 150 + Math.random() * 200;
+      setTimeout(printLine, delay);
+    } else {
+      // Completed typing, trigger particle dissolve & reassembly reveal
+      setTimeout(() => {
+        // Stop Matrix Rain animation loop
+        matrixActive = false;
+        if (matrixRequestId) cancelAnimationFrame(matrixRequestId);
+
+        const canvas = document.getElementById('boot-canvas');
+        canvas.style.zIndex = '100005'; // Bring canvas to front for particle animation
+        const ctx = canvas.getContext('2d');
+        const rect = overlay.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        const svgEl = document.querySelector('.boot-city-svg');
+        const termEl = document.getElementById('boot-terminal-text');
+        
+        if (!svgEl || !termEl) {
+          overlay.style.opacity = '0';
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            if (onComplete) onComplete();
+          }, 500);
+          return;
+        }
+
+        const svgRect = svgEl.getBoundingClientRect();
+        const termRect = termEl.getBoundingClientRect();
+
+        const scaleX = (x) => (svgRect.left - rect.left) + (x / 400) * svgRect.width;
+        const scaleY = (y) => (svgRect.top - rect.top) + (y / 160) * svgRect.height;
+
+        // 1. Draw SVG outline paths onto boot-canvas
+        ctx.strokeStyle = '#ff4d9d';
+        ctx.lineWidth = 2.5;
+        ctx.lineJoin = 'round';
+        ctx.shadowBlur = 6;
+        ctx.shadowColor = '#ff4d9d';
+
+        const paths = [
+          [[20, 140], [20, 80], [55, 80], [55, 140]],
+          [[65, 140], [65, 50], [95, 50], [95, 140]],
+          [[110, 140], [110, 100], [125, 100], [125, 70], [145, 70], [145, 30], [185, 30], [185, 70], [205, 70], [205, 140]],
+          [[220, 140], [220, 70], [235, 40], [255, 40], [255, 140]],
+          [[270, 140], [270, 90], [300, 90], [300, 140]],
+          [[315, 140], [315, 80], 'arc', [345, 80], [345, 140]]
+        ];
+
+        paths.forEach(p => {
+          ctx.beginPath();
+          let first = true;
+          for (let i = 0; i < p.length; i++) {
+            if (p[i] === 'arc') {
+              const cx = scaleX(330);
+              const cy = scaleY(80);
+              const r = (scaleX(345) - scaleX(315)) / 2;
+              ctx.arc(cx, cy, r, Math.PI, 0, false);
+              i++;
+            } else {
+              const x = scaleX(p[i][0]);
+              const y = scaleY(p[i][1]);
+              if (first) {
+                ctx.moveTo(x, y);
+                first = false;
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+          }
+          ctx.stroke();
+        });
+
+        // Draw background towers in low opacity
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = 'rgba(176, 123, 255, 0.1)';
+        ctx.strokeStyle = 'rgba(176, 123, 255, 0.2)';
+        ctx.lineWidth = 1;
+        const bgRects = [[30, 70, 35, 70], [95, 50, 40, 90], [270, 60, 45, 80], [330, 80, 30, 60]];
+        bgRects.forEach(r => {
+          const rx = scaleX(r[0]);
+          const ry = scaleY(r[1]);
+          const rw = (r[2] / 400) * svgRect.width;
+          const rh = (r[3] / 160) * svgRect.height;
+          ctx.fillRect(rx, ry, rw, rh);
+          ctx.strokeRect(rx, ry, rw, rh);
+        });
+
+        // Draw window lights
+        ctx.fillStyle = 'rgba(62, 230, 255, 0.8)';
+        ctx.shadowBlur = 4;
+        ctx.shadowColor = '#3ee6ff';
+        const wins = [
+          [73, 60], [83, 60], [73, 72], [83, 72], [73, 84], [83, 84], [73, 96], [83, 96],
+          [151, 42], [161, 42], [171, 42], [151, 54], [161, 54], [171, 54]
+        ];
+        wins.forEach(w => {
+          const wx = scaleX(w[0]);
+          const wy = scaleY(w[1]);
+          const wSize = (3 / 400) * svgRect.width;
+          ctx.fillRect(wx, wy, wSize, wSize);
+        });
+
+        // Right tower windows (pink)
+        ctx.fillStyle = 'rgba(255, 92, 160, 0.8)';
+        ctx.shadowColor = '#ff4d9d';
+        const rWins = [[324, 95], [334, 95], [324, 110], [334, 110]];
+        rWins.forEach(w => {
+          const wx = scaleX(w[0]);
+          const wy = scaleY(w[1]);
+          const wSize = (2 / 400) * svgRect.width;
+          const wH = (6 / 160) * svgRect.height;
+          ctx.fillRect(wx, wy, wSize, wH);
+        });
+
+        // 2. Draw terminal text lines onto boot-canvas
+        ctx.shadowBlur = 0;
+        ctx.textBaseline = 'top';
+        ctx.font = window.getComputedStyle(termEl).font || '12px "Share Tech Mono"';
+        
+        const linesEl = termEl.querySelectorAll('.boot-line');
+        linesEl.forEach(lineEl => {
+          const lRect = lineEl.getBoundingClientRect();
+          const lx = lRect.left - rect.left;
+          const ly = lRect.top - rect.top;
+          
+          if (lineEl.classList.contains('success')) {
+            ctx.fillStyle = '#5cffb0'; // lime
+          } else if (lineEl.classList.contains('accent')) {
+            ctx.fillStyle = '#ff4d9d'; // accent
+          } else {
+            ctx.fillStyle = '#3ee6ff'; // cyan
+          }
+          ctx.fillText(lineEl.textContent, lx, ly);
+        });
+
+        // Calculate steps dynamically based on screen area to ensure smooth performance
+        const area = canvas.width * canvas.height;
+        const targetStep = Math.max(8, Math.floor(Math.sqrt(area / 15000)));
+        const sourceStep = Math.max(6, Math.floor(Math.sqrt(area / 50000)));
+
+        // 3. Scan the canvas for pixels to create source particles
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+        const srcParticles = [];
+
+        for (let y = 0; y < canvas.height; y += sourceStep) {
+          for (let x = 0; x < canvas.width; x += sourceStep) {
+            const idx = (y * canvas.width + x) * 4;
+            const alpha = data[idx + 3];
+            if (alpha > 40) {
+              const r = data[idx];
+              const g = data[idx + 1];
+              const b = data[idx + 2];
+              srcParticles.push({
+                x: x,
+                y: y,
+                originX: x,
+                originY: y,
+                r: r,
+                g: g,
+                b: b,
+                vx: (Math.random() - 0.5) * 14,
+                vy: (Math.random() - 0.5) * 14 - 4, // explode upwards
+                size: Math.random() * 1.5 + 2.0 // matches pixelated block size
+              });
+            }
+          }
+        }
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Hide HTML elements
+        document.querySelector('.boot-container').classList.add('boot-fade');
+
+        // 4. Get target pixel art city pixels
+        const tgtPixels = (window.getCityPixels ? window.getCityPixels(targetStep) : []);
+
+        // 5. Match source particles to target positions
+        const particles = [];
+        const count = Math.max(srcParticles.length, tgtPixels.length);
+
+        for (let i = 0; i < count; i++) {
+          const src = srcParticles[i % srcParticles.length];
+          const hasTarget = i < tgtPixels.length;
+
+          const p = {
+            x: src.x,
+            y: src.y,
+            vx: src.vx,
+            vy: src.vy,
+            alpha: 1.0,
+            size: src.size,
+            r: src.r,
+            g: src.g,
+            b: src.b,
+            hasTarget: hasTarget,
+            phase1X: 0,
+            phase1Y: 0
+          };
+
+          if (hasTarget) {
+            const tgt = tgtPixels[i];
+            p.targetX = tgt.x;
+            p.targetY = tgt.y;
+            p.tr = tgt.r;
+            p.tg = tgt.g;
+            p.tb = tgt.b;
+            p.ta = tgt.a;
+          } else {
+            // Excess source particles: explode, drift and fade out
+            p.targetX = src.x + (Math.random() - 0.5) * 300;
+            p.targetY = canvas.height + 100;
+            p.tr = src.r;
+            p.tg = src.g;
+            p.tb = src.b;
+            p.ta = 0;
+          }
+
+          particles.push(p);
+        }
+
+        // 6. Animate particles
+        let frame = 0;
+        const totalFrames = 60; // stops early to free memory
+
+        function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          let active = false;
+
+          const easeProgress = (frame - 15) / 25; // 25 frames for reassembly morph
+          const ease = easeProgress <= 0 ? 0 : easeProgress >= 1 ? 1 : (easeProgress < 0.5 ? 4 * easeProgress * easeProgress * easeProgress : 1 - Math.pow(-2 * easeProgress + 2, 3) / 2);
+
+          particles.forEach(p => {
+            if (p.alpha <= 0) return;
+            active = true;
+
+            if (frame < 15) {
+              // Phase 1: Explode and drift (15 frames)
+              p.x += p.vx;
+              p.y += p.vy;
+              p.vx *= 0.88;
+              p.vy *= 0.88;
+              
+              // Record Phase 1 end position
+              p.phase1X = p.x;
+              p.phase1Y = p.y;
+
+              ctx.fillStyle = `rgba(${p.r},${p.g},${p.b},${p.alpha})`;
+            } else {
+              // Phase 2: Morph/assemble to target positions with organic wave motion
+              const waveX = Math.sin(frame * 0.2 + p.targetY * 0.02) * 15 * (1 - ease) * ease;
+              const waveY = Math.cos(frame * 0.2 + p.targetX * 0.02) * 15 * (1 - ease) * ease;
+
+              p.x = p.phase1X + (p.targetX - p.phase1X) * ease + waveX;
+              p.y = p.phase1Y + (p.targetY - p.phase1Y) * ease + waveY;
+
+              // Color lerping
+              const curR = Math.round(p.r + (p.tr - p.r) * ease);
+              const curG = Math.round(p.g + (p.tg - p.g) * ease);
+              const curB = Math.round(p.b + (p.tb - p.b) * ease);
+              
+              // Easing alpha
+              let curA = 1.0;
+              if (!p.hasTarget) {
+                // Fade out excess particles
+                curA = 1.0 * (1 - ease);
+                p.alpha = curA;
+              } else {
+                curA = 1.0 * (1 - ease) + p.ta * ease;
+              }
+
+              ctx.fillStyle = `rgba(${curR},${curG},${curB},${curA})`;
+            }
+
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+          });
+
+          frame++;
+
+          if (frame === 32) {
+            // Smoothly fade overlay and reveal background page (triggers halfway during morph)
+            overlay.style.opacity = '0';
+            overlay.style.transform = 'scale(1.02)';
+            if (onComplete) onComplete();
+          }
+
+          if (frame < totalFrames && active) {
+            requestAnimationFrame(animate);
+          } else {
+            overlay.style.display = 'none';
+          }
+        }
+
+        requestAnimationFrame(animate);
+      }, 500);
+    }
+  }
+  
+  // Start printing lines after a short initial delay (SVG draw time)
+  setTimeout(printLine, 400);
+}
+
+// ── CARD SPOTLIGHT HANDLER ──
+document.addEventListener('mousemove', e => {
+  const target = e.target.closest('.card, .chart-wrap, .aw-item');
+  if (target) {
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    target.style.setProperty('--mouse-x', `${x}px`);
+    target.style.setProperty('--mouse-y', `${y}px`);
+  }
+});
 
 // ── INIT ──
 document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullYear();});
-heroIntro();
+runBootCeremony(() => {
+  heroIntro();
+});
 route();
 </script>
 </body>
