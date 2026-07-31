@@ -262,6 +262,10 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 .proj-h::before{content:'';width:22px;height:2px;background:var(--violet)}
 .proj-card h3{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:8px}
 .proj-note{color:var(--dim);font-size:13px;font-family:var(--mono);margin-top:26px}
+.proj-cat-go{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.proj-cat-arr{color:var(--dim);transition:transform .2s,color .2s}
+.proj-cat-card:hover .proj-cat-arr{color:var(--accent);transform:translateX(4px)}
+.proj-cat-card:hover .proj-cat-count{color:var(--muted)}
 
 /* AWARDS */
 .aw-cat{margin-bottom:34px}
@@ -663,6 +667,24 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   color: var(--accent);
   background: rgba(255, 77, 157, 0.08);
   box-shadow: 0 0 12px rgba(255, 77, 157, 0.15);
+}
+/* a paper's own detail page is the primary action, so it reads as filled */
+.proj-detail-cta {
+  color: #05070e;
+  background: var(--cyan);
+  border-color: var(--cyan);
+  font-weight: 700;
+}
+.proj-detail-cta:hover {
+  color: var(--cyan);
+  background: rgba(62, 230, 255, 0.08);
+  border-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(62, 230, 255, 0.2);
+}
+/* "Details" affordance on a publication row */
+.p-btn.p-btn-detail {
+  border-color: rgba(62, 230, 255, 0.35);
+  color: var(--cyan);
 }
 /* Detail View Layout Header */
 .proj-detail-header {
@@ -1089,36 +1111,37 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 
       <div class="paper-tabs">
         <button class="p-tab active" onclick="switchTab('pub',event)">Published (12)</button>
-        <button class="p-tab" onclick="switchTab('rev',event)">Under Review (3)</button>
+        <button class="p-tab" onclick="switchTab('rev',event)">Under Review (4)</button>
         <button class="p-tab" onclick="switchTab('conf',event)">Conference (4)</button>
       </div>
 
       <div class="paper-list active" id="tab-pub">
-        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Desirable Bikeshare Routes: Nonlinear Impacts of Micro-Level Street Environments</div><div class="p-venue">Transportation Research Part A: Policy and Practice</div><div class="p-authors"><strong>Cai, Y.*</strong>, Song, Q., Cheng, Y., Chen, A., Wang, Y., Li, W., &amp; Qiu, W.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.tra.2026.104962" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Evaluating the Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver: A Social Media and GPS Data Approach</div><div class="p-venue">Land Use Policy</div><div class="p-authors">Huang, Y., Du, J., Chen, M., Lin, Y., Huang, S., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.landusepol.2025.107824" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors"><strong>Cai, Y.*</strong>, Huang, Y., Chen, A., Yang, Z., Chen, M., et al.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128835" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, &amp; Chen, A.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0331788" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Assessing Influence of Urban Scene Characteristics on Urban Heat Island: Interpretable ML in NYC</div><div class="p-venue">Urban Climate</div><div class="p-authors">Li, H., <strong>Cai, Y.*</strong>, Yang, Y., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Long-term PM2.5 Exposure and Mental Health Disparities: A Prospective Analysis of the All of Us Research Program</div><div class="p-venue">Environmental Research</div><div class="p-authors">Burrows, K., Luo, J., <strong>Cai, Y.</strong>, &amp; Aschebrook-Kilfoy, B.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.envres.2025.122691" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Greenery Inequalities in New York and London: Socio-economic and Spatial Dimensions</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Hu, Y., Chen, M., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128939" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Enhancing Sustainable Indoor Air: Potted Plants and ML Models for VOC Mitigation</div><div class="p-venue">Urban Climate</div><div class="p-authors">Shen, X., Sun, Q., Mosey, G., <strong>Cai, Y.</strong>, &amp; Cheng, W.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102497" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Residential Segregation: ML, SHAP Interpretability, and Deep Learning — Las Vegas</div><div class="p-venue">Land</div><div class="p-authors">Liu, J., <strong>Cai, Y.</strong>, &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/land14050957" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census &amp; Social Media</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Chen, M., <strong>Cai, Y.</strong>, Guo, S., Sun, R., Song, Y., &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2024.128289" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Empathy and Redemption: Online Support for Mental Health Before and After COVID-19</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, Wei, E., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0307042" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Urban Amenities and Urban Green Space Transformation in Guangzhou</div><div class="p-venue">ISPRS International Journal of Geo-Information</div><div class="p-authors">Zhang, S., Chen, J., <strong>Cai, Y.</strong>, Wen, Y., Niu, J., &amp; Chen, M.*</div></div><div class="p-actions"><a class="p-btn" href="https://doi.org/10.3390/ijgi13120452" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Desirable Bikeshare Routes: Nonlinear Impacts of Micro-Level Street Environments</div><div class="p-venue">Transportation Research Part A: Policy and Practice</div><div class="p-authors"><strong>Cai, Y.*</strong>, Song, Q., Cheng, Y., Chen, A., Wang, Y., Li, W., &amp; Qiu, W.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/bikeshare-routes.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.tra.2026.104962" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Evaluating the Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver: A Social Media and GPS Data Approach</div><div class="p-venue">Land Use Policy</div><div class="p-authors">Huang, Y., Du, J., Chen, M., Lin, Y., Huang, S., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/vancouver-urban-nature-vitality.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.landusepol.2025.107824" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Subjective Perception or Physical Environment: Which Matters More for Public Area Visitation?</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors"><strong>Cai, Y.*</strong>, Huang, Y., Chen, A., Yang, Z., Chen, M., et al.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/perception-vs-environment.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128835" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Advancing Urban Management: Integrating GIS, LLMs, and Media Narratives for Urban Crime Analysis</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, &amp; Chen, A.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/gis-llm-crime.html">Details →</a><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0331788" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Assessing Influence of Urban Scene Characteristics on Urban Heat Island: Interpretable ML in NYC</div><div class="p-venue">Urban Climate</div><div class="p-authors">Li, H., <strong>Cai, Y.*</strong>, Yang, Y., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/urban-heat-island-nyc.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Long-term PM2.5 Exposure and Mental Health Disparities: A Prospective Analysis of the All of Us Research Program</div><div class="p-venue">Environmental Research</div><div class="p-authors">Burrows, K., Luo, J., <strong>Cai, Y.</strong>, &amp; Aschebrook-Kilfoy, B.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/pm25-mental-health.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.envres.2025.122691" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Greenery Inequalities in New York and London: Socio-economic and Spatial Dimensions</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Hu, Y., Chen, M., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/greenery-inequalities-ny-london.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2025.128939" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Enhancing Sustainable Indoor Air: Potted Plants and ML Models for VOC Mitigation</div><div class="p-venue">Urban Climate</div><div class="p-authors">Shen, X., Sun, Q., Mosey, G., <strong>Cai, Y.</strong>, &amp; Cheng, W.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/indoor-air-voc-plants.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102497" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Residential Segregation: ML, SHAP Interpretability, and Deep Learning — Las Vegas</div><div class="p-venue">Land</div><div class="p-authors">Liu, J., <strong>Cai, Y.</strong>, &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/residential-segregation-las-vegas.html">Details →</a><a class="p-btn" href="https://doi.org/10.3390/land14050957" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census &amp; Social Media</div><div class="p-venue">Urban Forestry &amp; Urban Greening</div><div class="p-authors">Chen, M., <strong>Cai, Y.</strong>, Guo, S., Sun, R., Song, Y., &amp; Shen, X.*</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/sf-urban-nature-vitality.html">Details →</a><a class="p-btn" href="https://doi.org/10.1016/j.ufug.2024.128289" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Empathy and Redemption: Online Support for Mental Health Before and After COVID-19</div><div class="p-venue">PLOS ONE</div><div class="p-authors"><strong>Cai, Y.*</strong>, Wei, E., &amp; Cai, X.</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/empathy-redemption.html">Details →</a><a class="p-btn" href="https://doi.org/10.1371/journal.pone.0307042" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
+        <div class="paper-row"><div class="p-year">2024</div><div><div class="p-title">Urban Amenities and Urban Green Space Transformation in Guangzhou</div><div class="p-venue">ISPRS International Journal of Geo-Information</div><div class="p-authors">Zhang, S., Chen, J., <strong>Cai, Y.</strong>, Wen, Y., Niu, J., &amp; Chen, M.*</div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/guangzhou-green-space.html">Details →</a><a class="p-btn" href="https://doi.org/10.3390/ijgi13120452" target="_blank" rel="noopener noreferrer">DOI ↗</a></div></div>
       </div>
 
       <div class="paper-list" id="tab-rev">
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">Can Large Language Models Represent Urban Publics? Behavioral Replication and Population Mismatch in an Affordable-Housing Experiment</div><div class="p-venue">arXiv preprint · cs.CY</div><div class="p-authors"><strong>Cai, Y.</strong>, Hu, Y., Li, H., Ju, Z., &amp; Guo, S. — <em>Cai and Hu contributed equally</em></div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/llm-urban-publics.html">Details →</a><a class="p-btn" href="https://arxiv.org/abs/2607.27100" target="_blank" rel="noopener noreferrer">arXiv ↗</a></div></div>
         <div class="rev-item">Understanding how park and non-park urban nature shape urban vitality — <em>Landscape and Urban Planning</em></div>
         <div class="rev-item">Urban vitality measurement — multimodal approach</div>
         <div class="rev-item">Urban inequality &amp; environmental risk</div>
       </div>
 
       <div class="paper-list" id="tab-conf">
-        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">What Do Vision-Language Models Know About Urban Perception? A Mechanistic Investigation</div><div class="p-venue">ACSP 66th Annual Conference</div><div class="p-authors"><strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
+        <div class="paper-row"><div class="p-year">2026</div><div><div class="p-title">What Do Vision-Language Models Know About Urban Perception? A Mechanistic Investigation</div><div class="p-venue">ACSP 66th Annual Conference</div><div class="p-authors"><strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/vlm-mechanistic.html">Details →</a></div></div>
         <div class="paper-row"><div class="p-year">2025</div><div><div class="p-title">Nonlinear Impact of Built Environments on Bike-Share Route Discrepancies</div><div class="p-venue">TRB 2025 Annual Meeting</div><div class="p-authors"><strong>Cai, Y.</strong>, Cheng, Y., Chen, A., Qiu, W., &amp; Wang, Y.</div></div><div class="p-actions"></div></div>
         <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Street-Level Factors and Sexual Crime Using Computer Vision and Big Data — Manhattan</div><div class="p-venue">AESOP 35th Annual Congress — Full Paper Oral</div><div class="p-authors"><strong>Cai, Y.</strong>, Li, H., &amp; Dai, S.*</div></div><div class="p-actions"><a class="p-btn" href="https://hdl.handle.net/20.500.14235/1202" target="_blank" rel="noopener noreferrer">Full Paper ↗</a></div></div>
-        <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Human Perceptions to Inform Urban Landscape Design for Biking-Friendliness — Shanghai</div><div class="p-venue">IFLA 2023 Conference — Oral Report</div><div class="p-authors">Li, H., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"></div></div>
+        <div class="paper-row"><div class="p-year">2023</div><div><div class="p-title">Human Perceptions to Inform Urban Landscape Design for Biking-Friendliness — Shanghai</div><div class="p-venue">IFLA 2023 Conference — Oral Report</div><div class="p-authors">Li, H., &amp; <strong>Cai, Y.</strong></div></div><div class="p-actions"><a class="p-btn p-btn-detail" href="projects/shanghai-biking-perception.html">Details →</a></div></div>
       </div>
       <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai</div><div class="pf-right"><a href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer">Google Scholar ↗</a></div></div>
     </section>
@@ -1136,7 +1159,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
       <!-- Category Grid View (Level 1) -->
       <div id="proj-categories-view">
         <div class="proj-cat-grid">
-          <div class="proj-cat-card reveal" onclick="openProjectCategory('vlm')">
+          <div class="proj-cat-card reveal" data-cat="vlm" onclick="openProjectCategory('vlm')">
             <div class="proj-cat-img-wrap">
               <img src="assets/images/research/urban_perception_vlm.jpg" alt="Urban Perception & VLMs" loading="lazy">
             </div>
@@ -1144,10 +1167,14 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <div class="proj-cat-num">01 // VLM</div>
               <h3 class="proj-cat-title">Urban Perception &amp; VLMs</h3>
               <p class="proj-cat-desc">Visual representations, street-view segmentation, and multi-modal alignment models of urban space.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
             </div>
           </div>
           
-          <div class="proj-cat-card reveal" onclick="openProjectCategory('llm')">
+          <div class="proj-cat-card reveal" data-cat="llm" onclick="openProjectCategory('llm')">
             <div class="proj-cat-img-wrap">
               <img src="assets/images/research/llm_planning_simulation.jpg" alt="LLM Planning Simulation" loading="lazy">
             </div>
@@ -1155,21 +1182,58 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <div class="proj-cat-num">02 // SIMULATION</div>
               <h3 class="proj-cat-title">LLM Planning Simulation</h3>
               <p class="proj-cat-desc">Modeling policy negotiations, stakeholder intentions, and behavioral agents inside cities.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
             </div>
           </div>
           
-          <div class="proj-cat-card reveal" onclick="openProjectCategory('mobility')">
+          <div class="proj-cat-card reveal" data-cat="mobility" onclick="openProjectCategory('mobility')">
             <div class="proj-cat-img-wrap">
               <img src="assets/images/research/urban_mobility_streets.jpg" alt="Urban Mobility & Streets" loading="lazy">
             </div>
             <div class="proj-cat-meta">
               <div class="proj-cat-num">03 // MOBILITY</div>
               <h3 class="proj-cat-title">Urban Mobility &amp; Streets</h3>
-              <p class="proj-cat-desc">Micro-level built environments, bikeshare route desirability, and heat exposures.</p>
+              <p class="proj-cat-desc">Micro-level built environments, bikeshare route desirability, and route choice behaviour.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="proj-cat-card reveal" data-cat="nature" onclick="openProjectCategory('nature')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/proj_nature_vancouver.jpg" alt="Urban Nature &amp; Vitality" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num">04 // NATURE</div>
+              <h3 class="proj-cat-title">Urban Nature &amp; Vitality</h3>
+              <p class="proj-cat-desc">Greenery exposure, park access equity, and how urban nature shapes where people actually spend time.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="proj-cat-card reveal" data-cat="health" onclick="openProjectCategory('health')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/proj_health_uhi_nyc.jpg" alt="Environment, Health &amp; Equity" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num">05 // HEALTH &amp; EQUITY</div>
+              <h3 class="proj-cat-title">Environment, Health &amp; Equity</h3>
+              <p class="proj-cat-desc">Heat exposure, air quality, mental health, and residential segregation — interpretable models over city-scale data.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
             </div>
           </div>
         </div>
-        <div class="proj-note">// Click a category to view detailed research projects. Design &amp; practice portfolios coming soon.</div>
       </div>
 
       <!-- Detailed Projects View (Level 2) -->
@@ -1286,8 +1350,9 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
           <h3>Urban scene types &amp; heat-island risk in NYC — insights from interpretable ML</h3>
           <p>A plain-language walkthrough of our <em>Urban Climate</em> paper: which street-level features shape land-surface temperature across New York City. Street greenery beyond roughly 28% canopy, building height, and neighborhood socioeconomic context emerge as the strongest drivers — and heat exposure falls unevenly, with already-vulnerable neighborhoods carrying disproportionate risk.</p>
           <div class="post-links">
+            <a class="p-btn p-btn-detail" href="blog/nyc-heat-island.html">Read post →</a>
             <a class="p-btn" href="https://doi.org/10.1016/j.uclim.2025.102542" target="_blank" rel="noopener noreferrer">Paper ↗</a>
-            <a class="p-btn" href="https://natureailab.com/new-paper-measurement-tools-and-senior-2-2/" target="_blank" rel="noopener noreferrer">Original post ↗</a>
+            <a class="p-btn" href="projects/urban-heat-island-nyc.html">Project page →</a>
           </div>
         </article>
 
@@ -1303,6 +1368,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 
 <script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="assets/pubcover.js"></script>
 <script>
 const REDUCE_MOTION = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const HAS_GSAP = ()=>typeof gsap!=='undefined';
@@ -1324,11 +1390,15 @@ const COL={home:'#ff5ca0',study:'#3ee6ff',alma:'#9d8bff'};
 const HOME=CITIES[0];
 
 // ── PIXEL CITY CANVAS ──
-// v2 renderer: HiDPI-aware, palette-disciplined, offscreen-layer cached.
-// Static scenery (sky bands, buildings, windows, ground) is baked once per
-// resize into offscreen canvases; each frame only composites layers and
-// draws dynamic elements (train, cars, sign pulses, flicker windows, birds).
-// No ctx.shadowBlur anywhere — neon glow is pre-rendered pixel bloom.
+// v4 renderer. Art-directed against reference practice (1041uuu 250x144 / 32 colors;
+// waneella; Slynyrd / Saint11 / Derek Yu pixel-craft literature):
+//   · ~320-column logical grid — every element gets enough pixels to carry detail
+//   · fixed 44-colour palette in explicit 4-step ramps, no runtime colour mixing
+//     for structure; adjacent dark masses separated by HUE at matched value
+//   · buildings built silhouette → value planes → architectural marks
+//     (plinth, string course, cornice + cast shadow, pier rhythm, 3/4 side face)
+//   · glow = stepped rings with a hue progression, never alpha-only, never shadowBlur
+//   · static scenery baked into offscreen layers; ≤7 ambient loops on top
 (function(){
   const cv=document.getElementById('city-canvas');const ctx=cv&&cv.getContext('2d');
   if(!cv||!ctx)return;
@@ -1338,16 +1408,36 @@ const HOME=CITIES[0];
   let glowX=-999,glowY=-999;
   let rafId=null,cityRunning=false,lastTs=0;
 
-  // ── curated palette ──
-  const SKY_BANDS=['#02010a','#040113','#07021c','#0b0326','#100531','#16073d','#1d0949','#260b54','#310d5e','#3f1066','#52136b','#6b176a','#8c1c64','#b62a59','#e0484e'];
-  const FAR_BODY=['#3a1a55','#40205c','#341750','#442163'];
-  const MID_BODY=['#1c0e33','#200f38','#180b2d','#221238'];
-  const NEAR_BODY=['#0a0516','#0c061a','#080412'];
-  const WIN_WARM=['#ffce8a','#ffb066','#ffd9a6','#ffa24d'];
-  const WIN_COLD=['#9fc6ff','#7fa8e6','#6ee6e6'];
-  const NEON=['#ff6ec7','#ff3a3a','#ffd23a','#3ee6ff','#b07bff','#ff8c3c','#5cffb0'];
-  const WORDS=['URBAN AI','PERCEPTION','STREET VIEW','LLM AGENTS','GEOAI','MOBILITY','EQUITY','SENSING','VLM LAB','WALKABLE','BAR','HOTEL','CAFE','RAMEN','KARAOKE','DINER','CLUB','METRO'];
-  const SHORT=['BAR','VLM','GIS','24H','OPEN','CAFE','CLIP','GEO'];
+  // ════ PALETTE — 44 colours, explicit ramps (see art-direction plan) ════
+  // luminance-checked ramp: every band ≥11% relative luminance, so the sky is
+  // never the thing dragging the frame into near-black (it was, in v3)
+  const SKY=['#201838','#261e40','#2c2248','#342850','#3e2c58','#4a3060','#5c3468','#703a6c'];
+  const HORIZON=['#a8446a','#d97a72'];
+  // ramps are ordered [darkest/plinth, shadow, base, lit]
+  const FAR=['#342a48','#3e3054','#48385e'];
+  const MID=['#241d3c','#2a2348','#302852','#38305e','#4c4272'];
+  // [dark marks, top band, mid band, bottom band, highlight] — the 3 middle
+  // entries are a top→bottom value gradient (street light warms the base)
+  // near layer stays the darkest plane (≈11% luminance) — it is the foreground
+  // silhouette; depth ordering is near < mid < far < sky/ground
+  const NEAR_FAM=[
+    ['#100e1c','#171426','#1e1a32','#252140','#3a3558'],  // blue-black
+    ['#120d18','#191322','#20182e','#28203c','#402c52'],  // purple-black
+    ['#130e12','#1a141c','#211a26','#292132','#443646']   // warm-black
+  ];
+  const RIM_MID='#7a4880', RIM_NEAR='#6a4a80';
+  // NIGHT ground: dark base, brightness comes only from light pools and
+  // reflections. ("ground is the second-lightest plane" is a daylight rule.)
+  const G_WALK='#2a2236', G_WALK2='#241d30', G_ROAD='#1e1828', G_MARK='#6a5478', G_KERB='#3a3048';
+  const WIN_WARM=['#ffdba8','#ffc47e','#eda45c'];
+  const WIN_COLD=['#b0dcf0','#7cb4e4'];
+  // unlit glass reflects the sky — never near-black, this is where midtones live
+  const WIN_DARK=['#2a2440','#241f38','#302a48'];
+  const TV_COOL='#c8ecff';
+  const NEON=['#ff4d9d','#3ee6ff','#ffd23a','#5cffb0','#b07bff'];
+  const AMBIENT='#ff4d9d';           // sunset ambient — what all glow converges toward
+  const GLOW_OUT='#7a2a60';
+  const METAL='#6a5c80';
 
   const snap=v=>Math.round(v/PX)*PX;
   const rnd=s=>{const v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
@@ -1357,92 +1447,105 @@ const HOME=CITIES[0];
 
   const mkCanvas=()=>document.createElement('canvas');
   const Lsky=mkCanvas(),Lback=mkCanvas(),Lmid=mkCanvas(),Lnear=mkCanvas();
-  let sunSprite=null,sunX=0,sunBaseY=0,sunR=0;
+  let sunSprite=null,sunX=0,sunY=0,sunR=0;
 
-  let buildings=[],flickers=[],beacons=[],signs=[],traffic=[],walkers=[],twinkles=[];
+  let buildings=[],flickers=[],beacons=[],signs=[],traffic=[],steamSrcs=[],lightPools=[];
   let fontsRebuilt=false;
+
+  // ── scale anchors, all in logical pixels (× PX) ──
+  // person 10, floor pitch 15, window 5×7, ground floor 14 — derived from the
+  // reference ratio floor ≈ 1.5-2× figure, door ≈ 1.2-1.4× figure
+  let U={};
+  function setScale(){
+    U={fig:PX*10, floor:PX*15, winW:PX*5, winH:PX*7, gapX:PX*3,
+       bay:PX*18, marginX:PX*5, ground:PX*14, cornice:PX*3, plinth:PX*3};
+  }
 
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
-    PX=Math.max(2,Math.round(2*DPR));
-    W=cv.width=Math.max(PX*60,Math.round(window.innerWidth*DPR));
-    H=cv.height=Math.max(PX*60,Math.round(window.innerHeight*DPR));
-    gY=snap(H*0.8);
+    const devW=Math.max(320,Math.round(window.innerWidth*DPR));
+    const devH=Math.max(240,Math.round(window.innerHeight*DPR));
+    // ~320 logical columns (1041uuu works at 250 wide; Saint11's base is 320x180)
+    PX=Math.max(2,Math.round(devW/320));
+    W=cv.width=devW;
+    H=cv.height=devH;
+    gY=snap(H*0.78);          // low horizon: ground gets 22%
+    setScale();
   }
 
   const signFont=s=>'bold '+s+'px "Share Tech Mono","Courier New",monospace';
 
-  // ════ SKY LAYER — quantized bands + Bayer dither + stars ════
+  // ════ SKY — 8 quantized bands, dither only at the seams ════
   function bakeSky(){
     Lsky.width=W;Lsky.height=H;const g=Lsky.getContext('2d');
-    const n=SKY_BANDS.length;
+    const n=SKY.length;
     const bandH=Math.ceil(gY/n/PX)*PX;
-    for(let i=0;i<n;i++){g.fillStyle=SKY_BANDS[i];g.fillRect(0,i*bandH,W,bandH+PX);}
-    // dithered transition at each band boundary
-    const cell=PX;
+    for(let i=0;i<n;i++){g.fillStyle=SKY[i];g.fillRect(0,i*bandH,W,bandH+PX);}
     for(let i=1;i<n;i++){
-      const by=i*bandH;
-      const zone=Math.min(bandH,PX*7);
-      for(let y=by-zone;y<by+zone;y+=cell){
+      const by=i*bandH, zone=Math.min(bandH,PX*6);
+      for(let y=by-zone;y<by+zone;y+=PX){
         if(y<0||y>=gY)continue;
-        const row=Math.round(y/cell);
-        const f=(y-(by-zone))/(zone*2); // 0 above → 1 below
-        for(let x=0;x<W;x+=cell){
-          const col=Math.round(x/cell);
+        const row=Math.round(y/PX);
+        const f=(y-(by-zone))/(zone*2);
+        for(let x=0;x<W;x+=PX){
+          const col=Math.round(x/PX);
           const th=(BAYER[(row&3)*4+(col&3)]+0.5)/16;
-          // above boundary: sprinkle lower color; below: sprinkle upper color
-          if(f<0.5){ if(0.5-f>th*0.55) continue; g.fillStyle=SKY_BANDS[i]; }
-          else { if(f-0.5>th*0.55) continue; g.fillStyle=SKY_BANDS[i-1]; }
-          if(rnd(col*374761+row*668265)<0.5) g.fillRect(x,y,cell,cell);
+          if(f<0.5){ if(0.5-f>th*0.5) continue; g.fillStyle=SKY[i]; }
+          else { if(f-0.5>th*0.5) continue; g.fillStyle=SKY[i-1]; }
+          g.fillRect(x,y,PX,PX);
         }
       }
     }
-    // static stars (upper 55% of sky, avoid horizon glow)
-    for(let i=0;i<130;i++){
+    // stars — baked static (the twinkle loop was cut; see animation budget)
+    for(let i=0;i<90;i++){
       const sx=snap(((i*173+89)%1000)/1000*W);
-      const sy=snap(((i*97+23)%550)/1000*gY);
+      const sy=snap(((i*97+23)%520)/1000*gY);
       const r=rnd(i*3.3);
-      g.globalAlpha=0.10+r*0.22;
-      g.fillStyle=r<0.08?'#3ee6ff':r<0.16?'#ff6ec7':'#e8e4ff';
+      g.globalAlpha=0.16+r*0.26;
+      g.fillStyle=r<0.10?'#3ee6ff':r<0.18?'#ff6ec7':'#e8e4ff';
       g.fillRect(sx,sy,PX,PX);
-      if(r>0.93){g.globalAlpha=0.10;g.fillRect(sx-PX,sy,PX,PX);g.fillRect(sx+PX,sy,PX,PX);g.fillRect(sx,sy-PX,PX,PX);g.fillRect(sx,sy+PX,PX,PX);}
     }
     g.globalAlpha=1;
-    // horizon warm glow — stepped bands, no gradient
-    const glow=[[0.90,0.05],[0.93,0.09],[0.96,0.13],[0.985,0.18]];
-    glow.forEach(gl=>{g.globalAlpha=gl[1];g.fillStyle='#ff7a4d';g.fillRect(0,snap(gY*gl[0]),W,gY-snap(gY*gl[0]));});
+    // horizon warm band — stepped, no gradient
+    [[0.90,0.05],[0.94,0.09],[0.975,0.14]].forEach(gl=>{
+      g.globalAlpha=gl[1];g.fillStyle=HORIZON[0];
+      g.fillRect(0,snap(gY*gl[0]),W,gY-snap(gY*gl[0]));
+    });
     g.globalAlpha=1;
   }
 
-  // ════ SUN SPRITE — banded disc + scanline gaps + stepped halo ════
+  // ════ SUN — banded disc, scanline gaps, dithered stepped halo ════
   function bakeSun(){
-    sunX=snap(W*0.76);
-    sunBaseY=snap(gY*0.30);
-    sunR=Math.max(PX*6,snap(Math.min(W,gY)*0.17));
-    const R=sunR,haloR=snap(R*1.9);
+    sunX=snap(W*0.655);      // sits in the gap between the hero and the right block
+    sunY=snap(gY*0.30);
+    sunR=Math.max(PX*8,snap(Math.min(W,gY)*0.16));
+    const R=sunR,haloR=snap(R*1.85);
     sunSprite=mkCanvas();
     sunSprite.width=haloR*2+PX*4;sunSprite.height=haloR*2+PX*4;
     const g=sunSprite.getContext('2d');
     const cx=haloR+PX*2,cy=haloR+PX*2;
-    // stepped halo rings (outer→inner accumulate)
-    const rings=[[1.9,0.022,'#3ee6ff'],[1.55,0.04,'#b84dc7'],[1.22,0.07,'#ff4d9d']];
-    rings.forEach((rg,ri)=>{
+    [[1.85,0.020,'#3ee6ff'],[1.5,0.038,'#b84dc7'],[1.2,0.065,AMBIENT]].forEach((rg,ri)=>{
       const rr=R*rg[0];
       g.globalAlpha=rg[1];g.fillStyle=rg[2];
       for(let y=-rr;y<=rr;y+=PX){
         const inside=rr*rr-y*y;if(inside<=0)continue;
-        // dithered edge so the halo doesn't read as a hard circle
-        const jit=snap((rnd(y*7.7+ri*91.3)-0.5)*PX*5);
+        const jit=snap((rnd(y*7.7+ri*91.3)-0.5)*PX*4);
         const hw=snap(Math.sqrt(inside))+jit;
         if(hw<PX)continue;
         g.fillRect(cx-hw,snap(cy+y),hw*2,PX);
       }
     });
     g.globalAlpha=1;
-    // banded disc with widening scanline gaps toward bottom
     const stops=['#fff5c0','#ffdf9e','#ffb87e','#ff8f74','#ff5f82','#ff3a90','#f22a8c'];
     const bandStart=cy-R+R*2*0.55;
-    const isGap=y=>{if(y<bandStart)return false;const f=(y-bandStart)/(cy+R-bandStart);const gapPx=PX*(1+Math.floor(f*3));const period=PX*6+gapPx;const ph=((y-bandStart)%period+period)%period;return ph<gapPx;};
+    const isGap=y=>{
+      if(y<bandStart)return false;
+      const f=(y-bandStart)/(cy+R-bandStart);
+      const gapPx=PX*(1+Math.floor(f*2));
+      const period=PX*5+gapPx;
+      const ph=((y-bandStart)%period+period)%period;
+      return ph<gapPx;
+    };
     for(let y=cy-R;y<=cy+R;y+=PX){
       const ry=snap(y);if(isGap(ry))continue;
       const dy=ry-cy;const inside=R*R-dy*dy;if(inside<=0)continue;
@@ -1450,383 +1553,584 @@ const HOME=CITIES[0];
       const f=Math.max(0,Math.min(0.999,(ry-(cy-R))/(2*R)));
       g.fillStyle=stops[Math.floor(f*stops.length)];
       g.fillRect(cx-hw,ry,hw*2,PX);
-      if(hw*2>=PX*4){g.globalAlpha=0.45;g.fillStyle='#fffbe0';g.fillRect(cx+hw-snap(Math.max(PX,hw*0.16)),ry,snap(Math.max(PX,hw*0.16)),PX);g.globalAlpha=1;}
+      if(hw*2>=PX*4){
+        g.globalAlpha=0.4;g.fillStyle='#fffbe0';
+        g.fillRect(cx+hw-PX,ry,PX,PX);g.globalAlpha=1;
+      }
     }
   }
 
   // ════ CITY GENERATION ════
+  // 25 buildings (was 59). Each near building is 37-75 logical px wide so it can
+  // carry a real facade. Adjacent heights are forced ≥8% apart.
   function genCity(){
-    buildings=[];flickers=[];beacons=[];signs=[];walkers=[];twinkles=[];
+    buildings=[];flickers=[];beacons=[];signs=[];steamSrcs=[];lightPools=[];
     let seed=7.31;
     const R=()=>{seed+=1.618;return rnd(seed);};
 
-    // FAR — haze silhouettes
-    for(let i=0;i<30;i++){
-      const xf=i/30+R()*0.02;
-      buildings.push({xf,wf:0.016+R()*0.014,hf:0.16+R()*0.36,layer:0,type:'rect',
-        col:FAR_BODY[Math.floor(R()*FAR_BODY.length)],seed:R()*100});
-    }
-    // MID — varied types incl. one landmark tower
-    const midTypes=['rect','rect','stepped','setback','rect','stepped'];
-    for(let i=0;i<18;i++){
-      const xf=i/18+R()*0.03-0.012;
-      buildings.push({xf,wf:0.046+R()*0.034,hf:0.28+R()*0.34,layer:1,
-        type:midTypes[Math.floor(R()*midTypes.length)],
-        col:MID_BODY[Math.floor(R()*MID_BODY.length)],seed:R()*100});
-    }
-    buildings.push({xf:0.575,wf:0.052,hf:0.66,layer:1,type:'tower',col:'#241239',seed:42.7});
-    // NEAR — big dark silhouettes
-    for(let i=0;i<10;i++){
-      const xf=i/10+R()*0.04-0.012;
-      buildings.push({xf,wf:0.06+R()*0.10,hf:0.22+R()*0.30,layer:2,type:'rect',
-        col:NEAR_BODY[Math.floor(R()*NEAR_BODY.length)],seed:R()*100});
-    }
+    const mkLayer=(n,layer,wfLo,wfHi,hfLo,hfHi,spread)=>{
+      const arr=[];
+      for(let i=0;i<n;i++){
+        arr.push({xf:i/n+(R()-0.5)*spread, wf:wfLo+R()*(wfHi-wfLo),
+                  hf:hfLo+R()*(hfHi-hfLo), layer, seed:R()*100});
+      }
+      arr.sort((a,b)=>a.xf-b.xf);
+      // silhouette rhythm: never two adjacent buildings within 8% height
+      for(let i=1;i<arr.length;i++){
+        let guard=0;
+        while(Math.abs(arr[i].hf-arr[i-1].hf)/Math.max(arr[i].hf,arr[i-1].hf)<0.08&&guard++<12){
+          arr[i].hf=hfLo+R()*(hfHi-hfLo);
+        }
+      }
+      return arr;
+    };
+
+    // FAR — flat silhouettes, no internal detail (detail halves per layer back)
+    mkLayer(14,0,0.030,0.060,0.18,0.34,0.03).forEach(b=>{
+      b.ramp=FAR;b.type='rect';buildings.push(b);
+    });
+    // MID — simplified structures, deliberately taller than near so the
+    // skyline still reads above the foreground block
+    mkLayer(6,1,0.070,0.120,0.40,0.66,0.05).forEach((b,i)=>{
+      b.ramp=MID;b.type=(i%3===1)?'stepped':'rect';buildings.push(b);
+    });
+    // NEAR — hand-placed, not evenly spaced: two wide gaps let the mid/far
+    // layers through, and the sky negative space becomes a designed shape
+    [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.735,0.130,0.35],[0.880,0.140,0.26]]
+      .forEach((s,i)=>{
+        buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:'rect',
+          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===2});
+      });
+    // HERO — the focal building: tallest near mass, carries the billboard
+    buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
+      ramp:NEAR_FAM[1],seed:42.7,hero:true,shop:true});
+
     buildings.sort((a,b)=>a.layer-b.layer);
-    // pixel-space boxes
     buildings.forEach(b=>{
       b.x=snap(b.xf*W);
-      b.w=Math.max(PX*5,snap(b.wf*W));
+      b.w=Math.max(PX*6,snap(b.wf*W));
       b.h=snap(b.hf*gY);
       b.y=gY-b.h;
+      // 3/4 side face points inward toward the centre vanishing point
+      if(b.layer===2){
+        b.sideDir=(b.x+b.w/2<W/2)?1:-1;
+        b.sideW=Math.min(snap(b.w*0.26),PX*12);
+      }
     });
 
-    // traffic
     traffic=[];
-    const nCars=Math.max(6,Math.floor(W/(PX*95)));
+    const nCars=Math.max(4,Math.floor(W/(PX*140)));
     for(let i=0;i<nCars;i++){
       const lane=i%2;
-      traffic.push({x:R()*W,lane,speed:(0.55+R()*0.5)*(lane===0?1:-1),
+      traffic.push({x:R()*W,lane,speed:(0.5+R()*0.45)*(lane===0?1:-1),
         body:['#241536','#2a173e','#1e1230'][Math.floor(R()*3)],
-        trim:NEON[Math.floor(R()*NEON.length)],
-        head:R()<0.75});
-    }
-    // sidewalk walkers (behind road, in front of near buildings)
-    const nWalk=Math.max(3,Math.floor(W/(PX*260)));
-    for(let i=0;i<nWalk;i++){
-      walkers.push({x:R()*W,dir:R()<0.5?1:-1,speed:0.18+R()*0.2,ph:R()*10,front:false});
-    }
-    walkers.push({x:R()*W,dir:1,speed:0.10,ph:3.3,front:true});
-    // twinkling stars (drawn per frame)
-    for(let i=0;i<22;i++){
-      twinkles.push({x:snap(rnd(i*9.1)*W),y:snap(rnd(i*4.7)*gY*0.5),ph:rnd(i*6.3)*6.28,
-        col:i%7===0?'#3ee6ff':i%9===0?'#ff6ec7':'#ffffff'});
+        trim:NEON[Math.floor(R()*NEON.length)],head:R()<0.8});
     }
   }
 
-  // usable horizontal span of a building at height y (handles tiered shapes)
+  // usable span of a building at height y (tiered shapes)
   function shapeSpan(b,y){
-    if(b.type==='stepped'&&b.layer===1){
+    if(b.type==='stepped'){
       const f=(y-b.y)/b.h;
-      if(f<0.32){const tw=snap(b.w*0.56);return [b.x+snap((b.w-tw)/2),tw];}
-      if(f<0.38){const tw=snap(b.w*0.80);return [b.x+snap((b.w-tw)/2),tw];}
+      if(f<0.30){const tw=snap(b.w*0.62);return [b.x+snap((b.w-tw)/2),tw];}
       return [b.x,b.w];
     }
-    if(b.type==='setback'&&b.layer===1){
-      if(y<b.y+PX*6){const tw=snap(b.w*0.4);return [b.x+snap(b.w*0.3),tw];}
-      return [b.x,b.w];
-    }
-    if(b.type==='tower'){
+    if(b.type==='hero'){
       const f=(y-b.y)/b.h;
-      if(f<0.22){const tw=snap(b.w*0.64);return [b.x+snap(b.w*0.18),tw];}
+      if(f<0.13){const tw=snap(b.w*0.52);return [b.x+snap((b.w-tw)/2),tw];}
       return [b.x,b.w];
     }
     return [b.x,b.w];
   }
-  // is this point hidden behind a near-layer building?
   function coveredByNear(x,y){
     for(let i=0;i<buildings.length;i++){
       const b=buildings[i];
       if(b.layer!==2)continue;
-      if(x>=b.x&&x<=b.x+b.w&&y>=b.y)return true;
+      if(x>=b.x-((b.sideDir||0)<0?b.sideW||0:0)&&x<=b.x+b.w+((b.sideDir||0)>0?b.sideW||0:0)&&y>=b.y)return true;
     }
     return false;
   }
 
-  // ── window grid for one building; bakes unlit+lit, registers flickers ──
-  function bakeWindows(g,b){
-    if(b.layer===0){
-      // far: sparse dim dots
-      const n=Math.floor(b.w*b.h/(PX*PX*260));
-      for(let i=0;i<n;i++){
-        const wx=snap(b.x+PX+rnd(b.seed+i*3.7)*(b.w-PX*2));
-        const wy=snap(b.y+PX*2+rnd(b.seed+i*7.9)*(b.h-PX*4));
-        g.globalAlpha=0.5;g.fillStyle=rnd(b.seed+i)<0.3?'#c77bd8':'#e8a0c0';
-        g.fillRect(wx,wy,PX,PX);
-      }
-      g.globalAlpha=1;return;
-    }
+  // ════ FACADE GRID — pier rhythm is the dominant grid, windows nest inside ════
+  function facadeGeom(b){
     const near=b.layer===2;
-    const wW=near?PX*3:PX*2, wH=near?PX*4:PX*2;
-    const gapX=near?PX*3:PX*2, gapY=near?PX*3:PX*2;
-    const mX=near?PX*3:PX*2, mTop=PX*3;
-    const pitchX=wW+gapX,pitchY=wH+gapY;
-    const cols=Math.max(1,Math.floor((b.w-mX*2+gapX)/pitchX));
-    const rows=Math.max(2,Math.floor((b.h-mTop-PX*2+gapY)/pitchY));
-    const x0=b.x+snap((b.w-(cols*pitchX-gapX))/2);
-    const unlit=mix(b.col,'#8a7bb0',near?0.10:0.14);
-    const dark=mix(b.col,'#000000',0.35);
-    for(let r=0;r<rows;r++){
+    const bayW=near?U.bay:PX*11;
+    const marginX=near?U.marginX:PX*3;
+    const pitchY=near?U.floor:PX*8;
+    const wW=near?U.winW:PX*3, wH=near?U.winH:PX*4;
+    const usable=b.w-marginX*2;
+    const bays=Math.max(1,Math.floor(usable/bayW));
+    const x0=b.x+snap((b.w-bays*bayW)/2);
+    const top=b.y+U.cornice+PX*3;
+    const bottom=gY-(near?U.ground:PX*3)-PX*2;
+    const rows=Math.max(1,Math.floor((bottom-top)/pitchY));
+    return {bays,bayW,x0,top,rows,pitchY,wW,wH,near,
+            winOff:near?[PX*3,PX*10]:[PX*2,PX*6]};
+  }
+
+  // ── windows: lit ratio ≤35%, warm:cool 75:25, interiors on 1/6 of lit ──
+  function bakeWindows(g,b){
+    if(b.layer===0)return;                 // far layer stays pure silhouette
+    const R2=b.ramp;
+    const gm=facadeGeom(b);
+    const recess=R2[0], sill=R2[3];
+    let litCount=0,total=0;
+    for(let r=0;r<gm.rows;r++){
+      const wy=snap(gm.top+r*gm.pitchY);
+      if(wy+gm.wH>gY)continue;
       const fr=rnd(b.seed+r*13.7);
-      // floor modes: dark / sparse / cluster / busy
-      let mode; if(fr<0.20)mode=0; else if(fr<0.46)mode=1; else if(fr<0.86)mode=2; else mode=3;
-      const cs=Math.floor(rnd(b.seed+r*29.3)*cols);
-      const cl=2+Math.floor(rnd(b.seed+r*31.9)*cols*0.7);
-      for(let c=0;c<cols;c++){
-        const wx=snap(x0+c*pitchX), wy=snap(b.y+mTop+r*pitchY);
-        if(wy+wH>gY-PX)continue;
-        const span=shapeSpan(b,wy);
-        if(wx<span[0]+PX*2||wx+wW>span[0]+span[1]-PX*2)continue;
-        // baked recess
-        g.fillStyle=dark;g.fillRect(wx,wy,wW,wH);
-        let lit=false;
-        if(mode===1)lit=rnd(b.seed+r*7.7+c*3.1)<0.16;
-        else if(mode===2)lit=c>=cs&&c<cs+cl;
-        else if(mode===3)lit=rnd(b.seed+r*5.1+c*9.7)<0.82;
-        if(!lit){g.fillStyle=unlit;g.globalAlpha=0.45;g.fillRect(wx,wy,wW,PX);g.globalAlpha=1;continue;}
-        const cold=rnd(b.seed+r*3.3+c*11.1)<(b.layer===1?0.14:0.10);
-        const pal=cold?WIN_COLD:WIN_WARM;
-        const colr=pal[Math.floor(rnd(b.seed+c*17.3+r)*pal.length)];
-        g.fillStyle=colr;g.fillRect(wx,wy,wW,wH);
-        if(near){
-          // room depth: darker top strip + bright core
-          g.fillStyle='rgba(40,10,30,0.35)';g.fillRect(wx,wy,wW,PX);
-          g.fillStyle='#fff2d0';g.globalAlpha=0.5;g.fillRect(wx+PX,wy+PX*2,PX,PX);g.globalAlpha=1;
-        }
-        const fRoll=rnd(b.seed+c*23.9+r*41.3);
-        if(fRoll<0.05&&(near||!coveredByNear(wx,wy))){
-          flickers.push({x:wx,y:wy,w:wW,h:wH,col:colr,off:dark,rate:0.004+fRoll*0.05,ph:fRoll*126,tv:near&&fRoll<0.018});
+      // floor modes — dark 35% / sparse 30% / cluster 25% / busy 10% → ~24% lit
+      let mode; if(fr<0.35)mode=0; else if(fr<0.65)mode=1; else if(fr<0.90)mode=2; else mode=3;
+      const cs=Math.floor(rnd(b.seed+r*29.3)*gm.bays*2);
+      const cl=2+Math.floor(rnd(b.seed+r*31.9)*2);
+      for(let bay=0;bay<gm.bays;bay++){
+        const bx=gm.x0+bay*gm.bayW;
+        for(let k=0;k<gm.winOff.length;k++){
+          const wx=snap(bx+gm.winOff[k]);
+          const idx=bay*gm.winOff.length+k;
+          const span=shapeSpan(b,wy);
+          if(wx<span[0]+PX*2||wx+gm.wW>span[0]+span[1]-PX*2)continue;
+          total++;
+          // unlit glass reflects the sky rather than reading as a black hole
+          g.fillStyle=WIN_DARK[Math.floor(rnd(b.seed+idx*5.3+r*2.9)*WIN_DARK.length)];
+          g.fillRect(wx,wy,gm.wW,gm.wH);
+          g.fillStyle=recess;g.fillRect(wx,wy,gm.wW,PX);       // reveal shadow at the head
+          g.fillStyle=sill;g.fillRect(wx,wy+gm.wH,gm.wW,PX);   // sill catches light
+          let lit=false;
+          if(mode===1)lit=rnd(b.seed+r*7.7+idx*3.1)<0.15;
+          else if(mode===2)lit=idx>=cs&&idx<cs+cl;
+          else if(mode===3)lit=rnd(b.seed+r*5.1+idx*9.7)<0.70;
+          if(!lit)continue;
+          litCount++;
+          const cold=rnd(b.seed+r*3.3+idx*11.1)<0.25;
+          const pal=cold?WIN_COLD:WIN_WARM;
+          const colr=pal[Math.floor(rnd(b.seed+idx*17.3+r)*pal.length)];
+          g.fillStyle=colr;g.fillRect(wx,wy,gm.wW,gm.wH);
+          if(gm.near){
+            // interior: only 1 in 6 lit windows gets a room
+            const iRoll=rnd(b.seed+idx*23.9+r*41.3);
+            g.fillStyle='rgba(24,10,26,0.40)';g.fillRect(wx,wy,gm.wW,PX);  // ceiling shadow
+            if(iRoll<0.17){
+              g.fillStyle=mix(colr,'#3a1830',0.55);
+              if(iRoll<0.06){ // furniture silhouette
+                g.fillRect(wx+PX,wy+gm.wH-PX*3,PX*3,PX*3);
+              } else if(iRoll<0.12){ // curtain down one side
+                g.fillRect(wx,wy+PX,PX,gm.wH-PX);
+              } else { // ceiling lamp: bright core
+                g.fillStyle='#fff4d8';g.fillRect(wx+PX*2,wy+PX,PX,PX);
+              }
+            }
+            // light spill onto the wall under the window
+            g.globalAlpha=0.14;g.fillStyle=colr;
+            g.fillRect(wx-PX,wy+gm.wH+PX,gm.wW+PX*2,PX);
+            g.globalAlpha=1;
+          }
+          // flicker registry, hard-capped (animation budget)
+          if(flickers.length<6&&rnd(b.seed+idx*7.1+r*3.7)<0.14&&(gm.near||!coveredByNear(wx,wy))){
+            flickers.push({x:wx,y:wy,w:gm.wW,h:gm.wH,off:recess,
+              ph:Math.floor(rnd(b.seed+idx)*97),tv:gm.near&&flickers.length<2});
+          }
         }
       }
     }
-    g.globalAlpha=1;
+    b.litRatio=total?litCount/total:0;
+  }
+
+  // ════ ARCHITECTURAL MARKS ════
+  function bakeMarks(g,b){
+    const R2=b.ramp;
+    const near=b.layer===2;
+    const span=shapeSpan(b,b.y+b.h*0.5);
+    const bx=span[0],bw=span[1];
+    // plinth — darker base band with a lit top edge
+    const pTop=gY-U.plinth;
+    g.fillStyle=R2[0];g.fillRect(bx,pTop,bw,U.plinth);
+    g.fillStyle=R2[3];g.fillRect(bx,pTop,bw,PX);
+    // cornice — overhangs, then casts a 1px shadow on the facade below
+    const cTop=shapeSpan(b,b.y+PX);
+    g.fillStyle=R2[3];
+    g.fillRect(cTop[0]-PX,b.y,cTop[1]+PX*2,U.cornice);
+    g.fillStyle=R2[0];
+    g.fillRect(cTop[0],b.y+U.cornice,cTop[1],PX);
+    // string courses every 3rd floor
+    const gm=facadeGeom(b);
+    for(let r=3;r<gm.rows;r+=3){
+      const sy=snap(gm.top+r*gm.pitchY-PX*2);
+      const sp=shapeSpan(b,sy);
+      g.fillStyle=R2[3];g.fillRect(sp[0],sy,sp[1],PX);
+      g.fillStyle=R2[0];g.fillRect(sp[0],sy+PX,sp[1],PX);
+    }
+    // pier rhythm — the dominant grid; lit edge + shadow edge reads as relief
+    for(let i=0;i<=gm.bays;i++){
+      const px2=snap(gm.x0+i*gm.bayW-PX);
+      if(px2<bx||px2>bx+bw-PX*2)continue;
+      g.fillStyle=R2[3];g.fillRect(px2,gm.top-PX*2,PX,pTop-gm.top+PX*2);
+      g.fillStyle=R2[0];g.fillRect(px2+PX,gm.top-PX*2,PX,pTop-gm.top+PX*2);
+    }
+    if(near&&b.w>PX*30&&rnd(b.seed*8.3)<0.5)bakeFireEscape(g,b);
+  }
+
+  function bakeBuilding(g,b){
+    const R2=b.ramp;
+    // ── 1. silhouette + value planes ──
+    if(b.layer===2){
+      // 3/4 side face receding toward the centre vanishing point at eye level
+      const sw=b.sideW;
+      const sx0=b.sideDir>0?b.x+b.w:b.x-sw;
+      g.fillStyle=R2[1];
+      for(let dx=0;dx<sw;dx+=PX){
+        const f=(dx+PX)/sw;
+        const x=b.sideDir>0?sx0+dx:sx0+sw-PX-dx;
+        const top=snap(b.y+f*b.h*0.10);        // roofline drops toward the VP
+        const bot=snap(gY-f*U.plinth*0.8);     // base rises toward the VP
+        g.fillRect(x,top,PX,bot-top);
+      }
+      // hard edge between the two planes
+      g.fillStyle=R2[0];
+      g.fillRect(b.sideDir>0?b.x+b.w-PX:b.x,b.y,PX,b.h);
+    }
+    g.fillStyle=R2[2];
+    if(b.type==='stepped'){
+      const s2=snap(b.h*0.70);
+      g.fillRect(b.x,gY-s2,b.w,s2);
+      const tw=snap(b.w*0.62);
+      g.fillRect(b.x+snap((b.w-tw)/2),b.y,tw,b.h-s2+PX);
+    } else if(b.type==='hero'){
+      const crownH=snap(b.h*0.13);
+      g.fillRect(b.x,b.y+crownH,b.w,b.h-crownH);
+      const tw=snap(b.w*0.52);
+      g.fillRect(b.x+snap((b.w-tw)/2),b.y,tw,crownH+PX);
+    } else {
+      g.fillRect(b.x,b.y,b.w,b.h);
+    }
+    // vertical value gradient: street-level light warms the base, the top
+    // cools toward the night sky (Slynyrd's cyberpunk facade rule), 3 hard
+    // steps with a dithered seam so the bands don't read as taped-on stripes
+    if(b.layer>0){
+      const t3=snap(b.y+b.h*0.34), t6=snap(b.y+b.h*0.67);
+      [[b.y,t3,R2[1]],[t6,gY,R2[3]]].forEach(seg=>{
+        for(let y=seg[0];y<seg[1];y+=PX){
+          const sp=shapeSpan(b,y);
+          g.fillStyle=seg[2];g.fillRect(sp[0],y,sp[1],PX);
+        }
+      });
+      [[t3,R2[1],R2[2]],[t6,R2[2],R2[3]]].forEach(sm=>{
+        for(let dy=-PX*2;dy<=PX*2;dy+=PX){
+          const y=snap(sm[0]+dy);
+          if(y<b.y||y>=gY)continue;
+          const sp=shapeSpan(b,y);
+          const row=Math.round(y/PX);
+          const f=(dy+PX*2)/(PX*4);
+          for(let x=sp[0];x<sp[0]+sp[1];x+=PX){
+            const th=(BAYER[(row&3)*4+((Math.round(x/PX))&3)]+0.5)/16;
+            g.fillStyle=(f<th)?sm[1]:sm[2];
+            g.fillRect(x,y,PX,PX);
+          }
+        }
+      });
+    }
+    if(b.layer===0){
+      // far layer: silhouette + one lit edge only, zero internal detail
+      g.fillStyle=R2[2]===FAR[2]?FAR[1]:R2[1];
+      g.fillRect(b.x,b.y,b.w,PX);
+      if(rnd(b.seed*1.7)<0.35){
+        const ax=snap(b.x+b.w/2);
+        g.fillStyle=R2[1];g.fillRect(ax,b.y-PX*3,PX,PX*3);
+        if(rnd(b.seed*2.9)<0.5)beacons.push({x:ax,y:b.y-PX*4,far:true});
+      }
+      return;
+    }
+    // ── 2. sun-side rim light (1px, hue-shifted, not a value lerp) ──
+    const sunSide=b.x+b.w/2<sunX?'r':'l';
+    const sp=shapeSpan(b,b.y+b.h*0.5);
+    g.fillStyle=b.layer===1?RIM_MID:RIM_NEAR;
+    g.fillRect(sunSide==='r'?sp[0]+sp[1]-PX:sp[0],b.y+U.cornice,PX,gY-b.y-U.cornice);
+    // ── 3. architectural marks, windows, roof, ground floor ──
+    bakeMarks(g,b);
+    bakeWindows(g,b);
+    bakeRoof(g,b);
+    if(b.layer===2&&b.shop)bakeStorefront(g,b);
   }
 
   // ── rooftop kit ──
   function bakeRoof(g,b){
-    if(b.layer===0){
-      if(rnd(b.seed*1.7)<0.30){
-        const ax=snap(b.x+b.w/2);
-        g.fillStyle=b.col;g.fillRect(ax,b.y-PX*4,PX,PX*4);
-        if(rnd(b.seed*2.9)<0.6)beacons.push({x:ax,y:b.y-PX*5,far:true});
-      }
-      return;
-    }
-    const topSpan=shapeSpan(b,b.y+PX);
-    // parapet highlight facing the sun
-    g.fillStyle=mix(b.col,'#ff9e6a',b.layer===1?0.35:0.22);
-    g.fillRect(topSpan[0],b.y,topSpan[1],PX);
-    const budget=Math.floor(topSpan[1]/(PX*9));
-    const items=[];
-    const rolls=[rnd(b.seed*3.1),rnd(b.seed*5.7),rnd(b.seed*7.3)];
-    if(b.type==='tower'){
-      // landmark: spire + ring lights
+    const R2=b.ramp;
+    const top=shapeSpan(b,b.y+PX);
+    if(b.hero){
       const sx=snap(b.x+b.w/2);
-      g.fillStyle=b.col;
-      g.fillRect(sx-PX*3,b.y-PX*4,PX*6,PX*4);
-      g.fillRect(sx-PX,b.y-PX*18,PX*2,PX*14);
-      g.fillRect(sx-PX*2,b.y-PX*8,PX*4,PX*2);
-      beacons.push({x:sx,y:b.y-PX*20,far:false,fast:true});
-      for(let i=0;i<3;i++){
-        g.fillStyle='#3ee6ff';g.globalAlpha=0.85;
-        g.fillRect(b.x+PX*2,b.y+PX*(4+i*3),b.w-PX*4,PX);
-        g.globalAlpha=1;
-      }
+      g.fillStyle=R2[1];
+      g.fillRect(sx-PX*2,b.y-PX*22,PX*4,PX*22);
+      g.fillRect(sx-PX*4,b.y-PX*10,PX*8,PX*2);
+      g.fillStyle=R2[3];g.fillRect(sx-PX*2,b.y-PX*22,PX,PX*22);
+      beacons.push({x:sx-PX,y:b.y-PX*24,fast:true});
+      steamSrcs.push({x:snap(b.x+b.w*0.22),y:b.y});
       return;
     }
-    if(rolls[0]<0.32&&topSpan[1]>PX*16){items.push('water');}
-    if(rolls[1]<0.42){items.push('antenna');}
-    if(rolls[2]<0.5&&topSpan[1]>PX*12){items.push('ac');}
-    items.slice(0,Math.max(1,budget)).forEach((it,ii)=>{
-      const ox=snap(topSpan[0]+PX*3+rnd(b.seed*9.7+ii*3)*Math.max(PX,topSpan[1]-PX*14));
+    const budget=Math.max(1,Math.floor(top[1]/(PX*22)));
+    const kit=[];
+    if(rnd(b.seed*3.1)<0.45&&top[1]>PX*20)kit.push('water');
+    if(rnd(b.seed*5.7)<0.5)kit.push('antenna');
+    if(rnd(b.seed*7.3)<0.55&&top[1]>PX*16)kit.push('ac');
+    kit.slice(0,budget).forEach((it,ii)=>{
+      const ox=snap(top[0]+PX*4+rnd(b.seed*9.7+ii*3)*Math.max(PX,top[1]-PX*16));
       if(it==='water'){
-        const tw=PX*7,th=PX*5;
-        g.fillStyle=mix(b.col,'#9a86b8',0.18);
+        const tw=PX*8,th=PX*6;
+        g.fillStyle=METAL;
         g.fillRect(ox+PX,b.y-PX*2,PX,PX*2);g.fillRect(ox+tw-PX*2,b.y-PX*2,PX,PX*2);
-        g.fillRect(ox,b.y-PX*2-th,tw,th);
-        g.fillRect(ox+PX,b.y-PX*3-th,tw-PX*2,PX);
-        g.fillStyle=mix(b.col,'#ff9e6a',0.4);g.fillRect(ox+tw-PX*2,b.y-PX*2-th,PX,th);
+        g.fillStyle=R2[1];g.fillRect(ox,b.y-PX*2-th,tw,th);
+        g.fillStyle=METAL;g.fillRect(ox+PX,b.y-PX*3-th,tw-PX*2,PX);
+        g.fillStyle=RIM_NEAR;g.fillRect(ox+tw-PX,b.y-PX*2-th,PX,th);
       } else if(it==='antenna'){
-        const ah=PX*(7+Math.floor(rnd(b.seed*13.1+ii)*7));
-        g.fillStyle=mix(b.col,'#9a86b8',0.12);
+        const ah=PX*(9+Math.floor(rnd(b.seed*13.1+ii)*8));
+        g.fillStyle=METAL;
         g.fillRect(ox,b.y-ah,PX,ah);
-        g.fillRect(ox-PX*2,b.y-snap(ah*0.6),PX*5,PX);
-        if(rnd(b.seed*17.9+ii)<0.55)beacons.push({x:ox,y:b.y-ah-PX,far:false});
-      } else if(it==='ac'){
+        g.fillRect(ox-PX*2,b.y-snap(ah*0.62),PX*5,PX);
+        g.fillRect(ox-PX,b.y-snap(ah*0.38),PX*3,PX);
+        if(rnd(b.seed*17.9+ii)<0.6)beacons.push({x:ox,y:b.y-ah-PX});
+      } else {
         for(let k=0;k<2+Math.floor(rnd(b.seed+ii)*2);k++){
-          g.fillStyle=mix(b.col,'#8a7bb0',0.15);
-          g.fillRect(ox+k*PX*4,b.y-PX*2,PX*3,PX*2);
-          g.fillStyle=mix(b.col,'#000000',0.3);
-          g.fillRect(ox+k*PX*4+PX,b.y-PX*2,PX,PX);
+          g.fillStyle=R2[1];g.fillRect(ox+k*PX*5,b.y-PX*3,PX*4,PX*3);
+          g.fillStyle=METAL;g.fillRect(ox+k*PX*5,b.y-PX*3,PX*4,PX);
+          g.fillStyle=R2[0];g.fillRect(ox+k*PX*5+PX,b.y-PX*2,PX*2,PX);
         }
       }
     });
   }
 
-  function bakeBuilding(g,b){
-    // body (+ simple type shaping)
-    g.fillStyle=b.col;
-    if(b.type==='stepped'&&b.layer===1){
-      const s2=snap(b.h*0.62);
-      g.fillRect(b.x,b.y+(b.h-s2),b.w,s2);
-      g.fillRect(b.x+snap(b.w*0.10),b.y+snap(b.h*0.32),snap(b.w*0.80),snap(b.h*0.36));
-      g.fillRect(b.x+snap(b.w*0.22),b.y,snap(b.w*0.56),snap(b.h*0.40));
-      // parapet edges of each tier
-      g.fillStyle=mix(b.col,'#ff9e6a',0.3);
-      g.fillRect(b.x,b.y+(b.h-s2),b.w,PX);
-      g.fillRect(b.x+snap(b.w*0.10),b.y+snap(b.h*0.32),snap(b.w*0.80),PX);
-    } else if(b.type==='setback'&&b.layer===1){
-      g.fillRect(b.x,b.y+PX*6,b.w,b.h-PX*6);
-      g.fillRect(b.x+snap(b.w*0.3),b.y,snap(b.w*0.4),PX*6);
-      g.fillStyle=mix(b.col,'#ff9e6a',0.3);
-      g.fillRect(b.x,b.y+PX*6,snap(b.w*0.3),PX);
-      g.fillRect(b.x+snap(b.w*0.7),b.y+PX*6,snap(b.w*0.3),PX);
-    } else if(b.type==='tower'){
-      g.fillRect(b.x,b.y+snap(b.h*0.22),b.w,b.h-snap(b.h*0.22));
-      g.fillRect(b.x+snap(b.w*0.18),b.y,snap(b.w*0.64),snap(b.h*0.26));
-    } else {
-      g.fillRect(b.x,b.y,b.w,b.h);
-    }
-    // sun-side rim light on mid/near buildings
-    if(b.layer>0){
-      const sunSide=b.x+b.w/2<sunX?'r':'l';
-      g.fillStyle=mix(b.col,b.layer===1?'#ff7e9e':'#b8506a',b.layer===1?0.55:0.4);
-      const rx=sunSide==='r'?b.x+b.w-PX:b.x;
-      const ry=b.type==='setback'?b.y+PX*6:b.type==='tower'?b.y+snap(b.h*0.22):b.type==='stepped'?b.y+snap(b.h*0.38):b.y;
-      g.fillRect(rx,ry,PX,gY-ry);
-    }
-    // vertical facade piers on near buildings (subtle)
-    if(b.layer===2&&b.w>PX*20){
-      g.fillStyle=mix(b.col,'#000000',0.3);
-      for(let px2=b.x+PX*6;px2<b.x+b.w-PX*4;px2+=PX*9){
-        g.fillRect(snap(px2),b.y+PX*2,PX,b.h-PX*4);
+  // ── ground floor: awning + shop windows + doorway + light pool on pavement ──
+  const AWNINGS=[['#8f2f3e','#d8cfc0'],['#20706a','#122028'],['#a8762e','#1e1020'],['#6e3a86','#221430']];
+  function bakeStorefront(g,b){
+    const R2=b.ramp;
+    const pair=AWNINGS[Math.floor(rnd(b.seed*3.7)*AWNINGS.length)];
+    const top=gY-U.ground;
+    const konbini=!!b.hero;                    // the hero block holds the one bright shop
+    g.fillStyle=R2[0];g.fillRect(b.x,top,b.w,U.ground-U.plinth);
+    // shop windows
+    const pw=PX*7,ph=U.ground-U.plinth-PX*3;
+    let k=0;
+    for(let x=b.x+PX*3;x+pw<=b.x+b.w-PX*3;x+=pw+PX*2){
+      const roll=rnd(b.seed*9.1+k*7.3);
+      if(roll>=0.25||konbini){
+        const c=konbini?'#fff6e0':(roll>0.5?WIN_WARM[k%WIN_WARM.length]:WIN_COLD[k%WIN_COLD.length]);
+        g.globalAlpha=konbini?1:0.85;
+        g.fillStyle=c;g.fillRect(x,top+PX*2,pw,ph);
+        g.globalAlpha=1;
+        g.fillStyle='rgba(20,8,20,0.45)';g.fillRect(x,top+PX*2,pw,PX);
+        // mullion
+        g.fillStyle=R2[0];g.fillRect(x+snap(pw/2),top+PX*2,PX,ph);
       }
+      k++;
     }
-    bakeWindows(g,b);
-    bakeRoof(g,b);
+    // doorway
+    const dx=snap(b.x+PX*4+rnd(b.seed*11.3)*Math.max(PX,b.w-PX*14));
+    g.fillStyle=konbini?'#fffaf0':'#fff0c8';
+    g.fillRect(dx,top+PX*2,PX*4,U.ground-U.plinth-PX*2);
+    // striped awning — inset from the building edges so adjacent shopfronts
+    // never merge into one continuous band across the frame
+    const aw0=b.x+PX*3, aw1=b.x+b.w-PX*3;
+    let st=0;
+    for(let x=aw0;x<aw1;x+=PX*3){
+      g.fillStyle=st%2===0?pair[0]:pair[1];
+      g.fillRect(x,top-PX*2,Math.min(PX*3,aw1-x),PX*3);
+      st++;
+    }
+    g.fillStyle='rgba(0,0,0,0.4)';g.fillRect(aw0,top+PX,aw1-aw0,PX);
+    // the light pool must be painted AFTER the ground plane, so queue it
+    lightPools.push({x:b.x,w:b.w,konbini});
   }
 
-  // ════ SIGN SPRITES — pixel bloom, anchored to buildings ════
-  function makeSprite(wIn,hIn,drawContent,pad){
-    const P=pad||PX*4;
-    const tmp=mkCanvas();tmp.width=wIn+P*2;tmp.height=hIn+P*2;
-    const tg=tmp.getContext('2d');
-    tg.save();tg.translate(P,P);drawContent(tg);tg.restore();
-    const spr=mkCanvas();spr.width=tmp.width;spr.height=tmp.height;
+  function bakeFireEscape(g,b){
+    const side=rnd(b.seed*13.7)<0.5?0:1;
+    const fw=PX*9;
+    const fx=side?b.x+b.w-fw-PX*3:b.x+PX*3;
+    const top=b.y+U.cornice+PX*6,bot=gY-U.ground-PX*2;
+    if(bot-top<PX*20)return;
+    const step=U.floor;
+    let dir=0;
+    for(let y=top;y<=bot;y+=step){
+      g.fillStyle=METAL;
+      g.fillRect(fx,snap(y),fw,PX);
+      g.fillStyle=b.ramp[0];g.fillRect(fx,snap(y)+PX,fw,PX);   // cast shadow
+      g.fillStyle=METAL;
+      g.fillRect(fx,snap(y-PX*3),PX,PX*3);
+      g.fillRect(fx+fw-PX,snap(y-PX*3),PX,PX*3);
+      if(y+step<=bot){
+        const n=Math.floor(step/PX)-2;
+        for(let s=1;s<n;s++){
+          const sx2=dir?fx+fw-PX-s*((fw-PX)/n):fx+s*((fw-PX)/n);
+          g.fillRect(snap(sx2),snap(y+s*PX),PX,PX);
+        }
+      }
+      dir=1-dir;
+    }
+  }
+
+  // ════ SIGN SPRITES — stepped rings with a hue progression ════
+  function tintCopy(src,color){
+    const c=mkCanvas();c.width=src.width;c.height=src.height;
+    const g=c.getContext('2d');
+    g.drawImage(src,0,0);
+    g.globalCompositeOperation='source-in';
+    g.fillStyle=color;g.fillRect(0,0,c.width,c.height);
+    return c;
+  }
+  // The glow must be generated from the EMISSIVE parts only (frame, text,
+  // lamps). Tinting the sign's opaque dark backing panel as well is what turns
+  // a neon sign into a solid coloured slab.
+  function makeSprite(wIn,hIn,col,drawBody,drawEmit){
+    const P=PX*5;
+    const mk=()=>{const c=mkCanvas();c.width=wIn+P*2;c.height=hIn+P*2;return c;};
+    const body=mk(),emit=mk();
+    const bg=body.getContext('2d');bg.save();bg.translate(P,P);drawBody(bg);bg.restore();
+    const eg=emit.getContext('2d');eg.save();eg.translate(P,P);drawEmit(eg);eg.restore();
+    // 1-bit alpha on the emissive layer — kills text AA, gives bitmap edges
+    try{
+      const id=eg.getImageData(0,0,emit.width,emit.height);
+      const d=id.data;
+      for(let i=3;i<d.length;i+=4)d[i]=d[i]>110?255:0;
+      eg.putImageData(id,0,0);
+    }catch(e){}
+    const spr=mk();
     const g=spr.getContext('2d');
-    const o1=[[PX,0],[-PX,0],[0,PX],[0,-PX]];
-    const o2=[[PX,PX],[-PX,PX],[PX,-PX],[-PX,-PX],[PX*2,0],[-PX*2,0],[0,PX*2],[0,-PX*2]];
-    g.globalAlpha=0.05;o2.forEach(o=>g.drawImage(tmp,o[0],o[1]));
-    g.globalAlpha=0.13;o1.forEach(o=>g.drawImage(tmp,o[0],o[1]));
-    g.globalAlpha=1;g.drawImage(tmp,0,0);
+    const ring1=[[PX,0],[-PX,0],[0,PX],[0,-PX]];
+    const ring2=[[PX,PX],[-PX,PX],[PX,-PX],[-PX,-PX],[PX*2,0],[-PX*2,0],[0,PX*2],[0,-PX*2]];
+    const ring3=[[PX*3,0],[-PX*3,0],[0,PX*3],[0,-PX*3],[PX*2,PX*2],[-PX*2,PX*2],[PX*2,-PX*2],[-PX*2,-PX*2]];
+    // outermost ring converges on the ambient sunset hue, not the sign's own colour
+    const t3=tintCopy(emit,GLOW_OUT), t2=tintCopy(emit,mix(col,AMBIENT,0.5));
+    g.globalAlpha=0.06;ring3.forEach(o=>g.drawImage(t3,o[0],o[1]));
+    g.globalAlpha=0.14;ring2.forEach(o=>g.drawImage(t2,o[0],o[1]));
+    g.globalAlpha=0.28;ring1.forEach(o=>g.drawImage(emit,o[0],o[1]));
+    g.globalAlpha=1;
+    g.drawImage(body,0,0);
+    g.drawImage(emit,0,0);
     return {img:spr,pad:P};
   }
 
+  // dark backing panel — opaque, never glows
+  function signPanel(g,bw,bh){g.fillStyle='#0a0510';g.fillRect(0,0,bw,bh);}
+  // emissive layer: tube frame + white-hot inner line + optional real text
+  function signEmit(g,bw,bh,col,txt,fs,vertical){
+    g.fillStyle=col;
+    g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);
+    g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
+    g.fillStyle='#fff4fa';g.globalAlpha=0.6;
+    g.fillRect(PX,PX,bw-PX*2,PX);
+    g.globalAlpha=1;
+    if(!txt)return;
+    g.font=signFont(fs);g.textBaseline='top';g.fillStyle=col;
+    if(vertical){
+      g.textAlign='center';
+      for(let i=0;i<txt.length;i++)g.fillText(txt[i],bw/2,PX*3+i*(fs+PX));
+      g.textAlign='left';
+    } else {
+      g.fillText(txt,PX*3,PX*3);
+    }
+  }
+
   function placeSigns(){
-    const cand=buildings.filter(b=>b.layer>=1&&b.type!=='tower'&&b.w>=PX*14&&b.h>=PX*34);
-    // deterministic pick spread across x
-    cand.sort((a,b)=>a.x-b.x);
-    const used=new Set();
-    const pick=(fx,need)=>{
-      let best=null,bd=1e9;
-      cand.forEach(b=>{
-        if(used.has(b))return;
-        if(need==='wide'&&b.w<PX*20)return;
-        // mid-layer host must not be hidden behind a near building
-        if(b.layer===1&&coveredByNear(b.x+b.w/2,b.y+b.h*0.3))return;
-        const d=Math.abs(b.x+b.w/2-fx*W)+(b.layer===1?W*0.12:0);
-        if(d<bd){bd=d;best=b;}
-      });
-      if(best)used.add(best);
-      return best;
-    };
+    const hero=buildings.filter(b=>b.hero)[0];
+    const near=buildings.filter(b=>b.layer===2&&!b.hero).sort((a,b)=>a.x-b.x);
+    const mid=buildings.filter(b=>b.layer===1&&b.h>=PX*40).sort((a,b)=>a.x-b.x);
 
-    // 1) vertical kanban signs on building side edges
-    [[0.12,'PERCEPTION'],[0.40,'SENSING'],[0.88,'URBAN AI']].forEach((cfg,i)=>{
-      const b=pick(cfg[0]);if(!b)return;
-      const word=cfg[1].replace(/\s/g,'').slice(0,8);
-      const col=NEON[(i*2+1)%NEON.length];
-      const fs=PX*4;
-      const bw=fs+PX*4, bh=word.length*(fs+PX)+PX*4;
-      if(b.h<bh+PX*14)return;
-      let side=(b.x+b.w/2<W/2)?'r':'l';
-      if(side==='l'&&b.x-bw+PX<PX*2)side='r';
-      const sx=side==='r'?b.x+b.w-PX:b.x-bw+PX;
-      const sy=snap(b.y+PX*8);
-      const spr=makeSprite(bw,bh,g=>{
-        g.fillStyle='#07040d';g.fillRect(0,0,bw,bh);
-        g.fillStyle=col;
-        g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);
-        g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
-        g.font=signFont(fs);g.textBaseline='top';g.textAlign='center';g.fillStyle=col;
-        for(let li=0;li<word.length;li++){g.fillText(word[li],bw/2,PX*2+li*(fs+PX));}
-        g.textAlign='left';
-      });
-      const brX=side==='r'?b.x+b.w-PX*2:b.x-PX;
-      signs.push({spr,x:sx,y:sy,ph:i*1.7,cx:sx+bw/2,w:bw,col,bracket:{x:brX,y:sy+PX*2,w:PX*3}});
-    });
-
-    // 2) horizontal boxed facade signs
-    [[0.24,'RAMEN'],[0.55,'CAFE'],[0.72,'HOTEL'],[0.96,'BAR']].forEach((cfg,i)=>{
-      const b=pick(cfg[0]);if(!b)return;
-      const col=NEON[(i*3+2)%NEON.length];
-      const fs=PX*4;
-      const word=cfg[1];
-      const tw=Math.ceil(word.length*fs*0.62/PX)*PX;
-      const bw=tw+PX*4,bh=fs+PX*4;
-      const sx=snap(b.x+(b.w-bw)/2);
-      const sy=snap(b.y+PX*6+rnd(b.seed*3.3)*b.h*0.3);
-      const spr=makeSprite(bw,bh,g=>{
-        g.fillStyle='#0a0510';g.fillRect(0,0,bw,bh);
-        g.fillStyle=col;
-        g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);
-        g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
-        g.font=signFont(fs);g.textBaseline='top';g.fillStyle=col;
-        g.fillText(word,PX*2,PX*2);
-      });
-      signs.push({spr,x:sx,y:sy,ph:i*2.3+1,cx:sx+bw/2,w:bw,col});
-    });
-
-    // 3) rooftop billboards (research words — the personal-brand spot)
-    [[0.33,'GEOAI'],[0.63,'VLM LAB']].forEach((cfg,i)=>{
-      const b=pick(cfg[0],'wide');if(!b)return;
-      const col=i===0?'#3ee6ff':'#ff6ec7';
-      const fs=PX*5;
-      const word=cfg[1];
-      const tw=Math.ceil(word.length*fs*0.62/PX)*PX;
+    // ── 1) hero rooftop billboard — the one place the brand reads (cap ≥7 logical px)
+    if(hero){
+      const fs=PX*10, txt='URBAN AI', col=NEON[1];
+      const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
+      const bw=tw+PX*8,bh=fs+PX*8;
+      const legH=PX*10;
+      const sx=snap(hero.x+(hero.w-bw)/2), sy=Math.max(PX*4,hero.y-bh-legH);
+      const spr=makeSprite(bw,bh+legH,col,g=>{
+        g.fillStyle='#1a1028';
+        g.fillRect(PX*3,bh,PX*2,legH);g.fillRect(bw-PX*5,bh,PX*2,legH);
+        for(let y=bh+PX*3;y<bh+legH;y+=PX*5){g.fillRect(PX*3,y,bw-PX*8,PX);}
+        signPanel(g,bw,bh);
+      },g=>signEmit(g,bw,bh,col,txt,fs,false));
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:hero,
+                  box:{x:sx,y:sy,w:bw,h:bh},roof:true});
+    }
+    // ── 2) vertical kanban, 1 glyph wide — hosted on the hero because a
+    // 5-glyph column at 7px cap height needs ~55 logical px of clear facade
+    if(hero){
+      const b=hero, fs=PX*10, txt='GEOAI', col=NEON[0];
+      const bw=fs+PX*6, bh=txt.length*(fs+PX)+PX*6;
+      if(b.h>bh+U.ground){
+        const side=b.sideDir>0?'l':'r';
+        const sx=side==='r'?b.x+b.w-PX*2:b.x-bw+PX*2;
+        const sy=snap(b.y+U.cornice+PX*8);
+        const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),
+                             g=>signEmit(g,bw,bh,col,txt,fs,true));
+        signs.push({spr,x:sx,y:sy,ph:1.7,cx:sx+bw/2,w:bw,col,host:b,
+                    box:{x:sx,y:sy,w:bw,h:bh},
+                    bracket:{x:side==='r'?b.x+b.w-PX*3:b.x+PX,y:sy+PX*3,w:PX*4}});
+      }
+    }
+    // ── 3) one horizontal shop sign with real text
+    if(near[1]){
+      const b=near[1], fs=PX*10, txt='RAMEN', col=NEON[2];
+      const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
       const bw=tw+PX*6,bh=fs+PX*6;
-      const sx=snap(b.x+(b.w-bw)/2);
-      const sy=b.y-bh-PX*3;
-      const spr=makeSprite(bw,bh+PX*3,g=>{
-        // legs
-        g.fillStyle='#160b24';
-        g.fillRect(PX*2,bh,PX*2,PX*3);g.fillRect(bw-PX*4,bh,PX*2,PX*3);
-        g.fillStyle='#0a0510';g.fillRect(0,0,bw,bh);
-        g.fillStyle=col;
-        g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);
-        g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
-        g.font=signFont(fs);g.textBaseline='top';g.fillStyle=col;
-        g.fillText(word,PX*3,PX*3);
-      });
-      signs.push({spr,x:sx,y:sy,ph:i*2.9+0.6,cx:sx+bw/2,w:bw,col,roof:true});
-    });
-
-    // 4) street-level shop fronts on near buildings (izakaya strip)
-    buildings.filter(b=>b.layer===2&&b.w>PX*24).slice(0,4).forEach((b,i)=>{
+      const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*3);
+      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),
+                           g=>signEmit(g,bw,bh,col,txt,fs,false));
+      signs.push({spr,x:sx,y:sy,ph:2.6,cx:sx+bw/2,w:bw,col,host:b,
+                  box:{x:sx,y:sy,w:bw,h:bh}});
+    }
+    // ── 4) background signage: abstract marks only (below the legibility floor)
+    const absHosts=near.slice(2).concat(mid.slice(0,3));
+    absHosts.forEach((b,i)=>{
       const col=NEON[(i*2+3)%NEON.length];
-      const dw=PX*5,dh=PX*7;
-      const dx=snap(b.x+PX*4+rnd(b.seed*7.7)*(b.w-PX*16));
-      const dy=gY-dh;
-      const spr=makeSprite(dw+PX*8,dh,g=>{
-        // awning
-        g.fillStyle=col;g.globalAlpha=0.9;g.fillRect(0,0,dw+PX*8,PX*2);g.globalAlpha=1;
-        g.fillStyle='#0d0716';g.fillRect(PX*2,PX*2,dw,dh-PX*2);
-        // lit doorway
-        g.fillStyle=mix(col,'#ffffff',0.25);g.globalAlpha=0.9;
-        g.fillRect(PX*3,PX*3,dw-PX*2,dh-PX*4);g.globalAlpha=1;
-        // tiny lantern
-        g.fillStyle='#ffb066';g.fillRect(dw+PX*5,PX*3,PX,PX*2);
+      const vert=i%2===0;
+      const bw=vert?PX*5:snap(Math.min(b.w*0.5,PX*22));
+      const bh=vert?snap(Math.min(b.h*0.28,PX*30)):PX*7;
+      const sx=vert?(b.x+b.w/2<W/2?b.x+b.w-PX*2:b.x-bw+PX*2)
+                   :snap(b.x+(b.w-bw)/2);
+      const sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
+      if(sy+bh>gY-U.ground)return;
+      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
+        signEmit(g,bw,bh,col,null,0,false);
+        // illegible glyph blocks — reads as signage without degrading into noise
+        g.fillStyle=col;g.globalAlpha=0.9;
+        if(vert){
+          for(let y=PX*3;y+PX*3<=bh-PX*3;y+=PX*5){
+            const w2=PX*(rnd(b.seed+y)<0.5?3:2);
+            g.fillRect(PX*2,y,w2,PX*3);
+          }
+        } else {
+          for(let x=PX*3;x+PX*2<=bw-PX*3;x+=PX*4){
+            g.fillRect(x,PX*2,PX*2,PX*(rnd(b.seed+x)<0.5?3:2));
+          }
+        }
+        g.globalAlpha=1;
       });
-      signs.push({spr,x:dx-PX*2,y:dy,ph:i*1.3+2,cx:dx+dw/2,w:dw+PX*8,col,door:true});
+      signs.push({spr,x:sx,y:sy,ph:i*1.9+0.4,cx:sx+bw/2,w:bw,col,host:b,
+                  box:{x:sx,y:sy,w:bw,h:bh}});
+    });
+  }
+
+  // ── sign → wall: cast shadow, colour bleed, conduit stub ──
+  function bakeSignWall(g,b){
+    signs.forEach(s=>{
+      // a rooftop sign has sky behind it, not wall — no shadow, no bleed
+      if(s.host!==b||!s.box||s.roof)return;
+      const o=s.box;
+      // cast shadow, offset away from the sun — this is what sells "in front of"
+      const dir=b.x+b.w/2<sunX?1:-1;
+      g.fillStyle='rgba(0,0,0,0.45)';
+      g.fillRect(o.x+dir*PX*2,o.y+PX*2,o.w,o.h);
+      // colour bleed — 1-2px of wall tint, no more. Quantising a wider, stronger
+      // tint snaps it to an opaque neon and the facade becomes a colour slab.
+      [[PX,0.13],[PX*2,0.06]].forEach(st=>{
+        g.globalAlpha=st[1];g.fillStyle=s.col;
+        const x0=o.x-st[0],y0=o.y-st[0],w0=o.w+st[0]*2,h0=o.h+st[0]*2;
+        g.fillRect(x0,y0,w0,st[0]);                    // top
+        g.fillRect(x0,y0+h0-st[0],w0,st[0]);           // bottom
+        g.fillRect(x0,y0,st[0],h0);                    // left
+        g.fillRect(x0+w0-st[0],y0,st[0],h0);           // right
+      });
+      g.globalAlpha=1;
+      // conduit up to the roofline
+      g.fillStyle=b.ramp[0];
+      g.fillRect(snap(o.x+o.w*0.5),b.y+U.cornice,PX,o.y-b.y-U.cornice);
     });
   }
 
@@ -1834,160 +2138,287 @@ const HOME=CITIES[0];
   function bakeBack(){
     Lback.width=W;Lback.height=H;const g=Lback.getContext('2d');
     buildings.forEach(b=>{if(b.layer===0)bakeBuilding(g,b);});
-    // atmospheric haze over far layer — stepped
-    const hz=[[0.58,0.05],[0.68,0.08],[0.76,0.12],[0.79,0.16]];
-    hz.forEach(z=>{g.globalAlpha=z[1];g.fillStyle='#c96a6e';g.fillRect(0,snap(gY*z[0]),W,gY-snap(gY*z[0]));});
+    // atmospheric haze — stepped bands, dithered seam, no alpha gradient
+    [[0.62,0.05],[0.72,0.09],[0.80,0.13]].forEach(z=>{
+      g.globalAlpha=z[1];g.fillStyle=HORIZON[0];
+      g.fillRect(0,snap(gY*z[0]),W,gY-snap(gY*z[0]));
+    });
     g.globalAlpha=1;
   }
 
   function bakeMid(){
     Lmid.width=W;Lmid.height=H;const g=Lmid.getContext('2d');
-    buildings.forEach(b=>{if(b.layer===1)bakeBuilding(g,b);});
-    // elevated rail viaduct
-    const railY=snap(gY*0.52);
-    g.fillStyle='#241537';
-    for(let px2=0;px2<W;px2+=PX*30){
-      g.fillRect(px2,railY+PX*11,PX*3,gY-railY-PX*11);
-      g.fillRect(px2-PX*2,railY+PX*10,PX*7,PX*3);
+    buildings.forEach(b=>{if(b.layer===1){bakeBuilding(g,b);bakeSignWall(g,b);}});
+    // elevated rail viaduct — thin deck on piers, reads as structure not fence
+    const railY=snap(gY*0.58);
+    g.fillStyle=MID[0];
+    for(let px2=snap(PX*8);px2<W;px2+=PX*34){
+      g.fillRect(px2,railY+PX*9,PX*4,gY-railY-PX*9);
+      g.fillRect(px2-PX*2,railY+PX*8,PX*8,PX*2);
     }
-    g.fillStyle='#1c1030';g.fillRect(0,railY+PX*9,W,PX*4);
-    g.fillStyle='#2c1a44';g.fillRect(0,railY+PX*9,W,PX*2);
-    g.fillStyle='#120a1e';g.fillRect(0,railY+PX*13,W,PX);
-    g.fillStyle='rgba(150,60,220,0.10)';g.fillRect(0,railY+PX*14,W,PX*5);
+    g.fillStyle=MID[1];g.fillRect(0,railY+PX*7,W,PX*3);
+    g.fillStyle=MID[4];g.fillRect(0,railY+PX*7,W,PX);
+    g.fillStyle='#0e0918';g.fillRect(0,railY+PX*10,W,PX);
   }
 
   function bakeNear(){
     Lnear.width=W;Lnear.height=H;const g=Lnear.getContext('2d');
-    buildings.forEach(b=>{if(b.layer===2)bakeBuilding(g,b);});
-    // ── ground: stepped bands ──
+    buildings.forEach(b=>{if(b.layer===2){bakeBuilding(g,b);bakeSignWall(g,b);}});
+    // ══ GROUND — second-lightest plane in the scene; the road runs off the
+    // bottom edge so the foreground never becomes an empty dead band ══
     const gh=H-gY;
-    const bands=[['#241017',0],['#1a0b13',0.18],['#120711',0.45],['#0b040c',0.75]];
-    bands.forEach((bd,i)=>{
-      const y0=snap(gY+gh*bd[1]);
-      const y1=i<bands.length-1?snap(gY+gh*bands[i+1][1]):H;
-      g.fillStyle=bd[0];g.fillRect(0,y0,W,y1-y0);
+    const roadY=snap(gY+gh*0.22), roadH=H-roadY;
+    // pavement recedes: darkest at the building line, slightly lifted at the kerb
+    const pw3=[[0.00,mix(G_WALK,'#000000',0.40)],[0.40,mix(G_WALK,'#000000',0.18)],[0.75,G_WALK]];
+    pw3.forEach((seg,i)=>{
+      const y0=snap(gY+(roadY-gY)*seg[0]);
+      const y1=i<pw3.length-1?snap(gY+(roadY-gY)*pw3[i+1][0]):roadY;
+      g.fillStyle=seg[1];g.fillRect(0,y0,W,y1-y0);
     });
-    // curb line under the skyline
-    g.fillStyle='#31121c';g.fillRect(0,gY,W,PX);
-    // road strip + dashed center line
-    const roadY=snap(gY+gh*0.22),roadH=snap(gh*0.42);
-    g.fillStyle='#100713';g.fillRect(0,roadY,W,roadH);
-    g.fillStyle='#38182e';g.fillRect(0,roadY,W,PX);
-    g.fillStyle='#38182e';g.fillRect(0,roadY+roadH-PX,W,PX);
-    const midY=snap(roadY+roadH/2);
-    g.fillStyle='#5c3244';
-    for(let x=0;x<W;x+=PX*14){g.fillRect(x,midY,PX*7,PX);}
-    // crosswalk
-    const cwX=snap(W*0.205),cwW=PX*22;
-    g.fillStyle='#5a3a4c';
-    for(let x=cwX;x<cwX+cwW;x+=PX*4){g.fillRect(x,roadY+PX*2,PX*2,roadH-PX*4);}
-    // baked neon reflections on the road from signs
+    g.fillStyle=G_KERB;g.fillRect(0,gY,W,PX);
+    // vertical paving joints only — horizontal ones made it read as tiled wall
+    g.fillStyle=mix(G_WALK,'#000000',0.28);
+    for(let x=0;x<W;x+=PX*14)g.fillRect(x,gY+PX*2,PX,roadY-gY-PX*2);
+    // soft cast shadows from the near block onto the pavement
+    buildings.forEach(b=>{
+      if(b.layer!==2)return;
+      const dir=b.x+b.w/2<sunX?1:-1;
+      g.globalAlpha=0.16;g.fillStyle='#0e0a18';
+      g.fillRect(b.x+dir*PX*3,gY+PX,b.w,snap((roadY-gY)*0.42));
+      g.globalAlpha=1;
+    });
+    // kerb edge + gutter
+    g.fillStyle=G_KERB;g.fillRect(0,roadY-PX*3,W,PX*3);
+    g.fillStyle=mix(G_KERB,'#ffffff',0.22);g.fillRect(0,roadY-PX*3,W,PX);
+    g.fillStyle=G_ROAD;g.fillRect(0,roadY,W,roadH);
+    g.fillStyle=mix(G_ROAD,'#000000',0.35);g.fillRect(0,roadY,W,PX*2);
+    // lane markings in slight perspective — spacing widens toward the viewer
+    g.fillStyle=G_MARK;
+    const laneA=snap(roadY+roadH*0.34), laneB=snap(roadY+roadH*0.74);
+    for(let x=0;x<W;x+=PX*18)g.fillRect(x,laneA,PX*9,PX);
+    for(let x=PX*9;x<W;x+=PX*26)g.fillRect(x,laneB,PX*13,PX*2);
+    // crosswalk under the hero block
+    const cwX=snap(W*0.42),cwW=PX*44;
+    g.fillStyle=G_MARK;
+    for(let x=cwX;x<cwX+cwW;x+=PX*7){
+      g.fillRect(x,roadY+PX*3,PX*4,roadH-PX*4);
+      // worn: the far end of each stripe fades into the road
+      g.fillStyle=mix(G_MARK,G_ROAD,0.55);
+      g.fillRect(x,roadY+PX*3,PX*4,snap(roadH*0.30));
+      g.fillStyle=G_MARK;
+    }
+    // shopfront light pools — painted on top of the ground plane, 3 hard steps
+    lightPools.forEach(p=>{
+      const pool=p.konbini
+        ?[['rgba(255,242,205,0.30)',PX*2,PX*5],['rgba(255,230,180,0.17)',PX*9,PX*11],['rgba(255,215,160,0.08)',PX*18,PX*18]]
+        :[['rgba(255,224,175,0.20)',PX*2,PX*4],['rgba(255,212,162,0.11)',PX*8,PX*9],['rgba(255,200,150,0.05)',PX*15,PX*15]];
+      pool.forEach(s=>{g.fillStyle=s[0];g.fillRect(p.x-s[1],gY,p.w+s[1]*2,s[2]);});
+    });
+    // road texture: a few coherent patches and manholes, not scattered specks
+    for(let i=0;i<7;i++){
+      const mx=snap(rnd(i*5.7)*W), my=snap(roadY+PX*5+rnd(i*9.1)*(roadH-PX*10));
+      if(rnd(i*3.3)<0.4){
+        g.fillStyle=mix(G_ROAD,'#000000',0.45);g.fillRect(mx,my,PX*8,PX*3);
+        g.fillStyle=G_KERB;g.fillRect(mx+PX,my,PX*6,PX);
+      } else {
+        g.fillStyle=mix(G_ROAD,'#ffffff',0.06);g.fillRect(mx,my,PX*14,PX*2);
+      }
+    }
+    // puddles — locally darker with one sharp reflective highlight
+    [[0.22,0.55],[0.62,0.30],[0.86,0.70]].forEach((p,i)=>{
+      const px2=snap(p[0]*W), py=snap(roadY+roadH*p[1]);
+      const pw=snap(PX*(14+i*6)), ph=snap(PX*4);
+      g.fillStyle=mix(G_ROAD,'#000000',0.45);
+      g.fillRect(px2,py,pw,ph);
+      g.fillStyle=mix(SKY[5],'#ffffff',0.15);g.globalAlpha=0.5;
+      g.fillRect(px2+PX*2,py+PX,pw-PX*5,PX);
+      g.globalAlpha=1;
+    });
+    // ══ WET-ROAD REFLECTIONS — shortened dark smear, broken by offset bands ══
+    // a reflection is a coherent vertical column, shortened and darker than the
+    // source, broken by horizontal bands offset 1-2px — not scattered glints
     signs.forEach(s=>{
-      if(s.door)return;
       const rx=snap(s.cx);
-      for(let ry=roadY;ry<H;ry+=PX*2){
-        const f=(ry-roadY)/(H-roadY);
-        if(rnd(rx*0.37+ry*1.7)<0.42)continue;
-        g.globalAlpha=Math.max(0.02,0.10-f*0.08);
+      const len=snap(roadH*0.80);
+      for(let ry=roadY;ry<roadY+len;ry+=PX){
+        const f=(ry-roadY)/len;
+        const row=Math.round(ry/PX);
+        if(rnd(row*1.9+rx*0.31)<0.16)continue;                 // occasional break only
+        const off=snap((rnd(row*3.7)-0.5)*PX*2);               // 1px band offsets
+        const rw=snap(Math.max(PX*2,s.w*(0.55-f*0.28)));
+        g.globalAlpha=Math.max(0.03,0.17-f*0.13);
         g.fillStyle=s.col;
-        const rw=snap(Math.max(PX*2,s.w*(0.4-f*0.25)));
-        g.fillRect(snap(rx-rw/2+ (rnd(ry*3.1)-0.5)*PX*4),ry,rw,PX);
+        g.fillRect(snap(rx-rw/2+off),ry,rw,PX);
       }
     });
     g.globalAlpha=1;
-    // ── street furniture statics @ 0.80W ──
-    const sx=snap(W*0.80),sy=gY;
+    // the sun's column on the wet road — baked, no per-frame shimmer
+    for(let ry=roadY;ry<H;ry+=PX){
+      const f=(ry-roadY)/(H-roadY);
+      const row=Math.round(ry/PX);
+      if(rnd(row*3.7)<0.18+f*0.22)continue;
+      const off=snap((rnd(row*11.3)-0.5)*PX*3);
+      const gw=snap(Math.max(PX*3,sunR*(0.55-f*0.30)));
+      g.globalAlpha=Math.max(0.03,0.18-f*0.13);
+      g.fillStyle=row%3===0?'#ff6a86':'#ff9e5c';
+      g.fillRect(snap(sunX+off-gw/2),ry,gw,PX);
+    }
+    g.globalAlpha=1;
+    bakeStreetProps(g);
+  }
+
+  // ── street-level props, scaled to the 10-logical-px figure ──
+  function bakeStreetProps(g){
+    const F=U.fig/10;                       // 1 logical px unit
+    const sx=snap(W*0.80);
     // lamppost
     const lampX=sx+PX*4;
-    g.fillStyle='#241832';
-    g.fillRect(lampX,sy-PX*20,PX*2,PX*20);
-    g.fillRect(lampX-PX*4,sy-PX*20,PX*6,PX*2);
-    // phone booth
-    const pbX=sx+PX*18,pbY=sy-PX*16;
-    g.fillStyle='#571f7a';g.fillRect(pbX,pbY,PX*8,PX*16);
-    g.fillStyle='#0a0614';g.fillRect(pbX+PX,pbY+PX*2,PX*6,PX*8);
-    g.fillStyle='rgba(190,110,255,0.35)';g.fillRect(pbX+PX,pbY+PX*2,PX*6,PX*8);
-    g.fillStyle='#6e2b96';g.fillRect(pbX,pbY,PX*8,PX*2);g.fillRect(pbX,pbY+PX*14,PX*8,PX*2);
-    // bench + sitting person (static body; phone glow is dynamic)
-    const bchX=sx+PX*30,bchY=sy-PX*5,U=PX;
-    g.fillStyle='#2e1c30';
-    g.fillRect(bchX,bchY,PX*14,PX*2);g.fillRect(bchX,bchY-PX*4,PX*14,PX*2);
-    g.fillRect(bchX+PX,bchY,PX*2,PX*5);g.fillRect(bchX+PX*11,bchY,PX*2,PX*5);
-    const pX=bchX+PX*4,pY=bchY;
-    g.fillStyle='#1f1038';
-    g.fillRect(pX,pY,U*2,U*5);g.fillRect(pX+U*4,pY,U*2,U*5);
-    g.fillStyle='#120826';
-    g.fillRect(pX-U,pY+U*5,U*3,U*2);g.fillRect(pX+U*4,pY+U*5,U*3,U*2);
-    g.fillStyle='#221240';g.fillRect(pX-U,pY-U*6,U*8,U*6);
-    g.fillStyle='#ff6ec7';g.fillRect(pX,pY-U*6,U,U*3);g.fillRect(pX+U*5,pY-U*6,U,U*3);
-    g.fillStyle='#f0c898';g.fillRect(pX+U*3,pY-U*7,U*2,U*2);g.fillRect(pX+U*2,pY-U*11,U*4,U*4);
-    g.fillStyle='#180c2c';g.fillRect(pX+U*2,pY-U*12,U*4,U*2);g.fillRect(pX+U,pY-U*11,U,U*2);
-    g.fillStyle='#221240';g.fillRect(pX+U*7,pY-U*5,U*2,U*5);g.fillRect(pX+U*8,pY-U*8,U*2,U*4);
-    // vending machine
-    g.fillStyle='#b8b8c8';g.fillRect(pX-U*4,pY-U*5,U*3,U);
-    g.fillStyle='#a31022';g.fillRect(pX-U*4,pY-U*4,U*3,U*5);
-    g.fillStyle='#d02438';g.fillRect(pX-U*4,pY-U*3,U*3,U*2);
-    g.fillStyle='#b8b8c8';g.fillRect(pX-U*4,pY+U,U*3,U);
+    g.fillStyle=METAL;
+    g.fillRect(lampX,gY-PX*26,PX*2,PX*26);
+    g.fillRect(lampX-PX*5,gY-PX*26,PX*8,PX*2);
+    g.fillStyle='#e8f8ff';g.fillRect(lampX-PX*4,gY-PX*24,PX*5,PX*2);
+    // stepped light pool from the lamp — brightest directly beneath, 3 steps out
+    [['rgba(180,225,255,0.26)',PX*7],['rgba(175,220,255,0.14)',PX*13],
+     ['rgba(170,214,255,0.06)',PX*21]].forEach(p=>{
+      g.fillStyle=p[0];g.fillRect(lampX-p[1],gY,p[1]*2,PX*4+p[1]*0.6);
+    });
+    // vending machine (a "hero object" per waneella's clutter vocabulary)
+    const vx=sx+PX*14;
+    g.fillStyle='#b8b8c8';g.fillRect(vx,gY-PX*13,PX*7,PX);
+    g.fillStyle='#a31022';g.fillRect(vx,gY-PX*12,PX*7,PX*12);
+    g.fillStyle='#d02438';g.fillRect(vx+PX,gY-PX*10,PX*5,PX*5);
+    g.fillStyle='#ffdba8';g.fillRect(vx+PX,gY-PX*10,PX*5,PX*2);
+    g.fillStyle='rgba(220,40,60,0.14)';g.fillRect(vx-PX*4,gY-PX*12,PX*15,PX*14);
+    // bicycle leaning on the wall
+    const bx2=sx-PX*20;
+    g.fillStyle='#1a1626';
+    g.fillRect(bx2,gY-PX*4,PX*4,PX);g.fillRect(bx2+PX*7,gY-PX*4,PX*4,PX);
+    g.fillRect(bx2+PX,gY-PX*5,PX,PX);g.fillRect(bx2+PX*8,gY-PX*5,PX,PX);
+    g.fillRect(bx2+PX*2,gY-PX*7,PX*7,PX);
+    g.fillRect(bx2+PX*3,gY-PX*9,PX,PX*2);
+    // trash bags, non-uniform
+    const tx=sx+PX*30;
+    g.fillStyle='#16141c';
+    g.fillRect(tx,gY-PX*4,PX*4,PX*4);
+    g.fillRect(tx+PX*4,gY-PX*3,PX*3,PX*3);
+    g.fillRect(tx+PX,gY-PX*5,PX*2,PX);
+    // one waiting figure at the crossing (10 logical px)
+    const fx=snap(W*0.30)+PX*34;
+    g.fillStyle='#0d0a16';
+    g.fillRect(fx,gY-PX*4,PX,PX*4);g.fillRect(fx+PX*2,gY-PX*4,PX,PX*4);
+    g.fillRect(fx,gY-PX*8,PX*3,PX*4);
+    g.fillRect(fx+PX,gY-PX*10,PX*2,PX*2);
+    g.fillStyle='rgba(120,210,255,0.45)';g.fillRect(fx+PX*3,gY-PX*7,PX,PX);
+  }
+
+  // ════ PALETTE SNAP ════
+  // Every globalAlpha fill invents a new colour, so a freshly baked frame holds
+  // ~1300 of them. Quantising the baked layers back onto the declared palette is
+  // what makes the result read as pixel art rather than as a canvas gradient.
+  let QP=null,QLUT=null;
+  function buildQuant(){
+    const list=[];
+    const add=h=>{if(list.indexOf(h)<0)list.push(h);};
+    SKY.forEach(add);HORIZON.forEach(add);
+    FAR.forEach(add);MID.forEach(add);
+    NEAR_FAM.forEach(f=>f.forEach(add));
+    add(RIM_MID);add(RIM_NEAR);
+    [G_WALK,G_WALK2,G_ROAD,G_MARK,G_KERB].forEach(add);
+    WIN_WARM.forEach(add);WIN_COLD.forEach(add);WIN_DARK.forEach(add);
+    add(TV_COOL);add(METAL);add(GLOW_OUT);add(AMBIENT);
+    // three glow steps per neon so the stepped rings survive quantisation
+    NEON.forEach(n=>{
+      add(n);
+      add(rgbHex(mix(n,GLOW_OUT,0.45)));
+      add(rgbHex(mix(n,'#141020',0.70)));
+    });
+    // bridge midtones — gives the quantiser somewhere to land between the
+    // dark architecture and the bright light sources
+    ['#5c4a70','#6e5a80','#463a58','#8a6c94','#3a3048'].forEach(add);
+    add('#fff4fa');add('#fff6e0');
+    ['#fff5c0','#ffdf9e','#ffb87e','#ff8f74','#ff5f82','#ff3a90','#f22a8c'].forEach(add);
+    QP=list.map(hex2rgb);
+    QLUT=new Int16Array(32768).fill(-1);
+  }
+  const rgbHex=s=>{
+    const m=s.match(/\d+/g);
+    return '#'+((1<<24)+(+m[0]<<16)+(+m[1]<<8)+(+m[2])).toString(16).slice(1);
+  };
+  function nearestIdx(r,g,b){
+    const key=((r>>3)<<10)|((g>>3)<<5)|(b>>3);
+    let idx=QLUT[key];
+    if(idx>=0)return idx;
+    let best=0,bd=1e9;
+    for(let i=0;i<QP.length;i++){
+      const p=QP[i];
+      const dr=r-p[0],dg=g-p[1],db=b-p[2];
+      // luma-weighted distance keeps value relationships intact
+      const d=dr*dr*0.30+dg*dg*0.59+db*db*0.11;
+      if(d<bd){bd=d;best=i;}
+    }
+    QLUT[key]=best;
+    return best;
+  }
+  // every mark is PX-aligned, so one sample per PX block is exact — this is
+  // PX² cheaper than a per-pixel pass (~40ms instead of ~3s at 1440x900)
+  function quantize(cnv){
+    const g=cnv.getContext('2d');
+    const w=cnv.width,h=cnv.height;
+    let id;
+    try{id=g.getImageData(0,0,w,h);}catch(e){return;}
+    const d=id.data;
+    for(let by=0;by<h;by+=PX){
+      for(let bx=0;bx<w;bx+=PX){
+        const si=(by*w+bx)*4;
+        let R,G,B,A;
+        if(d[si+3]<8){R=G=B=0;A=0;}
+        else{const p=QP[nearestIdx(d[si],d[si+1],d[si+2])];R=p[0];G=p[1];B=p[2];A=255;}
+        const yEnd=Math.min(by+PX,h),xEnd=Math.min(bx+PX,w);
+        for(let y=by;y<yEnd;y++){
+          let i=(y*w+bx)*4;
+          for(let x=bx;x<xEnd;x++){
+            d[i]=R;d[i+1]=G;d[i+2]=B;d[i+3]=A;
+            i+=4;
+          }
+        }
+      }
+    }
+    g.putImageData(id,0,0);
   }
 
   function bakeAll(){
-    genCity();
-    bakeSun();
-    bakeSky();
-    placeSigns();
-    bakeBack();
-    bakeMid();
-    bakeNear();
+    genCity();bakeSun();bakeSky();placeSigns();
+    bakeBack();bakeMid();bakeNear();
+    buildQuant();
+    // only the opaque baked layers are snapped. Sign/sun sprites are NOT:
+    // their glow lives in low-alpha pixels whose RGB is the full neon, so
+    // snapping them would pull faint haloes up into solid slabs.
+    [Lsky,Lback,Lmid,Lnear].forEach(quantize);
   }
 
-  // ════ DYNAMIC ELEMENTS ════
-  function drawTwinkles(){
-    for(let i=0;i<twinkles.length;i++){
-      const s=twinkles[i];
-      ctx.globalAlpha=0.10+Math.max(0,Math.sin(t*0.025+s.ph))*0.25;
-      ctx.fillStyle=s.col;
-      ctx.fillRect(s.x,s.y,PX,PX);
-    }
-    ctx.globalAlpha=1;
-  }
-
-  function drawSearchlights(){
-    for(let s=0;s<2;s++){
-      const ph=s*2.3;
-      const baseX=W*(0.30+s*0.42)+Math.sin(t*0.003+ph)*W*0.05;
-      const ang=-Math.PI/2+Math.sin(t*0.008+ph)*0.26;
-      const tanA=Math.tan(ang+Math.PI/2);
-      ctx.fillStyle='#3ee6ff';
-      for(let y=gY;y>gY*0.14;y-=PX*2){
-        const d=gY-y;
-        const cx2=baseX+tanA*d;
-        const hw=PX+d*0.045;
-        const f=d/(gY*0.86);
-        ctx.globalAlpha=0.05*(1-f*0.85);
-        ctx.fillRect(snap(cx2-hw),y,snap(hw*2),PX*2);
-      }
-    }
-    ctx.globalAlpha=1;
-  }
+  // ════ AMBIENT LOOPS — 7 systems; everything else is baked static ════
+  // discrete state changes step every 4 frames (~130ms), inside the
+  // 150-500ms band the reference literature gives for ambient loops
+  const step4=()=>Math.floor(t/4);
 
   function drawClouds(){
-    const N=5,BODY='#32204a',LIT='#ff9e6a',wrapW=W+200*DPR;
+    const N=4,BODY='#32204a',LIT='#ff9e6a',wrapW=W+200*DPR;
     for(let i=0;i<N;i++){
       const r0=rnd(i),r1=rnd(i+17.3),r2=rnd(i+41.9),r3=rnd(i+63.2);
-      const yFrac=0.06+r0*0.36;const cy=snap(yFrac*gY);
-      const speed=(0.12+r1*0.22)*(0.18+yFrac)*DPR;
+      const yFrac=0.08+r0*0.30;const cy=snap(yFrac*gY);
+      const speed=(0.10+r1*0.18)*(0.18+yFrac)*DPR;
       const cx=snap(((r2*wrapW+t*speed)%wrapW)-100*DPR);
-      const blocks=5+Math.floor(r3*4);const seg=snap((6+r1*6)*PX);const rowH=PX*2;
-      const baseA=0.32+r0*0.12-yFrac*0.05;
+      const blocks=5+Math.floor(r3*3);const seg=snap((7+r1*5)*PX);const rowH=PX*2;
+      const baseA=0.30+r0*0.10-yFrac*0.04;
       for(let b=0;b<blocks;b++){
         const u=b/(blocks-1);const taper=Math.sin(u*Math.PI);
         const segRows=Math.max(1,Math.round(taper*3+0.2));
-        const jit=snap((rnd(i*31.7+b*7.13)-0.5)*PX*3);
+        const jit=snap((rnd(i*31.7+b*7.13)-0.5)*PX*2);
         const segX=snap(cx+b*seg);if(segX>W+PX||segX+seg<-PX)continue;
         const segTop=snap(cy-segRows*rowH+jit);
         ctx.globalAlpha=Math.max(0.05,baseA);ctx.fillStyle=BODY;
-        for(let r=0;r<segRows;r++){ctx.fillRect(segX,snap(segTop+r*rowH),seg,rowH);}
-        ctx.globalAlpha=Math.min(0.55,Math.max(0.1,baseA+0.16)*taper+0.04);ctx.fillStyle=LIT;
+        for(let r=0;r<segRows;r++)ctx.fillRect(segX,snap(segTop+r*rowH),seg,rowH);
+        ctx.globalAlpha=Math.min(0.5,Math.max(0.1,baseA+0.14)*taper+0.04);ctx.fillStyle=LIT;
         ctx.fillRect(segX,snap(segTop+segRows*rowH-PX),seg,PX);
       }
     }
@@ -1995,43 +2426,39 @@ const HOME=CITIES[0];
   }
 
   function drawSkyLife(){
-    const DARK='#0a0616';
-    const acY=snap(gY*0.12);const acSpan=W+12*PX;const acX=snap(((t*0.6*DPR)%acSpan)-6*PX);
-    ctx.fillStyle=DARK;ctx.fillRect(acX,acY,PX*3,PX);ctx.fillRect(acX+PX,acY-PX,PX,PX);
-    ctx.fillStyle=Math.floor(t/15)%2===0?'#ff3a3a':'#ffffff';ctx.fillRect(acX+PX*3,acY,PX,PX);
-    ctx.fillStyle=DARK;
-    for(let i=0;i<3;i++){
-      const yBase=snap(gY*(0.18+rnd(i)*0.26));const speed=(0.25+rnd(i+7)*0.35)*DPR;const span=W+8*PX;
-      const bx=snap(((t*speed+rnd(i+3)*span)%span)-4*PX);
-      const by=snap(yBase+Math.sin(t*0.05+i*2.1)*PX);
-      if(Math.floor(t*0.15+i*3)%2===0){ctx.fillRect(bx,by,PX,PX);ctx.fillRect(bx+PX,by-PX,PX,PX);ctx.fillRect(bx+PX*2,by,PX,PX);}
-      else{ctx.fillRect(bx,by-PX,PX,PX);ctx.fillRect(bx+PX,by,PX,PX);ctx.fillRect(bx+PX*2,by-PX,PX,PX);}
-    }
+    const acY=snap(gY*0.14);const span=W+12*PX;
+    const acX=snap(((t*0.5*DPR)%span)-6*PX);
+    ctx.fillStyle='#0a0616';
+    ctx.fillRect(acX,acY,PX*3,PX);ctx.fillRect(acX+PX,acY-PX,PX,PX);
+    ctx.fillStyle=step4()%3===0?'#ff3a3a':'#e8e4ff';
+    ctx.fillRect(acX+PX*3,acY,PX,PX);
   }
 
   function drawTrain(){
-    const railY=snap(gY*0.52);
+    const railY=snap(gY*0.56);
     const span=W+340*DPR;
-    const trainX=snap(((t*1.35*DPR)%span)-220*DPR);
-    ctx.fillStyle='#120c20';ctx.fillRect(trainX,railY,PX*34,PX*9);
-    ctx.fillStyle='#1a1230';ctx.fillRect(trainX,railY,PX*34,PX*3);
-    for(let wi=0;wi<6;wi++){
-      const wglow=Math.sin(t*0.02+wi*0.5)*0.1+0.9;
-      ctx.fillStyle=wi%3===0?'rgba(204,68,255,'+wglow+')':'rgba(255,110,199,'+wglow+')';
-      ctx.fillRect(trainX+PX*3+wi*PX*5,railY+PX,PX*3,PX*6);
+    const trainX=snap(((t*1.2*DPR)%span)-220*DPR);
+    ctx.fillStyle='#120c20';ctx.fillRect(trainX,railY-PX*2,PX*40,PX*10);
+    ctx.fillStyle='#1a1230';ctx.fillRect(trainX,railY-PX*2,PX*40,PX*3);
+    for(let wi=0;wi<7;wi++){
+      ctx.fillStyle=wi%3===0?'#cc44ff':'#ff6ec7';
+      ctx.fillRect(trainX+PX*3+wi*PX*5,railY,PX*3,PX*5);
     }
-    ctx.fillStyle='rgba(180,60,255,0.12)';ctx.fillRect(trainX,railY+PX*9,PX*34,PX*4);
-    if(t%8===0){ctx.fillStyle='rgba(255,200,80,0.7)';ctx.fillRect(trainX+PX*Math.floor(rnd(t)*30),railY+PX*9,PX,PX);}
+    ctx.globalAlpha=0.12;ctx.fillStyle='#b43cff';
+    ctx.fillRect(trainX,railY+PX*8,PX*40,PX*3);ctx.globalAlpha=1;
   }
 
   function drawBeacons(){
     for(let i=0;i<beacons.length;i++){
       const bc=beacons[i];
-      const on=Math.floor(t/(bc.fast?9:16)+i*3)%2===0;
-      if(!on)continue;
+      if(Math.floor(step4()/(bc.fast?2:4)+i*3)%2!==0)continue;
       ctx.fillStyle=bc.far?'#c04858':'#ff3a3a';
       ctx.fillRect(bc.x,bc.y,PX,PX);
-      if(!bc.far){ctx.globalAlpha=0.25;ctx.fillRect(bc.x-PX,bc.y,PX,PX);ctx.fillRect(bc.x+PX,bc.y,PX,PX);ctx.globalAlpha=1;}
+      if(!bc.far){
+        ctx.globalAlpha=0.22;
+        ctx.fillRect(bc.x-PX,bc.y,PX,PX);ctx.fillRect(bc.x+PX,bc.y,PX,PX);
+        ctx.globalAlpha=1;
+      }
     }
   }
 
@@ -2039,31 +2466,97 @@ const HOME=CITIES[0];
     for(let i=0;i<flickers.length;i++){
       const f=flickers[i];
       if(f.tv){
-        const fr=Math.floor(t*0.11+f.ph);
-        const c=fr%5===0?'#dff6ff':fr%3===0?'#7fd8ff':'#4f9fe6';
-        ctx.fillStyle=c;ctx.globalAlpha=0.85+Math.sin(t*0.3+f.ph)*0.15;
+        const fr=step4()+f.ph;
+        ctx.fillStyle=fr%7===0?'#dff6ff':fr%3===0?TV_COOL:'#5f9fd6';
         ctx.fillRect(f.x,f.y,f.w,f.h);
-        ctx.globalAlpha=1;
         continue;
       }
-      const on=Math.sin(t*f.rate*8+f.ph)>-0.86;
-      if(!on){ctx.fillStyle=f.off;ctx.fillRect(f.x,f.y,f.w,f.h);}
+      // irregular: long on, short off blip — never a 50/50 duty cycle
+      if((step4()+f.ph)%23===0){ctx.fillStyle=f.off;ctx.fillRect(f.x,f.y,f.w,f.h);}
     }
+  }
+
+  function drawSteam(){
+    ctx.fillStyle='#cabfdc';
+    for(let si=0;si<steamSrcs.length;si++){
+      const s=steamSrcs[si];
+      for(let i=0;i<4;i++){
+        const ph=(t*0.3+i*26+si*40)%104;
+        const f=ph/104;
+        const px2=snap(s.x+Math.sin(t*0.028+i*2.1+si*2)*PX*(1+f*3));
+        const py=snap(s.y-PX*2-ph*PX*0.32);
+        const sz=PX*(1+Math.round(f*2));
+        ctx.globalAlpha=0.16*(1-f);
+        ctx.fillRect(px2,py,sz,sz);
+      }
+    }
+    ctx.globalAlpha=1;
   }
 
   function drawSigns(){
     for(let i=0;i<signs.length;i++){
       const s=signs[i];
-      let A=0.80+0.20*Math.sin(t*0.045+s.ph);
-      if((t+i*37)%260<5)A*=0.3;           // rare flicker
       if(s.bracket){
         ctx.fillStyle='#160b24';
         ctx.fillRect(s.bracket.x,s.bracket.y,s.bracket.w,PX);
       }
-      ctx.globalAlpha=Math.max(0.1,Math.min(1,A));
+      // state machine: mostly on, occasional single-step dropout, phase-offset
+      const c=step4()+Math.floor(s.ph*7);
+      const dip=(c%37===0)||(c%53===0);
+      ctx.globalAlpha=dip?0.35:1;
       ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);
     }
     ctx.globalAlpha=1;
+  }
+
+  function drawTraffic(){
+    const gh=H-gY;
+    const roadY=snap(gY+gh*0.34),roadH=H-roadY;
+    for(let i=0;i<traffic.length;i++){
+      const car=traffic[i];
+      // near lane is closer to the viewer: bigger and faster (perspective)
+      const near=car.lane===1;
+      const S=near?1.4:1.0;
+      car.x+=car.speed*PX*(near?1.1:0.75);
+      if(car.speed>0&&car.x>W+PX*30)car.x=-PX*30;
+      if(car.speed<0&&car.x<-PX*30)car.x=W+PX*30;
+      const fwd=car.speed>0;
+      const y=snap(near?roadY+roadH*0.72:roadY+roadH*0.28);
+      const x=snap(car.x);
+      const L=snap(PX*13*S), bH=snap(PX*4*S), cH=snap(PX*3*S);
+      // wheels
+      ctx.fillStyle='#0e0a16';
+      ctx.fillRect(x+snap(PX*2*S),y+bH,snap(PX*3*S),snap(PX*S));
+      ctx.fillRect(x+L-snap(PX*5*S),y+bH,snap(PX*3*S),snap(PX*S));
+      // body + cabin
+      ctx.fillStyle=car.body;
+      ctx.fillRect(x,y,L,bH);
+      ctx.fillRect(x+snap(PX*3*S),y-cH,snap(PX*7*S),cH);
+      // windscreen + side glass
+      ctx.fillStyle='#8fd8f0';ctx.globalAlpha=0.65;
+      ctx.fillRect(x+snap(PX*4*S),y-cH+snap(PX*S),snap(PX*5*S),cH-snap(PX*S));
+      ctx.globalAlpha=1;
+      // trim strip
+      ctx.globalAlpha=0.9;ctx.fillStyle=car.trim;
+      ctx.fillRect(x,y+snap(PX*S),L,snap(PX*S));ctx.globalAlpha=1;
+      // head / tail lamps + cone
+      if(car.head){
+        ctx.fillStyle='#ffeab0';
+        ctx.fillRect(fwd?x+L:x-snap(PX*S),y+snap(PX*S),snap(PX*S),snap(PX*2*S));
+        ctx.globalAlpha=0.14;
+        for(let k=1;k<=8;k++){
+          const w2=snap(PX*S);
+          ctx.fillRect(fwd?x+L+k*w2:x-w2-k*w2,y+snap(PX*S),w2,snap(PX*S)+Math.floor(k/3)*snap(PX*S));
+        }
+        ctx.globalAlpha=1;
+      }
+      ctx.fillStyle='#ff3a4a';
+      ctx.fillRect(fwd?x-snap(PX*S):x+L,y+snap(PX*S),snap(PX*S),snap(PX*S));
+      // wet-road reflection under the car
+      ctx.globalAlpha=0.14;ctx.fillStyle=car.trim;
+      ctx.fillRect(x+snap(PX*S),y+bH+snap(PX*2*S),L-snap(PX*2*S),snap(PX*S));
+      ctx.globalAlpha=1;
+    }
   }
 
   function drawMouseGlow(){
@@ -2078,161 +2571,32 @@ const HOME=CITIES[0];
       const r=Math.round(255*(1-ratio)+62*ratio);
       const g2=Math.round(77*(1-ratio)+230*ratio);
       const b2=Math.round(157*(1-ratio)+255*ratio);
-      const base=Math.max(W*0.20,240*DPR);
-      const steps=[[1,0.045],[0.72,0.05],[0.45,0.055]];
-      steps.forEach(st=>{
+      const base=Math.max(W*0.18,220*DPR);
+      [[1,0.04],[0.7,0.045],[0.42,0.05]].forEach(st=>{
         ctx.fillStyle='rgba('+r+','+g2+','+b2+','+st[1]+')';
         ctx.beginPath();ctx.arc(glowX,glowY,base*st[0],0,Math.PI*2);ctx.fill();
       });
     }
   }
 
-  function drawSunStreak(){
-    const gh=H-gY;
-    const cxBase=sunX;
-    ctx.save();
-    for(let ry=gY+PX*2;ry<H;ry+=PX*2){
-      const f=(ry-gY)/gh;
-      const rowSeed=Math.floor(ry/PX);
-      if(rnd(rowSeed*3.7)<0.30+f*0.25)continue;
-      const shimmer=0.5+0.5*Math.sin(t*0.05+rowSeed*0.7);
-      const spread=sunR*(0.35+f*1.5);
-      const nGlints=1+(rnd(rowSeed*7.1)<0.4?1:0);
-      for(let k=0;k<nGlints;k++){
-        const off=(rnd(rowSeed*11.3+k*5)-0.5)*spread*0.9;
-        const gw=snap(Math.max(PX*2,sunR*(0.16+f*0.5)*rnd(rowSeed*13.7+k)*1.4));
-        const a=(0.22-f*0.13)*shimmer;
-        if(a<=0.02)continue;
-        ctx.globalAlpha=a;
-        ctx.fillStyle=(rowSeed%3===0)?'#ff6a86':'#ff9e5c';
-        ctx.fillRect(snap(cxBase+off-gw/2),ry,gw,PX);
-      }
-    }
-    ctx.restore();ctx.globalAlpha=1;
-  }
-
-  function drawTraffic(){
-    const gh=H-gY;
-    const roadY=snap(gY+gh*0.22),roadH=snap(gh*0.42);
-    for(let i=0;i<traffic.length;i++){
-      const car=traffic[i];
-      car.x+=car.speed*PX*0.8;
-      if(car.speed>0&&car.x>W+PX*16)car.x=-PX*16;
-      if(car.speed<0&&car.x<-PX*16)car.x=W+PX*16;
-      const fwd=car.speed>0;
-      const y=snap(car.lane===0?roadY+PX*3:roadY+roadH-PX*6);
-      const x=snap(car.x);
-      const L=PX*9;
-      // body + cabin
-      ctx.fillStyle=car.body;
-      ctx.fillRect(x,y,L,PX*2);
-      ctx.fillRect(x+(fwd?PX*2:PX*2),y-PX,PX*5,PX);
-      // trim light
-      ctx.globalAlpha=0.85;ctx.fillStyle=car.trim;
-      ctx.fillRect(x,y,L,PX);
-      ctx.globalAlpha=1;
-      // window
-      ctx.fillStyle='#8fd8f0';ctx.globalAlpha=0.7;
-      ctx.fillRect(x+(fwd?PX*4:PX*3),y-PX,PX*3,PX);
-      ctx.globalAlpha=1;
-      // lights
-      if(car.head){
-        ctx.fillStyle='#ffeab0';
-        ctx.fillRect(fwd?x+L:x-PX,y,PX,PX);
-        ctx.globalAlpha=0.16;
-        for(let k=1;k<=6;k++){
-          ctx.fillRect(fwd?x+L+k*PX:x-PX-k*PX,y,PX,PX+Math.floor(k/3)*PX);
-        }
-        ctx.globalAlpha=1;
-      }
-      ctx.fillStyle='#ff3a4a';
-      ctx.fillRect(fwd?x-PX:x+L,y,PX,PX);
-      // road reflection
-      ctx.globalAlpha=0.10;ctx.fillStyle=car.trim;
-      ctx.fillRect(x+PX,y+PX*3,L-PX*2,PX);
-      ctx.globalAlpha=1;
-    }
-  }
-
-  function drawWalkers(){
-    for(let i=0;i<walkers.length;i++){
-      const wk=walkers[i];
-      wk.x+=wk.dir*wk.speed*PX;
-      if(wk.x>W+PX*8)wk.x=-PX*8;
-      if(wk.x<-PX*8)wk.x=W+PX*8;
-      const sc=wk.front?2:1;
-      const U=PX*sc;
-      const baseY=wk.front?H-PX*2:snap(gY-PX);
-      const x=snap(wk.x);
-      const step=Math.floor(t*0.12+wk.ph)%2;
-      ctx.fillStyle=wk.front?'#04020a':'#0a0518';
-      // legs
-      if(step===0){ctx.fillRect(x,baseY-U*2,U,U*2);ctx.fillRect(x+U*2,baseY-U*2,U,U*2);}
-      else{ctx.fillRect(x+U,baseY-U*2,U,U*2);ctx.fillRect(x+U,baseY-U,U*2,U);}
-      // body + head
-      ctx.fillRect(x,baseY-U*5,U*3,U*3);
-      ctx.fillRect(x+U,baseY-U*7,U*2,U*2);
-      if(!wk.front){
-        // phone glow for some walkers
-        if(i%3===0){ctx.fillStyle='rgba(120,210,255,0.5)';ctx.fillRect(x+(wk.dir>0?U*3:-U),baseY-U*4,U,U);}
-      }
-    }
-  }
-
-  function drawStreetDynamic(){
-    const sx=snap(W*0.80),sy=gY;
-    // lamp light + stepped halo
-    const lampX=sx+PX*4;
-    const flick=Math.sin(t*0.04+1.2)>0.96;
-    if(!flick){
-      ctx.fillStyle='#e8f8ff';ctx.fillRect(lampX-PX*3,sy-PX*23,PX*4,PX*2);
-      ctx.fillStyle='rgba(160,220,255,0.14)';ctx.fillRect(lampX-PX*5,sy-PX*21,PX*8,PX*6);
-      ctx.fillStyle='rgba(160,220,255,0.06)';ctx.fillRect(lampX-PX*8,sy-PX*15,PX*14,PX*15);
-    }
-    // sitting person's phone glow
-    const bchX=sx+PX*30,pX=bchX+PX*4,pY=sy-PX*5;
-    const U=PX;
-    const ph=Math.sin(t*0.03)*0.15+0.85;
-    ctx.fillStyle='#222233';ctx.fillRect(pX+U*9,pY-U*11,U*3,U*5);
-    ctx.fillStyle='rgba(100,200,255,'+ph+')';ctx.fillRect(pX+U*9+1,pY-U*11+1,U*3-2,U*5-2);
-    ctx.fillStyle='rgba(100,200,255,0.10)';ctx.fillRect(pX,pY-U*13,U*10,U*7);
-    // vending machine glow
-    ctx.fillStyle='rgba(220,40,60,'+(0.10+Math.sin(t*0.05)*0.03)+')';
-    ctx.fillRect(pX-U*6,pY-U*5,U*7,U*8);
-    // curb shimmer dashes
-    for(let rx=0;rx<W;rx+=PX*12){
-      ctx.fillStyle='rgba(255,120,0,'+(0.07+Math.sin(t*0.02+rx*0.004)*0.03)+')';
-      ctx.fillRect(rx,gY+PX,PX*6,PX);
-    }
-  }
-
+  // foreground framing: dark power lines across the upper sky, outer margin only
   function drawForeground(){
-    // power lines sagging across the upper sky (classic city-pop framing),
-    // silhouetted against the bright sky — with a few birds perched on them
-    const SIL='#0a0417';
-    ctx.fillStyle=SIL;
+    ctx.fillStyle='#0a0417';
     const WSTEP=PX*4;
-    const wireY=(y0,sagPx,seed2,fr)=>{
+    const wireY=(y0,sag,seed2,fr)=>{
       const par=4*fr*(1-fr);
-      const drift=Math.sin(t*0.015+seed2)*PX*0.5;
-      return snap(y0+par*sagPx+drift*par);
+      return snap(y0+par*sag+Math.sin(t*0.015+seed2)*PX*0.5*par);
     };
-    const wires=[
-      [snap(gY*0.06),snap(gY*0.13),0.0],
-      [snap(gY*0.09),snap(gY*0.15),1.4],
-      [snap(gY*0.13),snap(gY*0.11),2.7]
-    ];
+    const wires=[[snap(gY*0.05),snap(gY*0.12),0.0],
+                 [snap(gY*0.085),snap(gY*0.14),1.4],
+                 [snap(gY*0.12),snap(gY*0.10),2.7]];
     wires.forEach(wr=>{
-      for(let x=0;x<=W;x+=WSTEP){
-        ctx.fillRect(snap(x),wireY(wr[0],wr[1],wr[2],W>0?x/W:0),WSTEP,PX);
-      }
+      for(let x=0;x<=W;x+=WSTEP)ctx.fillRect(snap(x),wireY(wr[0],wr[1],wr[2],W>0?x/W:0),WSTEP,PX);
     });
-    // perched birds — occasionally one flies off (skips)
-    for(let i=0;i<5;i++){
-      const fx=0.08+rnd(i*7.7)*0.84;
+    for(let i=0;i<4;i++){
+      const fx=0.10+rnd(i*7.7)*0.80;
       const wi=i%wires.length;
-      const away=Math.floor(t*0.004+rnd(i*3.1)*7)%9===0;
-      if(away)continue;
+      if(Math.floor(step4()*0.02+rnd(i*3.1)*7)%9===0)continue;
       const bx=snap(fx*W);
       const by=wireY(wires[wi][0],wires[wi][1],wires[wi][2],fx);
       ctx.fillRect(bx,by-PX*2,PX*2,PX*2);
@@ -2243,13 +2607,8 @@ const HOME=CITIES[0];
   // ════ FRAME COMPOSITE ════
   function draw(excludeSky=false){
     ctx.clearRect(0,0,W,H);
-    if(!excludeSky)t++;
-    if(!excludeSky)ctx.drawImage(Lsky,0,0);
-    drawTwinkles();
-    drawSearchlights();
-    // sun (bobs slowly)
-    const bob=snap(Math.sin(t*0.012)*PX*1.5);
-    ctx.drawImage(sunSprite,sunX-sunSprite.width/2,sunBaseY+bob-sunSprite.height/2);
+    if(!excludeSky){t++;ctx.drawImage(Lsky,0,0);}
+    ctx.drawImage(sunSprite,sunX-sunSprite.width/2,sunY-sunSprite.height/2);
     drawClouds();
     drawSkyLife();
     ctx.drawImage(Lback,0,0);
@@ -2258,19 +2617,16 @@ const HOME=CITIES[0];
     drawMouseGlow();
     ctx.drawImage(Lnear,0,0);
     drawFlickers();
+    drawSteam();
     drawBeacons();
     drawSigns();
-    drawSunStreak();
     drawTraffic();
-    drawWalkers();
-    drawStreetDynamic();
     drawForeground();
   }
 
   function rebuild(){resize();bakeAll();draw();}
   window.cityRebuild=rebuild;
 
-  // events
   let rsTimer=null;
   window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(rebuild,150);});
   window.addEventListener('load',()=>{rebuild();});
@@ -2299,7 +2655,8 @@ const HOME=CITIES[0];
         for(let x=0;x<W;x+=s){
           const idx=(y*W+x)*4;
           if(data[idx+3]>30){
-            targets.push({x:Math.round(x/DPR),y:Math.round(y/DPR),r:data[idx],g:data[idx+1],b:data[idx+2],a:data[idx+3]/255});
+            targets.push({x:Math.round(x/DPR),y:Math.round(y/DPR),
+              r:data[idx],g:data[idx+1],b:data[idx+2],a:data[idx+3]/255});
           }
         }
       }
@@ -2308,7 +2665,10 @@ const HOME=CITIES[0];
     if(wasRunning)startCity();
     return targets;
   };
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)stopCity();else if(document.getElementById('city-screen').style.display!=='none')startCity();});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)stopCity();
+    else if(document.getElementById('city-screen').style.display!=='none')startCity();
+  });
   startCity();
 })();
 
@@ -2473,6 +2833,7 @@ const PROJECTS_DATA = [
     desc: "Leveraged computer vision (CLIP/VLM) to measure subjective urban perception metrics (safety, beauty, depression) and compared their impacts on human visitation rates against physical GIS features.",
     tags: ["VLM", "Urban Perception", "CLIP", "Computer Vision"],
     img: "assets/images/research/proj_vlm_visitation.jpg",
+    page: "projects/perception-vs-environment.html",
     links: { paper: "https://doi.org/10.1016/j.ufug.2025.128835" }
   },
   {
@@ -2483,7 +2844,19 @@ const PROJECTS_DATA = [
     desc: "Investigated internal neuron activations of VLMs to reveal how representations of urban safety, walkability, and gentrification emerge within large multi-modal networks.",
     tags: ["VLMs", "Interpretability", "Urban Perception"],
     img: "assets/images/research/proj_vlm_mechanistic.jpg",
+    page: "projects/vlm-mechanistic.html",
     links: {}
+  },
+  {
+    id: "proj-llm-0",
+    category: "llm",
+    title: "Can Large Language Models Represent Urban Publics? Behavioral Replication and Population Mismatch",
+    venue: "arXiv preprint, 2026",
+    desc: "Compared eight open-weight LLMs against 843 respondents in a US affordable-housing survey experiment. One model matched the aggregate owner\u2013renter contrast, yet still failed to preserve the population structure, within-group heterogeneity, and measurement stability that produce it.",
+    tags: ["LLM Evaluation", "Survey Replication", "Affordable Housing"],
+    img: "assets/images/research/proj_llm_urban_publics.jpg",
+    page: "projects/llm-urban-publics.html",
+    links: { paper: "https://arxiv.org/abs/2607.27100" }
   },
   {
     id: "proj-llm-1",
@@ -2493,6 +2866,7 @@ const PROJECTS_DATA = [
     desc: "Designed a framework combining spatial GIS analysis with LLM reasoning agents to contextualize crime data and local media reports, simulating automated crime reporting dynamics.",
     tags: ["LLM Reasoning", "GIS", "Urban Safety"],
     img: "assets/images/research/proj_llm_crime.jpg",
+    page: "projects/gis-llm-crime.html",
     links: { paper: "https://doi.org/10.1371/journal.pone.0331788" }
   },
   {
@@ -2513,17 +2887,120 @@ const PROJECTS_DATA = [
     desc: "Modeled nonlinear relationships between micro-level street designs (via computer vision street-view segmentation) and bikeshare route selection using XGBoost and SHAP.",
     tags: ["Bikeshare Route", "Street View", "XGBoost", "SHAP"],
     img: "assets/images/research/proj_mobility_bikeshare.jpg",
+    page: "projects/bikeshare-routes.html",
     links: { paper: "https://doi.org/10.1016/j.tra.2026.104962" }
   },
   {
-    id: "proj-mobility-2",
-    category: "mobility",
+    id: "proj-nature-2",
+    category: "nature",
     title: "Evaluating Implied Urban Nature Vitality in San Francisco: Street View, Census & Social Media",
     venue: "Urban Forestry & Urban Greening, 2024",
     desc: "Used street view imagery, social media check-ins, and census data to measure how urban greenery layout increases local community vitality and walkability.",
     tags: ["Greenery", "Street View", "Community Vitality"],
     img: "assets/images/research/proj_mobility_greenery.jpg",
+    page: "projects/sf-urban-nature-vitality.html",
     links: { paper: "https://doi.org/10.1016/j.ufug.2024.128289" }
+  },
+  // Environment & Health
+  {
+    id: "proj-health-1",
+    category: "health",
+    title: "Assessing Influence of Urban Scene Characteristics on Urban Heat Island: Interpretable ML in NYC",
+    venue: "Urban Climate, 2025",
+    desc: "Examined how urban scene characteristics relate to urban heat island intensity across New York City, using interpretable machine learning so the contribution of individual scene attributes can be read off the fitted model.",
+    tags: ["Urban Heat Island", "Interpretable ML", "Urban Scene"],
+    img: "assets/images/research/proj_health_uhi_nyc.jpg",
+    page: "projects/urban-heat-island-nyc.html",
+    links: { paper: "https://doi.org/10.1016/j.uclim.2025.102542" }
+  },
+  {
+    id: "proj-health-2",
+    category: "health",
+    title: "Empathy and Redemption: Online Support for Mental Health Before and After COVID-19",
+    venue: "PLOS ONE, 2024",
+    desc: "Studied how online mental-health support was expressed and exchanged before and after the onset of COVID-19, comparing the two periods to characterise what changed in how people sought and offered support.",
+    tags: ["Mental Health", "Online Communities", "Text Analysis"],
+    img: "assets/images/research/proj_health_empathy.jpg",
+    page: "projects/empathy-redemption.html",
+    links: { paper: "https://doi.org/10.1371/journal.pone.0307042" }
+  },
+  // Urban Nature & Vitality
+  {
+    id: "proj-nature-1",
+    category: "nature",
+    title: "Evaluating the Spatial-Temporal Impact of Urban Nature on Urban Vitality in Vancouver",
+    venue: "Land Use Policy, 2026",
+    desc: "Evaluated how urban nature shapes urban vitality in Vancouver across space and time, combining social media data with GPS traces to observe where and when people are actually present.",
+    tags: ["Urban Vitality", "Social Media Data", "GPS Traces"],
+    img: "assets/images/research/proj_nature_vancouver.jpg",
+    page: "projects/vancouver-urban-nature-vitality.html",
+    links: { paper: "https://doi.org/10.1016/j.landusepol.2025.107824" }
+  },
+  {
+    id: "proj-nature-3",
+    category: "nature",
+    title: "Greenery Inequalities in New York and London: Socio-economic and Spatial Dimensions",
+    venue: "Urban Forestry & Urban Greening, 2025",
+    desc: "Compared how access to urban greenery is distributed across New York and London, examining the socio-economic and spatial dimensions along which that access is unequal.",
+    tags: ["Green Equity", "Comparative Cities", "Spatial Analysis"],
+    img: "assets/images/research/proj_nature_greenery_equity.jpg",
+    page: "projects/greenery-inequalities-ny-london.html",
+    links: { paper: "https://doi.org/10.1016/j.ufug.2025.128939" }
+  },
+  {
+    id: "proj-nature-4",
+    category: "nature",
+    title: "Urban Amenities and Urban Green Space Transformation in Guangzhou",
+    venue: "ISPRS International Journal of Geo-Information, 2024",
+    desc: "Examined how urban green space in Guangzhou has changed, and how those changes relate to the distribution of urban amenities across the city.",
+    tags: ["Green Space", "Urban Amenities", "Guangzhou"],
+    img: "assets/images/research/proj_nature_guangzhou.jpg",
+    page: "projects/guangzhou-green-space.html",
+    links: { paper: "https://doi.org/10.3390/ijgi13120452" }
+  },
+  {
+    id: "proj-health-3",
+    category: "health",
+    title: "Long-term PM2.5 Exposure and Mental Health Disparities: All of Us Research Program",
+    venue: "Environmental Research, 2025",
+    desc: "A prospective analysis using the All of Us Research Program, examining long-term exposure to PM2.5 and disparities in mental health outcomes across the cohort.",
+    tags: ["PM2.5", "Mental Health", "Health Disparities"],
+    img: "assets/images/research/proj_health_pm25.jpg",
+    page: "projects/pm25-mental-health.html",
+    links: { paper: "https://doi.org/10.1016/j.envres.2025.122691" }
+  },
+  {
+    id: "proj-health-4",
+    category: "health",
+    title: "Enhancing Sustainable Indoor Air: Potted Plants and ML Models for VOC Mitigation",
+    venue: "Urban Climate, 2025",
+    desc: "Investigated the use of potted plants for mitigating volatile organic compounds in indoor air, applying machine learning models to the resulting measurements.",
+    tags: ["Indoor Air", "VOC", "Machine Learning"],
+    img: "assets/images/research/proj_health_indoor_air.jpg",
+    page: "projects/indoor-air-voc-plants.html",
+    links: { paper: "https://doi.org/10.1016/j.uclim.2025.102497" }
+  },
+  {
+    id: "proj-health-5",
+    category: "health",
+    title: "Residential Segregation: ML, SHAP Interpretability, and Deep Learning — Las Vegas",
+    venue: "Land, 2025",
+    desc: "Studied residential segregation in Las Vegas using machine learning and deep learning models, with SHAP used to make the fitted relationships interpretable.",
+    tags: ["Residential Segregation", "SHAP", "Deep Learning"],
+    img: "assets/images/research/proj_health_segregation.jpg",
+    page: "projects/residential-segregation-las-vegas.html",
+    links: { paper: "https://doi.org/10.3390/land14050957" }
+  },
+  {
+    id: "proj-mobility-4",
+    category: "mobility",
+    title: "Human Perceptions to Inform Urban Landscape Design for Biking-Friendliness — Shanghai",
+    venue: "IFLA 2023 Conference",
+    desc: "Used measures of human perception to inform urban landscape design for biking-friendliness in Shanghai, presented as an oral report at the IFLA 2023 Conference.",
+    tags: ["Biking-Friendliness", "Human Perception", "Landscape Design"],
+    img: "assets/images/research/proj_mobility_shanghai.jpg",
+    page: "projects/shanghai-biking-perception.html",
+    links: {}
   },
   // Design & Practice Projects
   {
@@ -2597,6 +3074,44 @@ const PROJECTS_DATA = [
     links: { demo: "https://issuu.com/yuxuancai/docs/campusfight0521" }
   }
 ];
+
+// Cover art: use the supplied image, otherwise generate one from the paper's
+// own metadata (assets/pubcover.js) so a new publication needs no image asset.
+const _coverCache = {};
+function projImage(p) {
+  if (p.img) return p.img;
+  if (!p.cover || typeof window.makePubCover !== 'function') return '';
+  if (_coverCache[p.id]) return _coverCache[p.id];
+  const url = window.makePubCover({
+    title: p.title, venue: p.cover.venue || p.venue, year: p.cover.year,
+    category: p.cover.category || p.category, tags: p.tags,
+    seed: p.cover.seed || p.id, w: 800, h: 450
+  });
+  _coverCache[p.id] = url;
+  return url;
+}
+// Buttons shown under a project: its own detail page first, then external links.
+function projLinks(p) {
+  let h = '';
+  if (p.page) h += `<a href="${p.page}" class="proj-sticky-link-btn proj-detail-cta">Full details →</a>`;
+  if (p.links.paper) h += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
+  if (p.links.github) h += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
+  if (p.links.award) h += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
+  if (p.links.demo) h += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+  return h;
+}
+
+// The category cards advertise how much sits behind them, which replaces
+// the old block of instructions telling the reader to click.
+function labelProjectCategories() {
+  document.querySelectorAll('.proj-cat-card[data-cat]').forEach(card => {
+    const cat = card.getAttribute('data-cat');
+    const n = PROJECTS_DATA.filter(p => p.category === cat).length;
+    const el = card.querySelector('.proj-cat-count');
+    if (el) el.textContent = n + (n === 1 ? ' paper' : ' papers');
+  });
+}
+labelProjectCategories();
 
 function switchProjectsTab(tabId) {
   document.querySelectorAll('.proj-tab').forEach(btn => btn.classList.remove('active'));
@@ -2827,7 +3342,9 @@ function openProjectCategory(catId) {
   const categoryNames = {
     vlm: "Urban Perception & VLMs",
     llm: "LLM Planning Simulation",
-    mobility: "Urban Mobility & Streets"
+    mobility: "Urban Mobility & Streets",
+    nature: "Urban Nature & Vitality",
+    health: "Environment, Health & Equity"
   };
   titleEl.textContent = categoryNames[catId] || "Category Projects";
   
@@ -2859,23 +3376,19 @@ function openProjectCategory(catId) {
     
     const num = String(idx + 1).padStart(2, '0');
     const tagsHtml = p.tags.map(t => `<span class="tag">${t}</span>`).join('');
-    let linksHtml = '';
-    if(p.links.paper) linksHtml += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
-    if(p.links.github) linksHtml += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
-    if(p.links.award) linksHtml += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
-    if(p.links.demo) linksHtml += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Live Demo ↗</a>`;
-    
+    const linksHtml = projLinks(p);
+
     card.innerHTML = `
       <div class="proj-list-card-header">
         <span class="proj-list-card-num">${num}</span>
         <span class="proj-list-card-venue">${p.venue}</span>
       </div>
       <h4 class="proj-list-card-title">${p.title}</h4>
-      
+
       <!-- Mobile-only content -->
       <div class="proj-list-card-mobile-content">
         <div class="proj-list-card-mobile-img">
-          <img src="${p.img}" alt="${p.title}" loading="lazy">
+          <img src="${projImage(p)}" alt="${p.title}" loading="lazy">
         </div>
         <p class="proj-sticky-desc">${p.desc}</p>
         <div class="tags" style="margin-top: 10px;">${tagsHtml}</div>
@@ -2896,7 +3409,14 @@ function openProjectCategory(catId) {
     selectProjectDetail(filtered[0].id, true);
   }
   
+  // The view swap must never depend on an animation finishing: an interrupted
+  // tween (background tab, throttled rAF, reduced-motion, a fast second click)
+  // used to leave the details panel permanently hidden. The swap is now
+  // idempotent and is also fired by a timer, so the animation is decoration only.
+  let entered = false;
   const playEntranceAnimation = () => {
+    if (entered) return;
+    entered = true;
     catView.style.display = 'none';
     detView.style.display = 'block';
     
@@ -2938,6 +3458,17 @@ function openProjectCategory(catId) {
         }
       );
       
+      // If the decorative entrance tween is interrupted, the cards must not be
+      // left at opacity 0 — restore them to their resting state unconditionally.
+      setTimeout(() => {
+        gsap.set(leftCards, { clearProps: 'opacity,transform' });
+        leftCards.forEach(c => c.classList.remove('no-transition'));
+        if (rightPanel) {
+          gsap.set(rightPanel, { clearProps: 'opacity,transform' });
+          rightPanel.classList.remove('no-transition');
+        }
+      }, 1800);
+
       if (rightPanel) {
         gsap.fromTo(rightPanel,
           {
@@ -2977,6 +3508,8 @@ function openProjectCategory(catId) {
       }
     });
     
+    // safety net — 0.4s exit tween plus margin
+    setTimeout(playEntranceAnimation, 550);
     if (clickedCard) {
       gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.25 });
       gsap.to(clickedCard, {
@@ -3013,7 +3546,7 @@ function selectProjectDetail(projId, force = false) {
   if (typeof gsap === 'undefined' || REDUCE_MOTION || window.innerWidth <= 860) {
     const imgEl = document.getElementById('proj-sticky-image');
     if (imgEl) {
-      imgEl.src = p.img;
+      imgEl.src = projImage(p);
       imgEl.alt = p.title;
     }
     const venEl = document.getElementById('proj-sticky-venue');
@@ -3028,11 +3561,7 @@ function selectProjectDetail(projId, force = false) {
     
     const linksEl = document.getElementById('proj-sticky-links');
     if (linksEl) {
-      linksEl.innerHTML = '';
-      if (p.links.paper) linksEl.innerHTML += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
-      if (p.links.github) linksEl.innerHTML += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
-      if (p.links.award) linksEl.innerHTML += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
-      if (p.links.demo) linksEl.innerHTML += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+      linksEl.innerHTML = projLinks(p);
     }
     return;
   }
@@ -3048,7 +3577,7 @@ function selectProjectDetail(projId, force = false) {
       onComplete: () => {
         const imgEl = document.getElementById('proj-sticky-image');
         if (imgEl) {
-          imgEl.src = p.img;
+          imgEl.src = projImage(p);
           imgEl.alt = p.title;
         }
         const venEl = document.getElementById('proj-sticky-venue');
@@ -3063,11 +3592,7 @@ function selectProjectDetail(projId, force = false) {
         
         const linksEl = document.getElementById('proj-sticky-links');
         if (linksEl) {
-          linksEl.innerHTML = '';
-          if (p.links.paper) linksEl.innerHTML += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
-          if (p.links.github) linksEl.innerHTML += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
-          if (p.links.award) linksEl.innerHTML += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
-          if (p.links.demo) linksEl.innerHTML += `<a href="${p.links.demo}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Project Link ↗</a>`;
+          linksEl.innerHTML = projLinks(p);
         }
       }
     })
@@ -3103,8 +3628,11 @@ function backToCategories() {
     
     gsap.killTweensOf([leftCards, rightPanel, catView, '#proj-categories-view .proj-cat-card', '#proj-categories-view .proj-cat-meta']);
     
-    const tl = gsap.timeline({
-      onComplete: () => {
+    let returned = false;
+    const finishBack = () => {
+      if (returned) return;
+      returned = true;
+      {
         detView.style.display = 'none';
         catView.style.display = 'block';
         
@@ -3128,8 +3656,16 @@ function backToCategories() {
             }
           }
         );
+        // if that decorative tween is interrupted the cards must not stay at
+        // opacity 0 — force them back to their resting state
+        setTimeout(() => {
+          gsap.set(catCards, { clearProps: 'opacity,transform' });
+          catCards.forEach(c => c.classList.remove('no-transition'));
+        }, 1200);
       }
-    });
+    };
+    const tl = gsap.timeline({ onComplete: finishBack });
+    setTimeout(finishBack, 700);
     
     tl.to(leftCards, {
       opacity: 0,

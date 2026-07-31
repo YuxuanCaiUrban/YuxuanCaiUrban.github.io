@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Urban scene types &amp; heat-island risk in NYC — Yuxuan Cai</title>
+  <meta name="description" content="A plain-language walkthrough of our Urban Climate paper: which street-level features shape land-surface temperature across New York City, and who carries the heat.">
+  <link rel="canonical" href="https://yuxuancai.com/blog/nyc-heat-island.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070e; --panel: #0b0f19; --text: #f4f5f6; --muted: #8892b0;
+      --accent: #ff8c3c; --accent-pink: #ff4d9d; --cyan: #3ee6ff;
+      --line: rgba(255,255,255,.08);
+      --font-mono: 'Share Tech Mono','Courier New',monospace;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg); color: var(--text); font-family: var(--font-display);
+      line-height: 1.65; padding: clamp(20px,5vw,80px) clamp(20px,4vw,40px); min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .container { max-width: 820px; margin: 0 auto; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      margin-bottom: clamp(32px,6vh,56px); border-bottom: 1px solid var(--line); padding-bottom: 20px;
+    }
+    .back-btn {
+      font-family: var(--font-mono); font-size: 13px; text-decoration: none; color: var(--muted);
+      border: 1px solid var(--line); padding: 8px 16px; border-radius: 4px;
+      background: rgba(255,255,255,.02); transition: all .25s ease; white-space: nowrap;
+    }
+    .back-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.04); }
+    .hud-info { font-family: var(--font-mono); font-size: 11px; color: var(--accent-pink);
+      letter-spacing: .15em; text-transform: uppercase; }
+
+    .post-head { margin-bottom: 28px; }
+    .post-kicker { font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    h1 { font-size: clamp(26px,4.6vw,42px); font-weight: 300; letter-spacing: -.015em;
+      line-height: 1.22; margin-bottom: 16px; color: #fff; }
+    .post-lede { color: var(--muted); font-size: clamp(16px,2vw,19px); margin-bottom: 20px; }
+    .byline { font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+      border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      padding: 12px 0; display: flex; flex-wrap: wrap; gap: 8px 22px; }
+    .byline strong { color: var(--text); font-weight: 600; }
+
+    .cover { position: relative; width: 100%; aspect-ratio: 16/9; margin: 28px 0 40px;
+      background: rgba(255,255,255,.01); border: 1px solid var(--line);
+      border-radius: 6px; overflow: hidden; }
+    .cover img { width: 100%; height: 100%; object-fit: cover; display: block; image-rendering: pixelated; }
+
+    article h2 { font-size: clamp(19px,2.4vw,24px); font-weight: 400; color: #fff;
+      margin: 40px 0 14px; letter-spacing: -.01em; }
+    article h2::before { content: '// '; color: var(--accent); font-family: var(--font-mono); font-size: .8em; }
+    article p { color: var(--muted); margin-bottom: 18px; font-size: 16.5px; }
+    article ol, article ul { color: var(--muted); margin: 0 0 18px 22px; font-size: 16.5px; }
+    article li { margin-bottom: 8px; }
+    article strong { color: var(--text); font-weight: 600; }
+
+    /* pull-out numbers — the three results worth remembering */
+    .findings { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr));
+      gap: 14px; margin: 26px 0 30px; }
+    .finding { border: 1px solid var(--line); border-radius: 6px; padding: 18px;
+      background: rgba(255,255,255,.015); }
+    .finding .num { font-size: clamp(26px,4vw,34px); font-weight: 700; color: var(--accent);
+      line-height: 1.1; letter-spacing: -.02em; }
+    .finding .cap { font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+      text-transform: uppercase; letter-spacing: .08em; margin-top: 8px; display: block; }
+
+    .callout { border-left: 2px solid var(--accent); background: rgba(255,140,60,.05);
+      padding: 16px 20px; margin: 26px 0; border-radius: 0 4px 4px 0; }
+    .callout p { margin: 0; color: var(--text); font-size: 16px; }
+
+    .paper-card { border: 1px solid var(--line); border-radius: 6px; padding: 22px;
+      background: rgba(255,255,255,.01); margin-top: 44px; }
+    .paper-card .lbl { font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 10px; }
+    .paper-card .cite { color: var(--muted); font-size: 14.5px; margin-bottom: 16px; }
+    .paper-card .cite strong { color: var(--text); }
+    .btn-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      font-family: var(--font-mono); font-size: 12px; letter-spacing: .05em;
+      text-transform: uppercase; text-decoration: none; padding: 9px 18px;
+      border-radius: 999px; border: 1px solid var(--line); color: var(--text);
+      background: rgba(255,255,255,.02); transition: all .2s;
+    }
+    .btn:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #05070e; font-weight: 700; }
+    .btn-primary:hover { background: transparent; color: var(--accent); }
+
+    footer { margin-top: 52px; border-top: 1px solid var(--line); padding-top: 18px;
+      font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+      display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="../index.html#blog" class="back-btn">← Back to Blog</a>
+      <div class="hud-info">BLOG // JUL 2025</div>
+    </header>
+
+    <div class="post-head">
+      <div class="post-kicker">Urban Climate · Interpretable ML</div>
+      <h1>Urban scene types &amp; heat-island risk in NYC — insights from interpretable ML</h1>
+      <p class="post-lede">
+        A plain-language walkthrough of our <em>Urban Climate</em> paper: which street-level
+        features actually shape land-surface temperature across New York City — and who ends up
+        carrying the heat.
+      </p>
+      <div class="byline">
+        <span>By <strong>Yuxuan Cai</strong></span>
+        <span>July 2025</span>
+        <span>~5 min read</span>
+      </div>
+    </div>
+
+    <div class="cover">
+      <img alt="Cover illustration for the NYC urban heat island study"
+           data-pubcover='{"title":"Urban Scene Types and Heat-Island Risk in NYC","venue":"Urban Climate","year":2025,"category":"health","tags":["Heat Island","Interpretable ML","Street View"],"seed":"blog-nyc-heat-island","w":1000,"h":562}'>
+    </div>
+
+    <article>
+      <h2>Why street-level scenes, and not just land use</h2>
+      <p>
+        Most urban heat island research works from land-use categories and satellite thermal
+        imagery. That combination explains the coarse pattern well — downtown is hotter than the
+        park — but it says very little about what a street actually looks like at eye level: how
+        much canopy hangs over it, how tall the walls are, what occupies the ground floor.
+      </p>
+      <p>
+        Those are precisely the things a planner can change. So the question we set out to answer
+        was whether micro-scale scene characteristics, read directly off street-view imagery, carry
+        real explanatory weight for surface temperature — and whether they can be combined with
+        social vulnerability rather than analysed apart from it.
+      </p>
+
+      <h2>What we asked</h2>
+      <ol>
+        <li>Can NYC's streets be sorted into meaningful <strong>urban scene types</strong> using
+            street-view imagery?</li>
+        <li>How do <strong>urban morphology, points of interest, and socio-economic features</strong>
+            relate to urban heat island effects?</li>
+        <li>Is heat exposure distributed <strong>unevenly</strong> across socio-economic contexts?</li>
+      </ol>
+      <p>
+        The models are deliberately interpretable. The goal was never to predict temperature as
+        accurately as possible — it was to be able to say <em>which</em> attributes of a street are
+        doing the work, in units a planner can act on.
+      </p>
+
+      <h2>Three findings worth remembering</h2>
+      <div class="findings">
+        <div class="finding">
+          <span class="num">28%</span>
+          <span class="cap">Canopy threshold</span>
+        </div>
+        <div class="finding">
+          <span class="num">0.40 °C</span>
+          <span class="cap">Cooling per added floor</span>
+        </div>
+        <div class="finding">
+          <span class="num">Uneven</span>
+          <span class="cap">Exposure across neighbourhoods</span>
+        </div>
+      </div>
+
+      <p>
+        <strong>Canopy has a threshold, not a slope.</strong> Once tree canopy coverage passes
+        roughly <strong>28%</strong>, land-surface temperature drops consistently. Below that, added
+        greenery does much less. This is the kind of nonlinearity a linear model flattens away
+        entirely — and it matters, because it turns "plant more trees" into a concrete target.
+      </p>
+      <p>
+        <strong>Height helps, and helps more with greenery.</strong> Each additional floor is
+        associated with roughly <strong>0.40 °C</strong> lower land-surface temperature, and the
+        effect is strongest where built form and green elements occur together. Shade and vegetation
+        are not competing strategies; they compound.
+      </p>
+      <p>
+        <strong>The burden is not shared evenly.</strong> High-poverty neighbourhoods with large
+        minority populations face elevated heat exposure, driven by low vegetation cover and
+        inadequate infrastructure. Heat risk in New York is not only a physical geography — it
+        tracks the city's social geography as well.
+      </p>
+
+      <div class="callout">
+        <p>
+          The practical upshot: mitigation should be targeted rather than uniform. Greening
+          investment aimed at underserved neighbourhoods — and pushed past the canopy threshold
+          rather than sprinkled thinly — does more for both temperature and equity than the same
+          budget spread evenly across the city.
+        </p>
+      </div>
+
+      <h2>What I'd take into the next study</h2>
+      <p>
+        Two things stand out. First, interpretability paid for itself: the 28% threshold is only
+        visible because the model was built to be read, not just scored. Second, treating social
+        vulnerability as a covariate rather than a separate follow-up analysis is what let the
+        inequity result fall out of the same model — the two questions really are one question.
+      </p>
+    </article>
+
+    <div class="paper-card">
+      <div class="lbl">The paper</div>
+      <p class="cite">
+        Li, H., <strong>Cai, Y.*</strong>, Yang, Y., &amp; Cai, X. (2025). Assessing the influence of
+        urban scene characteristics on urban heat island: An interpretable machine learning approach
+        in New York City. <em>Urban Climate</em>, 62, 102542.
+      </p>
+      <div class="btn-row">
+        <a class="btn btn-primary" href="https://doi.org/10.1016/j.uclim.2025.102542"
+           target="_blank" rel="noopener noreferrer">Read the paper ↗</a>
+        <a class="btn" href="../projects/urban-heat-island-nyc.html">Project page →</a>
+      </div>
+    </div>
+
+    <footer>
+      <span>© 2026 Yuxuan Cai</span>
+      <span><a href="../index.html#blog">← All posts</a></span>
+    </footer>
+  </div>
+
+  <script src="../assets/pubcover.js"></script>
+  <script>applyPubCovers();</script>
+</body>
+</html>

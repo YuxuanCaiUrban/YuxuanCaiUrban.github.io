@@ -1,0 +1,7 @@
+# Local dev tooling — the preview-server config is machine-specific
+.claude/
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
