@@ -3534,13 +3534,16 @@ function openProjectCategory(catId) {
     });
     
     // safety net — 0.4s exit tween plus margin
-    setTimeout(playEntranceAnimation, 550);
+    // The clicked card runs its signal decode first, so the picture visibly
+    // unlocks before the view moves on; the timer stays ahead of that beat.
+    setTimeout(playEntranceAnimation, 700);
     if (clickedCard) {
-      gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.25 });
+      gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.18, delay: 0.12 });
       gsap.to(clickedCard, {
         opacity: 0,
-        scale: 1.06,
-        duration: 0.4,
+        scale: 1.05,
+        duration: 0.24,
+        delay: 0.22,
         ease: 'power2.out',
         onComplete: playEntranceAnimation
       });
@@ -4243,7 +4246,7 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
   // image reads as a signal in the house palette rather than colour confetti.
   var RAMP = ['#0a0616', '#171232', '#2a1c50', '#4a2c6e', '#823f88', '#c85a94'];
   var GLINT = '#3ee6ff';
-  var DURATION = 620;      // ms for a full decode
+  var DURATION = 340;      // ms for a full decode
   var SCAN = '#3ee6ff';
 
   function rnd(i) { var v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); }
@@ -4253,6 +4256,7 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
     this.img = img;
     this.cv = document.createElement('canvas');
     this.cv.className = 'signal-reveal';
+    this.cv.style.opacity = '0';   // nothing is drawn until a decode is asked for
     this.ctx = this.cv.getContext('2d');
     this.raf = null;
     this.blocks = [];
@@ -4388,7 +4392,7 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
       self.ctx.clearRect(0, 0, self.cv.width, self.cv.height);
       self.cv.style.opacity = '0';
       self.state = 'decoded';
-    }, DURATION + 500);
+    }, DURATION + 320);
   };
 
   // ── wiring ───────────────────────────────────────────────────────────────
@@ -4401,17 +4405,19 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
     return r;
   }
 
+  // The decode is the act of opening a category, not a hover flourish: a card
+  // shows its picture plainly until you commit to it, then unlocks on the way in.
   function initCategoryCards() {
     document.querySelectorAll('.proj-cat-card .proj-cat-img-wrap').forEach(function (wrap) {
       var img = wrap.querySelector('img');
-      if (!img) return;
+      if (!img || wrap.dataset.srArmed) return;
+      wrap.dataset.srArmed = '1';
       var r = get(wrap, img);
-      var card = wrap.closest('.proj-cat-card');
-      var arm = function () { if (img.complete && img.naturalWidth) r.encode(); };
-      if (img.complete) arm(); else img.addEventListener('load', arm, { once: true });
-      card.addEventListener('mouseenter', function () { r.decode(); });
-      card.addEventListener('mouseleave', function () { r.encode(); });
-      card.addEventListener('focusin', function () { r.decode(); });
+      wrap.classList.add('decoded');            // resting state is the plain picture
+      wrap.closest('.proj-cat-card').addEventListener('click', function () {
+        r.encode();
+        setTimeout(function () { r.decode(); }, 0);   // not rAF: it is throttled in hidden tabs
+      }, true);                                 // capture: runs before the nav handler
     });
   }
 
@@ -4425,7 +4431,7 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
     var r = get(wrap, img);
     img.addEventListener('load', function () {
       r.encode();
-      requestAnimationFrame(function () { r.decode(); });
+      setTimeout(function () { r.decode(); }, 0);   // not rAF: it is throttled in hidden tabs
     });
     if (img.complete && img.naturalWidth) { r.encode(); r.decode(); }
   }
