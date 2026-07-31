@@ -4238,7 +4238,11 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
   if (typeof document === 'undefined') return;
 
   var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var BLOCK = 14;          // device px per mosaic block
+  var BLOCK = 22;          // device px per mosaic block
+  // The mask quantises the picture onto the site's own ramp, so an un-decoded
+  // image reads as a signal in the house palette rather than colour confetti.
+  var RAMP = ['#0a0616', '#171232', '#2a1c50', '#4a2c6e', '#823f88', '#c85a94'];
+  var GLINT = '#3ee6ff';
   var DURATION = 620;      // ms for a full decode
   var SCAN = '#3ee6ff';
 
@@ -4292,12 +4296,14 @@ document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullY
       for (var x = 0; x < cols; x++) {
         var i = (y * cols + x) * 4;
         var n = rnd(x * 7.13 + y * 31.7);
-        // scramble: lift some blocks toward the neon, crush others to near-black
-        var k = n < 0.12 ? 1.9 : n < 0.2 ? 0.25 : 0.7 + n * 0.7;
-        var r = Math.min(255, data[i] * k);
-        var g = Math.min(255, data[i + 1] * k * (n < 0.12 ? 1.15 : 1));
-        var b = Math.min(255, data[i + 2] * k * (n < 0.12 ? 1.4 : 1));
-        this.ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+        // Luminance picks the ramp step, so the mosaic keeps the picture's
+        // structure and stays in the house palette. Only the odd block is
+        // nudged a step, to keep the field from looking mechanical.
+        var lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+        var step = Math.min(RAMP.length - 1, Math.floor(Math.pow(lum, 0.85) * RAMP.length));
+        if (n > 0.94 && step < RAMP.length - 1) step++;
+        else if (n < 0.06 && step > 0) step--;
+        this.ctx.fillStyle = (lum > 0.72 && n > 0.7) ? GLINT : RAMP[step];
         this.ctx.fillRect(x * B, y * B, B, B);
         // decode order: left-to-right scan, roughened so the edge isn't a ruler
         this.blocks.push({ x: x * B, y: y * B, t: x / cols * 0.78 + n * 0.22 });
