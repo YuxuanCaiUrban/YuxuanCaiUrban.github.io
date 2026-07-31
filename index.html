@@ -388,6 +388,19 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     transform: translateY(16px);
   }
 }
+/* signal reveal: imagery arrives as a scrambled pixel signal and decodes */
+.signal-reveal{position:absolute;inset:0;z-index:1;pointer-events:none;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  transition:opacity .28s ease}
+/* the picture underneath stays dimmed until its signal is decoded */
+.proj-cat-img-wrap img,.proj-sticky-img{filter:brightness(.85) saturate(.85);
+  transition:transform .6s cubic-bezier(.25,1,.5,1),opacity .3s,filter .5s ease}
+.proj-cat-img-wrap.decoded img,.proj-sticky-img-wrap.decoded .proj-sticky-img{
+  filter:brightness(1) saturate(1)}
+@media (prefers-reduced-motion: reduce){
+  .signal-reveal{display:none}
+  .proj-cat-img-wrap img,.proj-sticky-img{filter:none}
+}
 .proj-cat-img-wrap {
   position: absolute;
   inset: 0;
@@ -3273,6 +3286,7 @@ function openDesignProjects() {
   
   if (filtered.length > 0) {
     selectProjectDetail(filtered[0].id, true);
+    if (window.signalReveal) window.signalReveal.initStickyPanel();
   }
   
   catView.style.display = 'none';
@@ -3417,6 +3431,7 @@ function openProjectCategory(catId) {
   
   if (filtered.length > 0) {
     selectProjectDetail(filtered[0].id, true);
+    if (window.signalReveal) window.signalReveal.initStickyPanel();
   }
   
   // The view swap must never depend on an animation finishing: an interrupted
@@ -4213,6 +4228,216 @@ document.addEventListener('mousemove', e => {
 
 // ── INIT ──
 document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullYear();});
+// ── SIGNAL REVEAL ──────────────────────────────────────────────────────────
+// Project imagery starts as a scrambled pixel signal and decodes in a scan.
+// The overlay is a <canvas> holding a mosaic of the image with per-block noise;
+// decoding clears blocks in scan order, so the real <img> shows through. Only
+// clearRect runs per frame, which keeps it cheap even on the large panel.
+(function () {
+  'use strict';
+  if (typeof document === 'undefined') return;
+
+  var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BLOCK = 14;          // device px per mosaic block
+  var DURATION = 620;      // ms for a full decode
+  var SCAN = '#3ee6ff';
+
+  function rnd(i) { var v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); }
+
+  function Reveal(wrap, img) {
+    this.wrap = wrap;
+    this.img = img;
+    this.cv = document.createElement('canvas');
+    this.cv.className = 'signal-reveal';
+    this.ctx = this.cv.getContext('2d');
+    this.raf = null;
+    this.blocks = [];
+    this.state = 'idle';
+    wrap.appendChild(this.cv);
+  }
+
+  // Paint the scrambled signal: a mosaic of the image with the colour of each
+  // block pushed around, so it reads as interference rather than a blur.
+  Reveal.prototype.build = function () {
+    var w = this.wrap.clientWidth, h = this.wrap.clientHeight;
+    if (!w || !h || !this.img.naturalWidth) return false;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.cv.width = Math.round(w * dpr);
+    this.cv.height = Math.round(h * dpr);
+    this.cv.style.width = w + 'px';
+    this.cv.style.height = h + 'px';
+
+    var B = Math.max(6, Math.round(BLOCK * dpr));
+    var cols = Math.ceil(this.cv.width / B), rows = Math.ceil(this.cv.height / B);
+
+    // downscale the image to one pixel per block, then read it back
+    var tmp = document.createElement('canvas');
+    tmp.width = cols; tmp.height = rows;
+    var tg = tmp.getContext('2d');
+    try {
+      // cover-fit, matching object-fit: cover on the <img>
+      var ir = this.img.naturalWidth / this.img.naturalHeight, wr = cols / rows;
+      var sw = this.img.naturalWidth, sh = this.img.naturalHeight, sx = 0, sy = 0;
+      if (ir > wr) { sw = sh * wr; sx = (this.img.naturalWidth - sw) / 2; }
+      else { sh = sw / wr; sy = (this.img.naturalHeight - sh) / 2; }
+      tg.drawImage(this.img, sx, sy, sw, sh, 0, 0, cols, rows);
+      var data = tg.getImageData(0, 0, cols, rows).data;
+    } catch (e) {
+      return false;                       // tainted canvas — leave the image alone
+    }
+
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    this.blocks.length = 0;
+    for (var y = 0; y < rows; y++) {
+      for (var x = 0; x < cols; x++) {
+        var i = (y * cols + x) * 4;
+        var n = rnd(x * 7.13 + y * 31.7);
+        // scramble: lift some blocks toward the neon, crush others to near-black
+        var k = n < 0.12 ? 1.9 : n < 0.2 ? 0.25 : 0.7 + n * 0.7;
+        var r = Math.min(255, data[i] * k);
+        var g = Math.min(255, data[i + 1] * k * (n < 0.12 ? 1.15 : 1));
+        var b = Math.min(255, data[i + 2] * k * (n < 0.12 ? 1.4 : 1));
+        this.ctx.fillStyle = 'rgb(' + (r | 0) + ',' + (g | 0) + ',' + (b | 0) + ')';
+        this.ctx.fillRect(x * B, y * B, B, B);
+        // decode order: left-to-right scan, roughened so the edge isn't a ruler
+        this.blocks.push({ x: x * B, y: y * B, t: x / cols * 0.78 + n * 0.22 });
+      }
+    }
+    this.B = B;
+    return true;
+  };
+
+  Reveal.prototype.stop = function () {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = null;
+    clearTimeout(this.fallback);
+  };
+
+  Reveal.prototype.encode = function () {
+    this.stop();
+    if (REDUCED) { this.cv.style.opacity = '0'; return; }
+    if (!this.build()) { this.cv.style.opacity = '0'; return; }
+    this.cv.style.opacity = '1';
+    this.wrap.classList.remove('decoded');
+    this.state = 'encoded';
+  };
+
+  Reveal.prototype.decode = function () {
+    if (REDUCED) { this.cv.style.opacity = '0'; this.wrap.classList.add('decoded'); return; }
+    if (this.state !== 'encoded' && !this.build()) {
+      this.cv.style.opacity = '0'; this.wrap.classList.add('decoded'); return;
+    }
+    if (this.state === 'idle' && !this.build()) return;
+    this.stop();
+    this.state = 'decoding';
+    this.wrap.classList.add('decoded');
+    var self = this, t0 = null, B = this.B;
+
+    function frame(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / DURATION);
+      // clear every block whose threshold the scan has passed
+      for (var i = 0; i < self.blocks.length; i++) {
+        var b = self.blocks[i];
+        if (b.done || b.t > p) continue;
+        self.ctx.clearRect(b.x, b.y, B, B);
+        b.done = true;
+      }
+      // leading edge: a bright column just ahead of the wipe
+      if (p < 1) {
+        var ex = p * self.cv.width;
+        self.ctx.save();
+        self.ctx.globalCompositeOperation = 'source-over';
+        self.ctx.fillStyle = SCAN;
+        self.ctx.globalAlpha = 0.5;
+        self.ctx.fillRect(ex, 0, B, self.cv.height);
+        self.ctx.globalAlpha = 0.18;
+        self.ctx.fillRect(ex + B, 0, B, self.cv.height);
+        self.ctx.restore();
+        // wipe the previous frame's scan column so it doesn't smear
+        self.ctx.clearRect(ex - B * 1.2, 0, B * 1.2, self.cv.height);
+        for (var j = 0; j < self.blocks.length; j++) {
+          var c = self.blocks[j];
+          if (c.done && c.x >= ex - B * 2 && c.x <= ex + B * 2) {
+            self.ctx.clearRect(c.x, c.y, B, B);
+          }
+        }
+        self.raf = requestAnimationFrame(frame);
+      } else {
+        self.ctx.clearRect(0, 0, self.cv.width, self.cv.height);
+        self.cv.style.opacity = '0';
+        self.state = 'decoded';
+        self.raf = null;
+      }
+    }
+    this.cv.style.opacity = '1';
+    this.raf = requestAnimationFrame(frame);
+    // rAF is throttled in background tabs and low-power modes. Without this the
+    // mask could stay up and hide the picture for good, so the decode also
+    // finishes on a timer whether or not the animation ever ran a frame.
+    clearTimeout(this.fallback);
+    this.fallback = setTimeout(function () {
+      if (self.state === 'decoded') return;
+      self.stop();
+      self.ctx.clearRect(0, 0, self.cv.width, self.cv.height);
+      self.cv.style.opacity = '0';
+      self.state = 'decoded';
+    }, DURATION + 500);
+  };
+
+  // ── wiring ───────────────────────────────────────────────────────────────
+  var store = new WeakMap();
+
+  function get(wrap, img) {
+    var r = store.get(wrap);
+    if (!r) { r = new Reveal(wrap, img); store.set(wrap, r); }
+    r.img = img;
+    return r;
+  }
+
+  function initCategoryCards() {
+    document.querySelectorAll('.proj-cat-card .proj-cat-img-wrap').forEach(function (wrap) {
+      var img = wrap.querySelector('img');
+      if (!img) return;
+      var r = get(wrap, img);
+      var card = wrap.closest('.proj-cat-card');
+      var arm = function () { if (img.complete && img.naturalWidth) r.encode(); };
+      if (img.complete) arm(); else img.addEventListener('load', arm, { once: true });
+      card.addEventListener('mouseenter', function () { r.decode(); });
+      card.addEventListener('mouseleave', function () { r.encode(); });
+      card.addEventListener('focusin', function () { r.decode(); });
+    });
+  }
+
+  // The detail panel swaps its image as you move down the project list, so the
+  // decode plays on each swap rather than on hover.
+  function initStickyPanel() {
+    var img = document.getElementById('proj-sticky-image');
+    if (!img) return;
+    var wrap = img.closest('.proj-sticky-img-wrap');
+    if (!wrap) return;
+    var r = get(wrap, img);
+    img.addEventListener('load', function () {
+      r.encode();
+      requestAnimationFrame(function () { r.decode(); });
+    });
+    if (img.complete && img.naturalWidth) { r.encode(); r.decode(); }
+  }
+
+  window.signalReveal = {
+    initCategoryCards: initCategoryCards,
+    initStickyPanel: initStickyPanel,
+    refresh: function () { initCategoryCards(); initStickyPanel(); }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { initCategoryCards(); });
+  } else {
+    initCategoryCards();
+  }
+})();
+
+
 runBootCeremony(() => {
   heroIntro();
 });
