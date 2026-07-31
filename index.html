@@ -1444,9 +1444,12 @@ const HOME=CITIES[0];
   // near layer stays the darkest plane (≈11% luminance) — it is the foreground
   // silhouette; depth ordering is near < mid < far < sky/ground
   const NEAR_FAM=[
-    ['#100e1c','#171426','#1e1a32','#252140','#3a3558'],  // blue-black
-    ['#120d18','#191322','#20182e','#28203c','#402c52'],  // purple-black
-    ['#130e12','#1a141c','#211a26','#292132','#443646']   // warm-black
+    // The top band stays dark so the roofline still reads against the sky, but
+    // the base is lifted well clear of black — that is where the plinth, string
+    // courses and pier rhythm live, and where street light would fall.
+    ['#0d0b18','#151222','#221e38','#332e52','#524b7a'],  // blue-black
+    ['#0f0a16','#171020','#261c36','#372850','#584070'],  // purple-black
+    ['#100c12','#18121c','#26202e','#352c44','#564a66']   // warm-black
   ];
   const RIM_MID='#7a4880', RIM_NEAR='#6a4a80';
   // NIGHT ground: dark base, brightness comes only from light pools and
@@ -1460,7 +1463,7 @@ const HOME=CITIES[0];
   const NEON=['#ff4d9d','#3ee6ff','#ffd23a','#5cffb0','#b07bff'];
   const AMBIENT='#ff4d9d';           // sunset ambient — what all glow converges toward
   const GLOW_OUT='#7a2a60';
-  const METAL='#6a5c80';
+  const METAL='#4a4060';   // structural metal, kept below window brightness
 
   const snap=v=>Math.round(v/PX)*PX;
   const rnd=s=>{const v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
@@ -1480,8 +1483,12 @@ const HOME=CITIES[0];
   // reference ratio floor ≈ 1.5-2× figure, door ≈ 1.2-1.4× figure
   let U={};
   function setScale(){
-    U={fig:PX*10, floor:PX*15, winW:PX*5, winH:PX*7, gapX:PX*3,
-       bay:PX*18, marginX:PX*5, ground:PX*14, cornice:PX*3, plinth:PX*3};
+    // Window density is what separates a lit city from a black slab with a few
+    // holes in it. A tighter floor pitch and narrower bays roughly double the
+    // window count per facade, so the same lit ratio reads as an inhabited
+    // building rather than an empty one.
+    U={fig:PX*10, floor:PX*10, winW:PX*4, winH:PX*5, gapX:PX*2,
+       bay:PX*13, marginX:PX*4, ground:PX*14, cornice:PX*3, plinth:PX*3};
   }
 
   function resize(){
@@ -1688,7 +1695,7 @@ const HOME=CITIES[0];
     const bottom=gY-(near?U.ground:PX*3)-PX*2;
     const rows=Math.max(1,Math.floor((bottom-top)/pitchY));
     return {bays,bayW,x0,top,rows,pitchY,wW,wH,near,
-            winOff:near?[PX*3,PX*10]:[PX*2,PX*6]};
+            winOff:near?[PX*2,PX*7]:[PX*2,PX*5]};
   }
 
   // ── windows: lit ratio ≤35%, warm:cool 75:25, interiors on 1/6 of lit ──
@@ -1736,7 +1743,7 @@ const HOME=CITIES[0];
             if(iRoll<0.17){
               g.fillStyle=mix(colr,'#3a1830',0.55);
               if(iRoll<0.06){ // furniture silhouette
-                g.fillRect(wx+PX,wy+gm.wH-PX*3,PX*3,PX*3);
+                g.fillRect(wx+PX,wy+gm.wH-PX*2,PX*2,PX*2);
               } else if(iRoll<0.12){ // curtain down one side
                 g.fillRect(wx,wy+PX,PX,gm.wH-PX);
               } else { // ceiling lamp: bright core
@@ -2089,7 +2096,8 @@ const HOME=CITIES[0];
     }
     // ── 3) one horizontal shop sign with real text
     if(near[1]){
-      const b=near[1], fs=PX*10, txt='RAMEN', col=NEON[2];
+      // the shop signs carry the site's own vocabulary, not stock city-pop nouns
+      const b=near[1], fs=PX*10, txt='SENSE', col=NEON[2];
       const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
       const bw=tw+PX*6,bh=fs+PX*6;
       const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*3);
@@ -2238,7 +2246,7 @@ const HOME=CITIES[0];
       pool.forEach(s=>{g.fillStyle=s[0];g.fillRect(p.x-s[1],gY,p.w+s[1]*2,s[2]);});
     });
     // road texture: a few coherent patches and manholes, not scattered specks
-    for(let i=0;i<7;i++){
+    for(let i=0;i<4;i++){
       const mx=snap(rnd(i*5.7)*W), my=snap(roadY+PX*5+rnd(i*9.1)*(roadH-PX*10));
       if(rnd(i*3.3)<0.4){
         g.fillStyle=mix(G_ROAD,'#000000',0.45);g.fillRect(mx,my,PX*8,PX*3);
@@ -2280,8 +2288,10 @@ const HOME=CITIES[0];
       const f=(ry-roadY)/(H-roadY);
       const row=Math.round(ry/PX);
       if(rnd(row*3.7)<0.18+f*0.22)continue;
-      const off=snap((rnd(row*11.3)-0.5)*PX*3);
-      const gw=snap(Math.max(PX*3,sunR*(0.55-f*0.30)));
+      // taper the column rather than jittering every row: a reflection should
+      // read as one shape, not as a field of loose horizontal chips
+      const off=snap((rnd(row*11.3)-0.5)*PX*1.2);
+      const gw=snap(Math.max(PX*3,sunR*(0.62-f*0.42)));
       g.globalAlpha=Math.max(0.03,0.18-f*0.13);
       g.fillStyle=row%3===0?'#ff6a86':'#ff9e5c';
       g.fillRect(snap(sunX+off-gw/2),ry,gw,PX);
