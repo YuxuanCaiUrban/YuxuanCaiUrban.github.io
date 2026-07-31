@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empathy and Redemption: Online Support for Mental Health Before and After COVID-19 — Yuxuan Cai</title>
+  <meta name="description" content="This study examines the impact of the COVID-19 pandemic on individuals' mental health and their online interactions, particularly within Reddit's mental he">
+  <link rel="canonical" href="https://yuxuancai.com/projects/empathy-redemption.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070e; --panel: #0b0f19; --text: #f4f5f6; --muted: #8892b0;
+      --accent: #ff8c3c; --accent-pink: #ff4d9d; --line: rgba(255,255,255,.08);
+      --font-mono: 'Share Tech Mono','Courier New',monospace;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg); color: var(--text); font-family: var(--font-display);
+      line-height: 1.6; padding: clamp(20px,5vw,80px) clamp(20px,4vw,40px); min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      margin-bottom: clamp(32px,6vh,56px); border-bottom: 1px solid var(--line); padding-bottom: 20px;
+    }
+    .back-btn {
+      font-family: var(--font-mono); font-size: 13px; text-decoration: none; color: var(--muted);
+      border: 1px solid var(--line); padding: 8px 16px; border-radius: 4px;
+      background: rgba(255,255,255,.02); transition: all .25s ease; white-space: nowrap;
+    }
+    .back-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.04); }
+    .hud-info { font-family: var(--font-mono); font-size: 11px; color: var(--accent-pink);
+      letter-spacing: .15em; text-transform: uppercase; }
+    .project-header { margin-bottom: 32px; }
+    .project-venue { font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .project-title { font-size: clamp(24px,4.5vw,40px); font-weight: 300; letter-spacing: -.01em;
+      line-height: 1.25; margin-bottom: 14px; color: #fff; }
+    .project-authors { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    .project-authors strong { color: var(--text); font-weight: 600; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { font-family: var(--font-mono); font-size: 11px; background: rgba(255,255,255,.04);
+      border: 1px solid var(--line); color: var(--muted); padding: 4px 10px; border-radius: 3px; }
+    .showcase-container { position: relative; width: 100%; aspect-ratio: 16/9;
+      background: rgba(255,255,255,.01); border: 1px solid var(--line); border-radius: 6px;
+      overflow: hidden; margin-bottom: 40px; }
+    .showcase-container img { width: 100%; height: 100%; object-fit: cover; display: block;
+      image-rendering: pixelated; }
+    .project-content { display: grid; grid-template-columns: 2fr 1fr; gap: clamp(30px,5vw,60px);
+      border-top: 1px solid var(--line); padding-top: 40px; }
+    @media (max-width: 768px) { .project-content { grid-template-columns: 1fr; } }
+    .main-text h3 { font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 16px; letter-spacing: -.01em; }
+    .main-text p { color: var(--muted); margin-bottom: 24px; font-size: 16px; }
+    .sidebar-panel { background: rgba(255,255,255,.01); border: 1px solid var(--line);
+      border-radius: 6px; padding: 24px; height: fit-content; }
+    .sidebar-title { font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px;
+      border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    .meta-list { display: flex; flex-direction: column; gap: 16px; }
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    .meta-value { font-size: 14px; color: var(--text); }
+    .project-link-btn { display: inline-block; width: 100%; text-align: center;
+      font-family: var(--font-mono); font-size: 13px; text-decoration: none; color: #05070e;
+      background: var(--accent); border: 1px solid var(--accent); padding: 10px 16px;
+      border-radius: 4px; margin-top: 20px; transition: all .25s ease; font-weight: bold; }
+    .project-link-btn:hover { background: transparent; color: var(--accent); }
+    .pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 56px;
+      border-top: 1px solid var(--line); padding-top: 20px; }
+    .pager a { font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+      text-decoration: none; max-width: 46%; }
+    .pager a:hover { color: var(--accent); }
+    .pager .lbl { display: block; font-size: 10px; letter-spacing: .12em;
+      text-transform: uppercase; opacity: .6; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="../index.html#projects" class="back-btn">← Back to Projects</a>
+      <div class="hud-info">JOURNAL ARTICLE // 2024</div>
+    </header>
+
+    <main>
+      <section class="project-header">
+        <div class="project-venue">PLOS ONE · 2024</div>
+        <h1 class="project-title">Empathy and Redemption: Online Support for Mental Health Before and After COVID-19</h1>
+        <p class="project-authors"><strong>Cai, Y.*</strong>, Wei, E., &amp; Cai, X.</p>
+        <div class="tags"><span class="tag">Mental Health</span><span class="tag">Online Communities</span><span class="tag">Text Analysis</span></div>
+      </section>
+
+      <section class="showcase-container">
+        <img src="../assets/images/research/proj_health_empathy.jpg" alt="Cover art for Empathy and Redemption: Online Support for Mental Health Before and After COVID-19">
+      </section>
+
+      <section class="project-content">
+        <div class="main-text">
+          <h3>Abstract</h3>
+          <p>This study examines the impact of the COVID-19 pandemic on individuals' mental health and their online interactions, particularly within Reddit's mental health communities. By analyzing data from 15 subreddits categorized into mental health and control groups from 2018 to 2022, we observed that forums dedicated to mental health exhibited higher levels of user engagement and received more supportive responses than those in other categories. However, as the pandemic evolved, a significant decrease in online support was noted, especially within these mental health groups. This decline hints at a risk of emotional burnout among users, which poses a particularly acute challenge for individuals grappling with mental health issues. Intimate relationships have also an impact on online expression of mental health. The research underscores the pandemic's effect on online support and interaction dynamics, signaling the necessity for a deeper understanding and the development of strategies to maintain support within online communities during times of crisis.</p>
+        </div>
+
+        <div class="sidebar-panel">
+          <h4 class="sidebar-title">Publication Info</h4>
+          <div class="meta-list">
+            <div class="meta-item"><span class="meta-label">Type</span><span class="meta-value">Journal Article</span></div>
+            <div class="meta-item"><span class="meta-label">Venue</span><span class="meta-value">PLOS ONE</span></div>
+            <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2024</span></div>
+            <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">First author &amp; corresponding author</span></div>
+            <div class="meta-item"><span class="meta-label">Methods</span><span class="meta-value">Text analysis of online community data, pre/post COVID-19 comparison</span></div>
+          </div>
+          <a href="https://doi.org/10.1371/journal.pone.0307042" target="_blank" rel="noopener noreferrer" class="project-link-btn">Read Full Paper ↗</a>
+        </div>
+      </section>
+
+      <nav class="pager"><a href="urban-heat-island-nyc.html"><span class="lbl">← Previous</span>Assessing Influence of Urban Scene Characteristics on Urba</a><a href="vancouver-urban-nature-vitality.html" style="text-align:right"><span class="lbl">Next →</span>Evaluating the Spatial-Temporal Impact of Urban Nature on </a></nav>
+    </main>
+  </div>
+  <script src="../assets/pubcover.js"></script>
+  <script>applyPubCovers();</script>
+</body>
+</html>
