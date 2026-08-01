@@ -2183,6 +2183,59 @@ const HOME=CITIES[0];
       signs.push({spr,x:sx,y:sy,ph:2.6,cx:sx+bw/2,w:bw,col,host:b,
                   box:{x:sx,y:sy,w:bw,h:bh}});
     }
+    // ── 5) protruding pictogram signs (袖看板) — signage that reads as a
+    // PICTURE rather than a word, so the scene's text budget stays at the
+    // three brand signs while the street stops being three words on a wall
+    const ICONS={
+      ramen:['..1..1..','.1..1...','........','11111111','.111111.','.111111.','..1111..','........'],
+      cup:  ['..1.1...','.1..1...','........','.11111..','.11111.1','.11111.1','.11111..','..111...'],
+      glass:['1111111.','.11111..','..111...','...1....','...1....','...1....','..111...','.11111..'],
+      arrow:['...11...','...11...','...11...','11111111','.111111.','..1111..','...11...','........']
+    };
+    const drawIcon=(g,name,x0,y0)=>{
+      ICONS[name].forEach((row,r)=>{
+        for(let c=0;c<row.length;c++)
+          if(row[c]==='1')g.fillRect(x0+c*PX,y0+r*PX,PX,PX);
+      });
+    };
+    // a sign that lands on another sign reads as a bug, not as density — the
+    // host layout shifts with viewport width, so check instead of trusting it
+    const hitsSign=(x,y,w,h,pad,kind)=>{
+      const p=pad==null?PX*2:pad;
+      return signs.some(s=>s.box&&(!kind||s.kind===kind)&&
+        x<s.box.x+s.box.w+p&&x+w>s.box.x-p&&
+        y<s.box.y+s.box.h+p&&y+h>s.box.y-p);
+    };
+    // [host, icon, neon index, height above ground floor, side]
+    // side 'c' = flat wall mount, no bracket — used where the frame margin
+    // otherwise runs out of signage before the edge
+    const picto=[[near[0],'ramen',0,PX*18,'r'],[near[1],'cup',3,PX*8,'r'],
+                 [near[3],'glass',4,PX*2,'r'],[hero,'arrow',1,PX*2,'l'],
+                 [near[5],'glass',4,PX*4,'c']];
+    picto.forEach((spec,pi)=>{
+      const b=spec[0];if(!b)return;
+      const col=NEON[spec[2]];
+      const bw=PX*12,bh=PX*12;
+      const sy=snap(gY-U.ground-spec[3]-bh);
+      let side=spec[4];
+      let sx=side==='c'?snap(b.x+(b.w-bw)/2)
+            :side==='r'?b.x+b.w-PX*2:b.x-bw+PX*2;
+      if(side!=='c'&&hitsSign(sx,sy,bw,bh)){          // try the other edge
+        side=side==='r'?'l':'r';
+        sx=side==='r'?b.x+b.w-PX*2:b.x-bw+PX*2;
+      }
+      if(hitsSign(sx,sy,bw,bh))return;
+      if(sy<b.y+U.cornice+PX*2||sx<PX||sx+bw>W-PX)return;
+      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
+        signEmit(g,bw,bh,col,null,0,false);
+        g.fillStyle=col;drawIcon(g,spec[1],PX*2,PX*2);
+      });
+      signs.push({spr,x:sx,y:sy,ph:2.2+pi*1.3,cx:sx+bw/2,w:bw,col,host:b,
+                  kind:'picto',box:{x:sx,y:sy,w:bw,h:bh},
+                  bracket:side==='c'?undefined
+                    :{x:side==='r'?b.x+b.w-PX*3:b.x+PX,y:sy+PX*2,w:PX*4}});
+    });
+
     // ── 4) background signage: abstract marks only (below the legibility floor)
     // never give the VISION host a second abstract sign — the two boxes fuse
     // into one garbled "EVISION" read
@@ -2196,14 +2249,24 @@ const HOME=CITIES[0];
                    :snap(b.x+(b.w-bw)/2);
       const sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
       if(sy+bh>gY-U.ground)return;
+      // yield to pictograms only — brushing against a brand sign is fine (the
+      // GEOAI base sub-sign reads as intentional layering, not a collision)
+      if(hitsSign(sx,sy,bw,bh,PX*4,'picto'))return;
+      // a single glyph cell reads as one big letter; demand at least two
+      if(vert&&bh<PX*18)return;
       const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
         signEmit(g,bw,bh,col,null,0,false);
         // illegible glyph blocks — reads as signage without degrading into noise
         g.fillStyle=col;g.globalAlpha=0.9;
         if(vert){
-          for(let y=PX*3;y+PX*3<=bh-PX*3;y+=PX*5){
-            const w2=PX*(rnd(b.seed+y)<0.5?3:2);
-            g.fillRect(PX*2,y,w2,PX*3);
+          // pseudo-glyphs from offset strokes — the bar never sits flush on a
+          // full-height stem, so no cell can resolve into a real Latin letter
+          for(let y=PX*3;y+PX*4<=bh-PX*3;y+=PX*6){
+            const r1=rnd(b.seed+y), r2=rnd(b.seed*1.7+y);
+            g.fillRect(PX*(r1<0.5?2:3),y,PX*2,PX);
+            g.fillRect(PX*(r2<0.5?3:2),y+PX,PX,PX*2);
+            if(r1>0.55)g.fillRect(PX*2,y+PX*3,PX*3,PX);
+            if(r2>0.6)g.fillRect(PX*4,y+PX,PX,PX);
           }
         } else {
           for(let x=PX*3;x+PX*2<=bw-PX*3;x+=PX*4){
@@ -2215,6 +2278,108 @@ const HOME=CITIES[0];
       signs.push({spr,x:sx,y:sy,ph:i*1.9+0.4,cx:sx+bw/2,w:bw,col,host:b,
                   box:{x:sx,y:sy,w:bw,h:bh}});
     });
+
+    // ── 6) lintel strips over two shopfronts — a row of dash-text below the
+    // legibility floor, the workhorse sign every real street is covered in
+    // the street lamps live at this exact height — a strip that lands on a
+    // lamp head deletes the fixture, so carve the lamp columns out first
+    const lampXs=[];
+    for(let i=0;i<7;i++){
+      const lx=snap(W*(0.06+i*0.145));
+      if(Math.abs(lx-W*0.80)>=PX*30)lampXs.push(lx);
+    }
+    [[hero,NEON[2],0.52],[near[1],NEON[1],0.60]].forEach((spec,li)=>{
+      const b=spec[0];if(!b)return;
+      const col=spec[1];
+      // widest sub-span of the facade clear of every lamp column
+      let spans=[[b.x+PX*2,b.x+b.w-PX*2]];
+      lampXs.forEach(lx=>{
+        const nx=[];
+        spans.forEach(sp=>{
+          if(lx+PX*10<=sp[0]||lx-PX*10>=sp[1]){nx.push(sp);return;}
+          if(lx-PX*10>sp[0])nx.push([sp[0],lx-PX*10]);
+          if(lx+PX*10<sp[1])nx.push([lx+PX*10,sp[1]]);
+        });
+        spans=nx;
+      });
+      spans.sort((a,c)=>(c[1]-c[0])-(a[1]-a[0]));
+      if(!spans.length)return;
+      const span=spans[0];
+      const bw=Math.min(snap(b.w*spec[2]),snap(span[1]-span[0]-PX*2)),bh=PX*7;
+      if(bw<PX*10)return;
+      const sx=snap(span[0]+(span[1]-span[0]-bw)/2), sy=snap(gY-U.ground-bh-PX);
+      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
+        g.fillStyle=col;
+        // dash-text with ragged widths, heights and baselines — five identical
+        // blocks in a row read as a progress bar, not as blurred lettering
+        let x=PX*2,k=0;
+        while(x+PX*2<=bw-PX*2){
+          const dw=PX*(2+Math.floor(rnd(b.seed*7.7+k*13.1)*3));
+          if(x+dw>bw-PX*2)break;
+          const dh=PX*(rnd(b.seed*3.1+k*7.7)<0.4?3:2);
+          const dy=PX*(rnd(b.seed*5.3+k*3.7)<0.3?3:2);
+          g.fillRect(x,dy,dw,dh);
+          x+=dw+PX*(rnd(b.seed*9.1+k*5.1)<0.3?3:2);k++;
+        }
+      });
+      signs.push({spr,x:sx,y:sy,ph:3.4+li*2.1,cx:sx+bw/2,w:bw,col,host:b,
+                  box:{x:sx,y:sy,w:bw,h:bh}});
+    });
+
+    // ── 7) rooftop skeleton sign on a mid tower — an open steel frame with
+    // glyph cells and one burned-out socket, silhouetted against the sky
+    const skelHost=mid.filter(b=>b.x>W*0.14&&b.x+b.w<W*0.36)
+      .sort((a,b)=>b.h-a.h)[0];
+    if(skelHost){
+      // muted violet, not full neon — a half-dead sign shouldn't glow as hard
+      // as the working ones, and paired symmetric cells read as a mascot face
+      const b=skelHost,col='#8a68b8';
+      const bw=PX*27,bh=PX*9,legH=PX*5;
+      const sx=snap(b.x+(b.w-bw)/2), sy=b.y-bh-legH;
+      if(sy>PX*2){
+        const spr=makeSprite(bw,bh+legH,col,g=>{
+          g.fillStyle='#1a1028';
+          g.fillRect(PX*2,bh,PX,legH);g.fillRect(bw-PX*3,bh,PX,legH);
+          g.fillRect(PX*2,bh+legH-PX,bw-PX*4,PX);
+          g.fillRect(snap(bw*0.35),bh,PX,legH);g.fillRect(snap(bw*0.65),bh,PX,legH);
+        },g=>{
+          g.fillStyle=col;
+          // five narrow cells, dead ones off-centre (indices 2 and 4)
+          [[0,PX*5],[1,PX*4],[3,PX*5]].forEach(cell=>{
+            g.fillRect(PX*2+cell[0]*PX*5,PX*2+(cell[0]%2)*PX,PX*3,cell[1]);
+          });
+        });
+        signs.push({spr,x:sx,y:sy,ph:5.3,cx:sx+bw/2,w:bw,col,host:b,
+                    box:{x:sx,y:sy,w:bw,h:bh},roof:true});
+      }
+    }
+
+    // ── 8) paper and cloth — posters on the shopfront glass and one noren
+    // banner. Unlit matter between the neon is what keeps neon special.
+    [[near[1],0.24],[hero,0.68],[near[4],0.18]].forEach((spec,ni)=>{
+      const b=spec[0];if(!b)return;
+      const bw=PX*5,bh=PX*7;
+      const sx=snap(b.x+b.w*spec[1]), sy=gY-PX*11;
+      const spr=makeSprite(bw,bh,'#ded6c8',g=>{
+        g.fillStyle='#ded6c8';g.fillRect(0,0,bw,bh);
+        g.fillStyle=NEON[(ni*3+1)%NEON.length];g.fillRect(PX,PX,bw-PX*2,PX*2);
+        g.fillStyle='#2a2236';
+        g.fillRect(PX,PX*4,bw-PX*2,PX);g.fillRect(PX,PX*6,bw-PX*3,PX);
+      },()=>{});
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ded6c8',host:b,dim:true});
+    });
+    if(near[2]){
+      const b=near[2];
+      const bw=PX*4,bh=PX*11;
+      const sx=snap(b.x+PX*4), sy=gY-U.ground+PX*2;
+      const spr=makeSprite(bw,bh,'#7a2545',g=>{
+        g.fillStyle='#7a2545';g.fillRect(0,0,bw,bh);
+        g.fillStyle='#d8c8b8';
+        g.fillRect(PX,PX*2,PX*2,PX*2);g.fillRect(PX,PX*6,PX*2,PX*2);
+        g.fillStyle='#4a1530';g.fillRect(0,bh-PX,bw,PX);   // ragged hem
+      },()=>{});
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#7a2545',host:b,dim:true});
+    }
   }
 
   // ── sign → wall: cast shadow, colour bleed, conduit stub ──
@@ -2355,6 +2520,7 @@ const HOME=CITIES[0];
     // a reflection is a coherent vertical column, shortened and darker than the
     // source, broken by horizontal bands offset 1-2px — not scattered glints
     signs.forEach(s=>{
+      if(s.dim)return;                     // paper doesn't reach the road
       const rx=snap(s.cx);
       const len=snap(roadH*0.80);
       for(let ry=roadY;ry<roadY+len;ry+=PX){
@@ -2655,6 +2821,8 @@ const HOME=CITIES[0];
         ctx.fillStyle='#160b24';
         ctx.fillRect(s.bracket.x,s.bracket.y,s.bracket.w,PX);
       }
+      // paper and cloth don't flicker — dropouts are for gas and diodes
+      if(s.dim){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
       // state machine: mostly on, occasional single-step dropout, phase-offset
       const c=step4()+Math.floor(s.ph*7);
       const dip=(c%37===0)||(c%53===0);
@@ -2745,8 +2913,17 @@ const HOME=CITIES[0];
     const wires=[[snap(gY*0.05),snap(gY*0.12),0.0],
                  [snap(gY*0.085),snap(gY*0.14),1.4],
                  [snap(gY*0.12),snap(gY*0.10),2.7]];
+    // the billboard owns its sky — a wire slicing through the flagship text
+    // reads as a compositing bug, so spans break around it
+    const bb=signs.find(s=>s.roof&&s.host&&s.host.hero);
+    const inBB=(x,y)=>bb&&x+WSTEP>bb.box.x-PX*2&&x<bb.box.x+bb.box.w+PX*2&&
+                      y+PX>bb.box.y-PX*2&&y<bb.box.y+bb.box.h+PX*2;
     wires.forEach(wr=>{
-      for(let x=0;x<=W;x+=WSTEP)ctx.fillRect(snap(x),wireY(wr[0],wr[1],wr[2],W>0?x/W:0),WSTEP,PX);
+      for(let x=0;x<=W;x+=WSTEP){
+        const wy=wireY(wr[0],wr[1],wr[2],W>0?x/W:0);
+        if(inBB(x,wy))continue;
+        ctx.fillRect(snap(x),wy,WSTEP,PX);
+      }
     });
     for(let i=0;i<4;i++){
       const fx=0.10+rnd(i*7.7)*0.80;
@@ -2754,6 +2931,7 @@ const HOME=CITIES[0];
       if(Math.floor(step4()*0.02+rnd(i*3.1)*7)%9===0)continue;
       const bx=snap(fx*W);
       const by=wireY(wires[wi][0],wires[wi][1],wires[wi][2],fx);
+      if(inBB(bx,by))continue;             // no birds perched on skipped wire
       ctx.fillRect(bx,by-PX*2,PX*2,PX*2);
       ctx.fillRect(bx+PX*(rnd(i)>0.5?2:-1),by-PX*3,PX,PX);
     }
