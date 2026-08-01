@@ -2095,9 +2095,17 @@ const HOME=CITIES[0];
       }
     }
     // ── 3) one horizontal shop sign with real text
-    if(near[1]){
-      // the shop signs carry the site's own vocabulary, not stock city-pop nouns
-      const b=near[1], fs=PX*10, txt='SENSE', col=NEON[2];
+    // Host the widest near building whose sign would still land fully on screen:
+    // the outermost slots sit against the frame edge, and a clipped word reads
+    // as a mistake rather than as signage.
+    const shopTxt='VISION', shopFs=PX*10;
+    const shopW=Math.ceil(shopTxt.length*shopFs*0.62/PX)*PX+PX*6;
+    const shopHost=near.slice()
+      .sort((a,b)=>b.w-a.w)
+      .filter(b=>{const sx=b.x+(b.w-shopW)/2; return sx>PX*3 && sx+shopW<W-PX*3;})[0];
+    if(shopHost){
+      // the sign carries the site's own vocabulary, not a stock city-pop noun
+      const b=shopHost, fs=shopFs, txt=shopTxt, col=NEON[2];
       const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
       const bw=tw+PX*6,bh=fs+PX*6;
       const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*3);
