@@ -206,6 +206,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 .about-photo{width:100%;aspect-ratio:3/4;border-radius:16px;border:1px solid var(--line);background:
   linear-gradient(135deg,rgba(255,77,157,0.08),rgba(157,139,255,0.06)),var(--bg2);
   display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);font-size:11px;position:relative;overflow:hidden}
+.about-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .about-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent,rgba(255,77,157,0.04))}
 .lede{font-family:var(--body);font-weight:500;font-size:clamp(20px,2.6vw,30px);line-height:1.35;letter-spacing:-.01em;margin-bottom:22px}
 .lede em{font-style:normal;color:var(--accent)}
@@ -1075,10 +1076,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
       <div class="s-head"><div class="eyebrow">00 · About</div></div>
       <div class="about-grid">
         <div class="reveal">
-          <div class="about-photo" aria-hidden="true">
-            <!-- TODO: replace with <img src="headshot.jpg" alt="Yuxuan Cai" style="width:100%;height:100%;object-fit:cover"> -->
-            [ portrait ]
-          </div>
+          <div class="about-photo"><img src="assets/images/about/about_option_c_2.jpg" alt="Yuxuan Cai — a figure on the rocks at night, the city glowing on the horizon" loading="lazy" decoding="async"></div>
         </div>
         <div>
           <h2 class="s-title reveal" tabindex="-1">Teaching machines<br>to <em>sense</em> the city</h2>
