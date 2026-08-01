@@ -2755,8 +2755,8 @@ function initResearchGlobe(){
       .backgroundColor('rgba(0,0,0,0)')
       .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
       .showAtmosphere(true).atmosphereColor('#3ee6ff').atmosphereAltitude(0.16)
-      .pointsData(CITIES).pointLat('lat').pointLng('lng').pointColor(d=>COL[d.type]).pointAltitude(0.012).pointRadius(d=>d.type==='home'?0.5:0.34).pointLabel('name')
-      .ringsData(CITIES.filter(c=>c.type!=='alma')).ringColor(d=>(tt=>`rgba(${d.type==='home'?'255,92,160':'62,230,255'},${1-tt})`)).ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(1400)
+      .pointsData(CITIES).pointLat('lat').pointLng('lng').pointColor(d=>COL[d.type]).pointAltitude(0.012).pointRadius(d=>d.type==='home'?0.55:d.type==='alma'?0.46:0.34).pointLabel('name')
+      .ringsData(CITIES).ringColor(d=>(tt=>`rgba(${d.type==='home'?'255,92,160':d.type==='alma'?'157,139,255':'62,230,255'},${(1-tt)*(d.type==='alma'?0.7:1)})`)).ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(1400)
       .arcsData(CITIES.filter(c=>c.type==='study').map(c=>({sLat:HOME.lat,sLng:HOME.lng,eLat:c.lat,eLng:c.lng}))).arcStartLat('sLat').arcStartLng('sLng').arcEndLat('eLat').arcEndLng('eLng').arcColor(()=>['rgba(255,92,160,0.55)','rgba(62,230,255,0.55)']).arcDashLength(0.45).arcDashGap(0.25).arcDashAnimateTime(2600).arcStroke(0.42).arcAltitudeAutoScale(0.42);
     fitResearchGlobe(); window.addEventListener('resize',fitResearchGlobe);
     rGlobe.pointOfView({lat:24,lng:-52,altitude:2.3},0);
