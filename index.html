@@ -206,6 +206,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 .about-photo{width:100%;aspect-ratio:3/4;border-radius:16px;border:1px solid var(--line);background:
   linear-gradient(135deg,rgba(255,77,157,0.08),rgba(157,139,255,0.06)),var(--bg2);
   display:flex;align-items:center;justify-content:center;color:var(--dim);font-family:var(--mono);font-size:11px;position:relative;overflow:hidden}
+.about-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .about-photo::after{content:'';position:absolute;inset:0;background:linear-gradient(transparent,rgba(255,77,157,0.04))}
 .lede{font-family:var(--body);font-weight:500;font-size:clamp(20px,2.6vw,30px);line-height:1.35;letter-spacing:-.01em;margin-bottom:22px}
 .lede em{font-style:normal;color:var(--accent)}
@@ -270,7 +271,10 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 /* AWARDS */
 .aw-cat{margin-bottom:34px}
 .aw-cat-h{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.aw-cat-h::before{content:'';width:18px;height:2px}
+.aw-cat-h::before{content:none}
+/* pixel icons render 1:1 on their 32-unit grid */
+.aw-ico{display:inline-flex;width:24px;height:24px}
+.aw-ico svg{width:24px;height:24px;shape-rendering:crispEdges}
 .aw-c1{color:var(--accent)}.aw-c1::before{background:var(--accent)}
 .aw-c2{color:var(--lime)}.aw-c2::before{background:var(--lime)}
 .aw-c3{color:var(--amber)}.aw-c3::before{background:var(--amber)}
@@ -290,7 +294,10 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 .c-link:first-child{border-top:1px solid var(--line)}
 .c-link:hover{padding-left:6px}
 .c-link:hover .c-arr{color:var(--accent);transform:translate(3px,-3px)}
-.c-icon{width:38px;height:38px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex:none;color:var(--accent)}
+.c-icon{width:40px;height:40px;border:1px solid var(--line);border-radius:10px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:13px;flex:none;color:var(--accent)}
+/* pixel icons are drawn on a 32-unit grid — render 1:1 so edges stay sharp */
+.c-icon svg{width:32px;height:32px;display:block;shape-rendering:crispEdges}
+.c-link:hover .c-icon{border-color:var(--accent)}
 .c-l1{font-family:var(--display);font-weight:500;font-size:14.5px;flex:1}
 .c-l2{font-family:var(--mono);font-size:11px;color:var(--muted)}
 .c-arr{font-family:var(--mono);color:var(--dim);transition:all .2s}
@@ -382,6 +389,19 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     transform: translateY(16px);
   }
 }
+/* signal reveal: imagery arrives as a scrambled pixel signal and decodes */
+.signal-reveal{position:absolute;inset:0;z-index:1;pointer-events:none;
+  image-rendering:pixelated;image-rendering:crisp-edges;
+  transition:opacity .28s ease}
+/* the picture underneath stays dimmed until its signal is decoded */
+.proj-cat-img-wrap img,.proj-sticky-img{filter:brightness(.85) saturate(.85);
+  transition:transform .6s cubic-bezier(.25,1,.5,1),opacity .3s,filter .5s ease}
+.proj-cat-img-wrap.decoded img,.proj-sticky-img-wrap.decoded .proj-sticky-img{
+  filter:brightness(1) saturate(1)}
+@media (prefers-reduced-motion: reduce){
+  .signal-reveal{display:none}
+  .proj-cat-img-wrap img,.proj-sticky-img{filter:none}
+}
 .proj-cat-img-wrap {
   position: absolute;
   inset: 0;
@@ -416,6 +436,10 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   color: var(--accent);
   margin-bottom: 8px;
 }
+.proj-cat-num{display:flex;align-items:center;gap:8px}
+.cat-ico{display:inline-flex;width:20px;height:20px;flex:none}
+.cat-ico svg{width:20px;height:20px;shape-rendering:crispEdges}
+.proj-cat-card:hover .cat-ico{filter:brightness(1.25)}
 .proj-cat-card:nth-child(2) .proj-cat-num {
   color: var(--violet);
 }
@@ -1018,7 +1042,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     <div class="eyebrow">PhD · UNC Chapel Hill · City &amp; Regional Planning</div>
     <h1 class="hero-name">Yuxuan&nbsp;Cai<span class="zh" lang="zh">蔡 雨 轩</span></h1>
     <p class="hero-tag">Teaching machines to <em>sense</em> the city.</p>
-    <p class="hero-sub">Urban AI · vision-language models for urban perception · LLM multi-agent planning simulation · environmental health &amp; equity.</p>
+    <p class="hero-sub">Urban informatics &amp; human-centered AI · vision-language models for urban perception · LLM agent pathology and multi-agent deliberation · interpretability for planning.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="#papers">View research →</a>
       <a class="btn" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer">CV (PDF)</a>
@@ -1052,16 +1076,13 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
       <div class="s-head"><div class="eyebrow">00 · About</div></div>
       <div class="about-grid">
         <div class="reveal">
-          <div class="about-photo" aria-hidden="true">
-            <!-- TODO: replace with <img src="headshot.jpg" alt="Yuxuan Cai" style="width:100%;height:100%;object-fit:cover"> -->
-            [ portrait ]
-          </div>
+          <div class="about-photo"><img src="assets/images/about/about_option_c_2.jpg" alt="Yuxuan Cai — a figure on the rocks at night, the city glowing on the horizon" loading="lazy" decoding="async"></div>
         </div>
         <div>
           <h2 class="s-title reveal" tabindex="-1">Teaching machines<br>to <em>sense</em> the city</h2>
           <div class="about-body reveal">
             <p>I am a PhD student in <strong>City and Regional Planning at the University of North Carolina at Chapel Hill</strong>. Previously I completed an MA in Computational Social Science at the <strong>University of Chicago</strong> and studied architecture at <strong>UC Berkeley</strong>.</p>
-            <p>My research sits at the intersection of urban planning, machine perception of the built environment, and public health — using vision-language models to measure how people experience cities, and building LLM multi-agent frameworks that model planning decision-making, behavioral bias, negotiation, and intent alignment in urban contexts.</p>
+            <p>My research works at the intersection of <em>urban informatics</em> and <em>human-centered AI</em>. I study urban perception, behavior, and mental health through LLM agent pathology, multi-agent deliberation, and vision-language models — with an emphasis on interpretability for planning decisions: not just whether a model predicts what people do, but whether its reasoning can be read, questioned, and acted on by the people who make the plans.</p>
           </div>
           <div class="meta-table reveal">
             <div class="meta-r"><span class="meta-k">Position</span><span class="meta-v">PhD Student, UNC Chapel Hill</span></div>
@@ -1164,7 +1185,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <img src="assets/images/research/urban_perception_vlm.jpg" alt="Urban Perception & VLMs" loading="lazy">
             </div>
             <div class="proj-cat-meta">
-              <div class="proj-cat-num">01 // VLM</div>
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="m30.47 18.28 0 -10.66 -1.52 0 0 9.14 -1.52 0 0 -1.52 -1.53 0 0 12.19 1.53 0 0 -1.53 3.04 0 0 -1.52 1.53 0 0 -6.1 -1.53 0z" fill="currentColor" stroke-width="1"></path><path d="M24.38 12.19h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m6.09 27.43 0 1.52 1.53 0 0 1.53 1.52 0 0 -1.53 13.71 0 0 1.53 1.53 0 0 -1.53 1.52 0 0 -1.52 -19.81 0z" fill="currentColor" stroke-width="1"></path><path d="M22.85 18.28h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M22.85 10.67h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 16.76h3.04v1.52h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 30.48h13.71V32H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 21.33h3.04v1.53h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M18.28 18.28h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M18.28 1.52h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 24.38h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 0h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 18.28h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 1.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 16.76h3.05v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="m22.85 10.67 0 -1.53 -6.09 0 0 -4.57 1.52 0 0 -1.52 -4.57 0 0 1.52 1.52 0 0 4.57 -6.09 0 0 1.53 13.71 0z" fill="currentColor" stroke-width="1"></path><path d="M9.14 21.33h3.05v1.53H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 18.28h1.52v3.05H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 10.67h1.52v1.52H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M6.09 12.19h1.53v3.05H6.09Z" fill="currentColor" stroke-width="1"></path><path d="m6.09 15.24 -1.52 0 0 1.52 -1.53 0 0 -9.14 -1.52 0 0 10.66 -1.52 0 0 6.1 1.52 0 0 1.52 3.05 0 0 1.53 1.52 0 0 -12.19z" fill="currentColor" stroke-width="1"></path></g></svg></span>01 // VLM</div>
               <h3 class="proj-cat-title">Urban Perception &amp; VLMs</h3>
               <p class="proj-cat-desc">Visual representations, street-view segmentation, and multi-modal alignment models of urban space.</p>
               <div class="proj-cat-go">
@@ -1179,7 +1200,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <img src="assets/images/research/llm_planning_simulation.jpg" alt="LLM Planning Simulation" loading="lazy">
             </div>
             <div class="proj-cat-meta">
-              <div class="proj-cat-num">02 // SIMULATION</div>
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M28.955 16.76h1.52v7.62h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M27.425 1.52h1.53v6.1h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="m27.425 16.76 1.53 0 0 -1.52 -1.53 0 0 -1.53 -1.52 0 0 15.24 1.52 0 0 -3.05 1.53 0 0 -1.52 -1.53 0 0 -7.62z" fill="currentColor" stroke-width="1"></path><path d="M25.905 7.62h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M25.905 0h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M24.375 28.95h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M24.375 12.19h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M22.855 16.76h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.855 3.05h1.52v3.04h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M7.615 30.48h16.76V32H7.615Z" fill="currentColor" stroke-width="1"></path><path d="M19.805 15.24h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M21.335 6.09h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M21.335 1.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.805 19.81h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="m10.665 24.38 0 1.52 1.52 0 0 1.53 1.53 0 0 1.52 4.57 0 0 -1.52 1.52 0 0 -1.53 1.53 0 0 -1.52 -10.67 0z" fill="currentColor" stroke-width="1"></path><path d="M18.285 16.76h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m13.715 22.86 4.57 0 0 -1.53 -1.53 0 0 -1.52 -1.52 0 0 1.52 -1.52 0 0 1.53z" fill="currentColor" stroke-width="1"></path><path d="M12.185 16.76h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M9.145 19.81h3.04v1.52h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M9.145 15.24h3.04v1.52h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="m24.375 12.19 0 -1.52 -7.62 0 0 -3.05 1.53 0 0 -1.53 1.52 0 0 -4.57 -1.52 0 0 -1.52 -4.57 0 0 1.52 -1.53 0 0 4.57 1.53 0 0 1.53 1.52 0 0 3.05 -7.62 0 0 1.52 16.76 0z" fill="currentColor" stroke-width="1"></path><path d="M9.145 6.09h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.145 1.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M7.615 16.76h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M7.615 3.05h1.53v3.04h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M6.095 28.95h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M6.095 12.19h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m6.095 13.71 -1.53 0 0 1.53 -1.52 0 0 1.52 1.52 0 0 7.62 -1.52 0 0 1.52 1.52 0 0 3.05 1.53 0 0 -15.24z" fill="currentColor" stroke-width="1"></path><path d="M4.565 7.62h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M4.565 0h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M3.045 1.52h1.52v6.1h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M1.525 16.76h1.52v7.62h-1.52Z" fill="currentColor" stroke-width="1"></path></g></svg></span>02 // SIMULATION</div>
               <h3 class="proj-cat-title">LLM Planning Simulation</h3>
               <p class="proj-cat-desc">Modeling policy negotiations, stakeholder intentions, and behavioral agents inside cities.</p>
               <div class="proj-cat-go">
@@ -1194,7 +1215,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <img src="assets/images/research/urban_mobility_streets.jpg" alt="Urban Mobility & Streets" loading="lazy">
             </div>
             <div class="proj-cat-meta">
-              <div class="proj-cat-num">03 // MOBILITY</div>
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M30.47 16.76H32v7.62h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 24.38h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 15.24h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 25.9h7.62v1.53h-7.62Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 19.81h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 24.38h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 15.24h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 4.57h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="m19.81 16.76 -1.53 0 0 3.05 -4.57 0 0 -3.05 -1.52 0 0 3.05 -6.1 0 0 -1.53 -1.52 0 0 3.05 7.62 0 0 3.05 1.52 0 0 -3.05 4.57 0 0 3.05 1.53 0 0 -7.62z" fill="currentColor" stroke-width="1"></path><path d="M10.66 24.38h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M10.66 15.24h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M3.05 25.9h7.61v1.53H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M6.09 16.76h1.53v1.52H6.09Z" fill="currentColor" stroke-width="1"></path><path d="m7.62 15.24 0 1.52 1.52 0 0 -1.52 1.52 0 0 -1.53 10.67 0 0 1.53 1.53 0 0 4.57 1.52 0 0 -4.57 4.57 0 0 -1.53 -4.57 0 0 -7.62 -3.05 0 0 1.53 1.53 0 0 4.57 -12.2 0 0 -1.53 3.05 0 0 -1.52 -1.52 0 0 -1.52 -3.05 0 0 -1.53 -3.05 0 0 4.57 3.05 0 0 3.05 -6.09 0 0 1.53 4.57 0z" fill="currentColor" stroke-width="1"></path><path d="M1.52 24.38h1.53v1.52H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 15.24h1.53v1.52H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M0 16.76h1.52v7.62H0Z" fill="currentColor" stroke-width="1"></path></g></svg></span>03 // MOBILITY</div>
               <h3 class="proj-cat-title">Urban Mobility &amp; Streets</h3>
               <p class="proj-cat-desc">Micro-level built environments, bikeshare route desirability, and route choice behaviour.</p>
               <div class="proj-cat-go">
@@ -1209,7 +1230,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <img src="assets/images/research/proj_nature_vancouver.jpg" alt="Urban Nature &amp; Vitality" loading="lazy">
             </div>
             <div class="proj-cat-meta">
-              <div class="proj-cat-num">04 // NATURE</div>
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M26.66 19.81h1.53v4.57h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M25.14 18.28h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M23.62 24.38h3.04v1.52h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M23.62 13.71h1.52v4.57h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.09 19.81h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M22.09 9.14h1.53v4.57h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="m17.52 25.9 0 -1.52 1.52 0 0 -1.53 -1.52 0 0 -4.57 -3.05 0 0 4.57 -3.04 0 0 1.53 3.04 0 0 1.52 -6.09 0 0 1.53 6.09 0 0 4.57 3.05 0 0 -4.57 6.1 0 0 -1.53 -6.1 0z" fill="currentColor" stroke-width="1"></path><path d="M20.57 18.28h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M20.57 4.57h1.52v4.57h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.04 21.33h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M17.52 12.19h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M19.04 3.05h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M17.52 1.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16 10.66h1.52v1.53H16Z" fill="currentColor" stroke-width="1"></path><path d="M16 6.09h1.52v1.53H16Z" fill="currentColor" stroke-width="1"></path><path d="M14.47 0h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M12.95 7.62H16v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M12.95 13.71h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.95 1.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M11.43 3.05h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.9 21.33h1.53v1.52H9.9Z" fill="currentColor" stroke-width="1"></path><path d="M9.9 15.24h3.05v1.52H9.9Z" fill="currentColor" stroke-width="1"></path><path d="M9.9 4.57h1.53v4.57H9.9Z" fill="currentColor" stroke-width="1"></path><path d="M8.38 9.14H9.9v4.57H8.38Z" fill="currentColor" stroke-width="1"></path><path d="M5.33 24.38h3.05v1.52H5.33Z" fill="currentColor" stroke-width="1"></path><path d="M6.85 13.71h1.53v4.57H6.85Z" fill="currentColor" stroke-width="1"></path><path d="M5.33 18.28h1.52v1.53H5.33Z" fill="currentColor" stroke-width="1"></path><path d="M3.81 19.81h1.52v4.57H3.81Z" fill="currentColor" stroke-width="1"></path></g></svg></span>04 // NATURE</div>
               <h3 class="proj-cat-title">Urban Nature &amp; Vitality</h3>
               <p class="proj-cat-desc">Greenery exposure, park access equity, and how urban nature shapes where people actually spend time.</p>
               <div class="proj-cat-go">
@@ -1224,7 +1245,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               <img src="assets/images/research/proj_health_uhi_nyc.jpg" alt="Environment, Health &amp; Equity" loading="lazy">
             </div>
             <div class="proj-cat-meta">
-              <div class="proj-cat-num">05 // HEALTH &amp; EQUITY</div>
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M22.1 15.24h9.14v1.52H22.1Z" fill="currentColor" stroke-width="1"></path><path d="M28.19 7.62h1.53v6.1h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M26.67 6.1h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M25.15 18.29h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M23.62 19.81h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M23.62 4.57h3.05V6.1h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M22.1 21.33h1.52v1.53H22.1Z" fill="currentColor" stroke-width="1"></path><path d="M20.57 22.86h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M20.57 13.72h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M19.05 24.38h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.05 12.19h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M17.53 3.05h6.09v1.52h-6.09Z" fill="currentColor" stroke-width="1"></path><path d="M17.53 25.91h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M17.53 13.72h1.52v6.09h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16 19.81h1.53v1.52H16Z" fill="currentColor" stroke-width="1"></path><path d="M16 4.57h1.53V6.1H16Z" fill="currentColor" stroke-width="1"></path><path d="M12.96 27.43h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M14.48 16.76H16v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M14.48 6.1H16v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.96 12.19h1.52v4.57h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.96 4.57h1.52V6.1h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M11.43 25.91h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M11.43 10.67h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M9.91 24.38h1.52v1.53H9.91Z" fill="currentColor" stroke-width="1"></path><path d="M9.91 12.19h1.52v3.05H9.91Z" fill="currentColor" stroke-width="1"></path><path d="M8.38 22.86h1.53v1.52H8.38Z" fill="currentColor" stroke-width="1"></path><path d="M6.86 3.05h6.1v1.52h-6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.86 21.33h1.52v1.53H6.86Z" fill="currentColor" stroke-width="1"></path><path d="M5.34 15.24h4.57v1.52H5.34Z" fill="currentColor" stroke-width="1"></path><path d="M5.34 19.81h1.52v1.52H5.34Z" fill="currentColor" stroke-width="1"></path><path d="M3.81 4.57h3.05V6.1H3.81Z" fill="currentColor" stroke-width="1"></path><path d="M3.81 18.29h1.53v1.52H3.81Z" fill="currentColor" stroke-width="1"></path><path d="M2.29 16.76h1.52v1.53H2.29Z" fill="currentColor" stroke-width="1"></path><path d="M2.29 6.1h1.52v1.52H2.29Z" fill="currentColor" stroke-width="1"></path><path d="M0.76 7.62h1.53v9.14H0.76Z" fill="currentColor" stroke-width="1"></path></g></svg></span>05 // HEALTH &amp; EQUITY</div>
               <h3 class="proj-cat-title">Environment, Health &amp; Equity</h3>
               <p class="proj-cat-desc">Heat exposure, air quality, mental health, and residential segregation — interpretable models over city-scale data.</p>
               <div class="proj-cat-go">
@@ -1259,7 +1280,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
     <section class="page" id="page-awards">
       <div class="s-head"><div class="eyebrow">04 · Recognition</div><h2 class="s-title reveal" tabindex="-1">Awards &amp; <em>honors</em></h2></div>
       <div class="aw-cat reveal">
-        <div class="aw-cat-h aw-c1">Fellowships &amp; Scholarships</div>
+        <div class="aw-cat-h aw-c1"><span class="aw-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="m30.48 23.62 -1.53 0 0 1.52 3.05 0 0 -6.09 -1.52 0 0 4.57z" fill="currentColor" stroke-width="1"></path><path d="M30.48 14.47H32V16h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m0 0.76 0 24.38 15.24 0 0 -1.52 -13.72 0 0 -21.34 28.96 0 0 9.15 1.52 0L32 0.76l-32 0z" fill="currentColor" stroke-width="1"></path><path d="M28.95 16h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 12.95h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="m27.43 20.57 -3.05 0 0 1.52 -1.52 0 0 1.53 -1.53 0 0 -1.53 -1.52 0 0 -1.52 -3.05 0 0 -3.05 -1.52 0 0 4.57 1.52 0 0 9.15 3.05 0 0 -1.53 1.52 0 0 -1.52 1.53 0 0 1.52 1.52 0 0 1.53 3.05 0 0 -9.15 1.52 0 0 -4.57 -1.52 0 0 3.05z" fill="currentColor" stroke-width="1"></path><path d="m28.95 6.86 0 -3.05 -4.57 0 0 1.52 3.05 0 0 1.53 1.52 0z" fill="currentColor" stroke-width="1"></path><path d="M25.9 12.95h1.53v4.57H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 17.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 11.43h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m27.43 9.9 0 3.05 1.52 0 0 -4.57 -4.57 0 0 1.52 3.05 0z" fill="currentColor" stroke-width="1"></path><path d="M19.81 19.05h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 6.86h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 5.33h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 9.9h4.57v1.53h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 6.86h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 17.52h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 11.43h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 12.95h1.53v4.57h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="m16.76 9.9 3.05 0 0 -1.52 -4.57 0 0 4.57 1.52 0 0 -3.05z" fill="currentColor" stroke-width="1"></path><path d="M13.71 16h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 12.95h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 14.47h1.52V16h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m19.81 5.33 0 -1.52 -16.76 0 0 18.28 10.66 0 0 -1.52 -9.14 0 0 -15.24 15.24 0z" fill="currentColor" stroke-width="1"></path><path d="M6.1 12.95h4.57v1.52H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 6.86h4.57v4.57H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 16h4.57v1.52H6.1Z" fill="currentColor" stroke-width="1"></path></g></svg></span>Fellowships &amp; Scholarships</div>
         <div class="aw-grid">
           <div class="aw-item"><span class="aw-year">2024</span><div class="aw-text"><strong>University Scholarship <span class="aw-amt">$30,000</span></strong>University of Chicago</div></div>
           <div class="aw-item"><span class="aw-year">2023</span><div class="aw-text"><strong>Phoenix Research &amp; Merit Scholarship <span class="aw-amt">$22,000</span></strong>University of Chicago</div></div>
@@ -1268,13 +1289,13 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
         </div>
       </div>
       <div class="aw-cat reveal">
-        <div class="aw-cat-h aw-c2">Academic Honors</div>
+        <div class="aw-cat-h aw-c2"><span class="aw-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M25.91 1.52h1.52v28.95h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 30.47h3.05V32h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M21.34 28.95h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m22.86 7.62 -1.52 0 0 1.52 -1.53 0 0 1.52 -1.52 0 0 1.53 -1.53 0 0 1.52 -1.52 0 0 1.52 -1.52 0 0 -1.52 -1.53 0 0 -1.52 -1.52 0 0 1.52 -1.52 0 0 1.52 1.52 0 0 1.53 1.52 0 0 1.52 1.53 0 0 1.53 1.52 0 0 -1.53 1.52 0 0 -1.52 1.53 0 0 -1.53 1.52 0 0 -1.52 1.53 0 0 -1.52 1.52 0 0 -1.53 1.52 0 0 -1.52 -1.52 0 0 -1.52z" fill="currentColor" stroke-width="1"></path><path d="M19.81 27.43h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 25.9h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 24.38h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M15.24 22.85h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M13.72 24.38h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 25.9h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 27.43h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.15 28.95h1.52v1.52H9.15Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 0h19.81v1.52H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 30.47h3.05V32H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 1.52H6.1v28.95H4.57Z" fill="currentColor" stroke-width="1"></path></g></svg></span>Academic Honors</div>
         <div class="aw-grid">
           <div class="aw-item"><span class="aw-year">2025</span><div class="aw-text"><strong>MACSS Outstanding Thesis Award — Nominee</strong>University of Chicago</div></div>
         </div>
       </div>
       <div class="aw-cat reveal">
-        <div class="aw-cat-h aw-c3">Design Awards</div>
+        <div class="aw-cat-h aw-c3"><span class="aw-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M30.48 12.19H32v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 13.71h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M27.43 27.43h1.52v3.04h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 24.38h1.53v3.05H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 15.23h3.05v1.53H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 30.47h3.05V32h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 21.33h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 16.76h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 28.95h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 18.28h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 27.43h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 10.66h9.15v1.53h-9.15Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 7.62h1.52v3.04h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 25.9h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 16.76h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 4.57h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 24.38h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 13.71h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 1.52h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M15.24 22.85h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 18.28h4.58v1.53h-4.58Z" fill="currentColor" stroke-width="1"></path><path d="M15.24 0h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 24.38h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 13.71h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 1.52h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 25.9h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 16.76h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 4.57h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 7.62h1.52v3.04h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 27.43h3.05v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 28.95h1.52v1.52H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 18.28h1.52v3.05H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 21.33h1.52v3.05H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 16.76h1.52v1.52H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 30.47h3.05V32H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 24.38H6.1v3.05H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M3.05 15.23H6.1v1.53H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M3.05 27.43h1.52v3.04H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 10.66h9.15v1.53H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 13.71h1.53v1.52H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M0 12.19h1.52v1.52H0Z" fill="currentColor" stroke-width="1"></path></g></svg></span>Design Awards</div>
         <div class="aw-grid">
           <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>iF Design Talent Award</strong></div></div>
           <div class="aw-item"><span class="aw-year">2020</span><div class="aw-text"><strong>Architecture Master Prize — Best of Best</strong>Student Landscape Architecture</div></div>
@@ -1297,11 +1318,11 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
           <h2 class="s-title reveal" tabindex="-1">Open to<br><em>collaboration</em></h2>
           <p class="c-intro reveal">Urban AI, visiting opportunities, &amp; research conversations.</p>
           <div class="reveal">
-            <a class="c-link" href="mailto:yuxuanc@unc.edu"><div class="c-icon">@</div><div style="flex:1"><div class="c-l1">Email</div><div class="c-l2">yuxuanc@unc.edu</div></div><div class="c-arr">↗</div></a>
-            <a class="c-link" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer"><div class="c-icon">↓</div><div style="flex:1"><div class="c-l1">Curriculum Vitae</div><div class="c-l2">Download CV (PDF)</div></div><div class="c-arr">↗</div></a>
-            <a class="c-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer"><div class="c-icon">G</div><div style="flex:1"><div class="c-l1">Google Scholar</div><div class="c-l2">View all publications</div></div><div class="c-arr">↗</div></a>
-            <a class="c-link" href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer"><div class="c-icon">&lt;/&gt;</div><div style="flex:1"><div class="c-l1">GitHub</div><div class="c-l2">github.com/YuxuanCaiUrban</div></div><div class="c-arr">↗</div></a>
-            <a class="c-link" href="https://issuu.com/yuxuancai/docs/a5_" target="_blank" rel="noopener noreferrer"><div class="c-icon">P</div><div style="flex:1"><div class="c-l1">Design Portfolio (Issuu)</div><div class="c-l2">issuu.com/yuxuancai/docs/a5_</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="mailto:yuxuanc@unc.edu"><div class="c-icon"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="m30.47 9.145 -1.52 0 0 1.53 1.52 0 0 1.52 -1.52 0 0 1.52 1.52 0 0 1.53 -1.52 0 0 1.52 1.52 0 0 1.52 -1.52 0 0 1.53 1.52 0 0 1.52 -1.52 0 0 1.53 1.52 0 0 1.52 1.53 0 0 -16.76 -1.53 0 0 1.52z" fill="currentColor" stroke-width="1"></path><path d="m27.43 22.865 -1.53 0 0 1.52 -1.52 0 0 -1.52 -1.52 0 0 1.52 -1.53 0 0 -1.52 -1.52 0 0 1.52 -1.53 0 0 -1.52 -1.52 0 0 1.52 -1.52 0 0 -1.52 -1.53 0 0 1.52 -1.52 0 0 -1.52 -1.53 0 0 1.52 -1.52 0 0 -1.52 -1.52 0 0 1.52 -1.53 0 0 -1.52 -1.52 0 0 1.52 -3.05 0 0 1.52 28.95 0 0 -1.52 -3.04 0 0 -1.52z" fill="currentColor" stroke-width="1"></path><path d="m25.9 10.675 -3.04 0 0 1.52 -1.53 0 0 3.05 1.53 0 0 1.52 3.04 0 0 -1.52 1.53 0 0 -3.05 -1.53 0 0 -1.52z" fill="currentColor" stroke-width="1"></path><path d="M4.57 19.815h9.14v1.52H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 16.765h6.09v1.52H4.57Z" fill="currentColor" stroke-width="1"></path><path d="m4.57 9.145 1.52 0 0 -1.52 1.53 0 0 1.52 1.52 0 0 -1.52 1.52 0 0 1.52 1.53 0 0 -1.52 1.52 0 0 1.52 1.53 0 0 -1.52 1.52 0 0 1.52 1.52 0 0 -1.52 1.53 0 0 1.52 1.52 0 0 -1.52 1.53 0 0 1.52 1.52 0 0 -1.52 1.52 0 0 1.52 1.53 0 0 -1.52 3.04 0 0 -1.53 -28.95 0 0 1.53 3.05 0 0 1.52z" fill="currentColor" stroke-width="1"></path><path d="m3.05 22.865 0 -1.53 -1.53 0 0 -1.52 1.53 0 0 -1.53 -1.53 0 0 -1.52 1.53 0 0 -1.52 -1.53 0 0 -1.53 1.53 0 0 -1.52 -1.53 0 0 -1.52 1.53 0 0 -1.53 -1.53 0 0 -1.52 -1.52 0 0 16.76 1.52 0 0 -1.52 1.53 0z" fill="currentColor" stroke-width="1"></path></g></svg></div><div style="flex:1"><div class="c-l1">Email</div><div class="c-l2">yuxuanc@unc.edu</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="Yuxuan_Cai_CV_2026-03.pdf" target="_blank" rel="noopener noreferrer"><div class="c-icon"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M30.47 12.195H32v6.09h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 18.285h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 10.665h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M27.43 19.815h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M27.43 9.145h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="m24.38 7.625 0 -1.53 -1.53 0 0 3.05 4.58 0 0 -1.52 -3.05 0z" fill="currentColor" stroke-width="1"></path><path d="M21.33 21.335h6.1v1.52h-6.1Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 9.145h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 4.575h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 10.665h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.28 3.045h3.05v1.53h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="m13.71 19.815 0 4.57 -3.05 0 0 1.52 1.53 0 0 1.52 1.52 0 0 1.53 1.53 0 0 1.52 1.52 0 0 -1.52 1.52 0 0 -1.53 1.53 0 0 -1.52 1.52 0 0 -1.52 -3.05 0 0 -4.57 -4.57 0z" fill="currentColor" stroke-width="1"></path><path d="M13.71 1.525h4.57v1.52h-4.57Z" fill="currentColor" stroke-width="1"></path><path d="M10.66 12.195h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M10.66 3.045h3.05v1.53h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 10.665h1.52v1.53H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 4.575h1.52v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="m7.62 9.145 -4.57 0 0 1.52 6.09 0 0 -4.57 -1.52 0 0 3.05z" fill="currentColor" stroke-width="1"></path><path d="M3.05 21.335h7.61v1.52H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 19.815h1.53v1.52H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 10.665h1.53v1.53H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M0 12.195h1.52v7.62H0Z" fill="currentColor" stroke-width="1"></path></g></svg></div><div style="flex:1"><div class="c-l1">Curriculum Vitae</div><div class="c-l2">Download CV (PDF)</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en" target="_blank" rel="noopener noreferrer"><div class="c-icon"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="m30.47 7.61 -1.52 0 0 3.05 -3.05 0 0 1.53 -3.05 0 0 1.52 3.05 0 0 4.57 -1.52 0 0 1.53 1.52 0 0 3.04 1.52 0 0 -10.66 1.53 0 0 13.71 -1.53 0 0 6.1L32 32l0 -6.1 -1.53 0 0 -18.29z" fill="currentColor" stroke-width="1"></path><path d="M25.9 6.09h3.05v1.52H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 22.85h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.8 9.14h6.1v1.52h-6.1Z" fill="currentColor" stroke-width="1"></path><path d="M22.85 4.57h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 24.38h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 19.81h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M19.8 13.71h3.05v1.52H19.8Z" fill="currentColor" stroke-width="1"></path><path d="M19.8 3.04h3.05v1.53H19.8Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 25.9h12.19v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 21.33h12.19v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 15.23h3.04v1.53h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 7.61h6.09v1.53h-6.09Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 1.52h3.04v1.52h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 0h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 16.76h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M10.66 1.52h3.05v1.52h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M10.66 15.23h3.05v1.53h-3.05Z" fill="currentColor" stroke-width="1"></path><path d="M7.61 3.04h3.05v1.53H7.61Z" fill="currentColor" stroke-width="1"></path><path d="M6.09 24.38h3.05v1.52H6.09Z" fill="currentColor" stroke-width="1"></path><path d="M6.09 19.81h3.05v1.52H6.09Z" fill="currentColor" stroke-width="1"></path><path d="M7.61 13.71h3.05v1.52H7.61Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 4.57h3.04v1.52H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 22.85h1.52v1.53H4.57Z" fill="currentColor" stroke-width="1"></path><path d="m6.09 19.81 0 -1.53 -1.52 0 0 -4.57 3.04 0 0 -1.52 -3.04 0 0 -1.53 -3.05 0 0 1.53 1.52 0 0 10.66 1.53 0 0 -3.04 1.52 0z" fill="currentColor" stroke-width="1"></path><path d="M1.52 6.09h3.05v1.52H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M0 7.61h1.52v3.05H0Z" fill="currentColor" stroke-width="1"></path></g></svg></div><div style="flex:1"><div class="c-l1">Google Scholar</div><div class="c-l2">View all publications</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://github.com/YuxuanCaiUrban" target="_blank" rel="noopener noreferrer"><div class="c-icon"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M30.48 16.005H32v7.62h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 23.625h1.53v3.04h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M28.95 12.955h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M27.43 26.665h1.52v3.05h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M27.43 11.425h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 29.715h1.53v1.52H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 20.575h1.53v3.05H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 16.005h1.53v3.04H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M25.9 9.905h1.53v1.52H25.9Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 23.625h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 11.425h1.52v4.58h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M24.38 5.335h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 25.145h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 19.045h3.04v1.53h-3.04Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 6.855h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M22.86 3.815h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 20.575h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 8.385h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M21.33 2.285h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 29.715h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 22.095h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 9.905h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M19.81 0.765h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M18.29 23.625h1.52v6.09h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M16.76 0.765h1.53v3.05h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M15.24 3.815h1.52v4.57h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M13.71 8.385h1.53v3.04h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M12.19 23.625h1.52v6.09h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 29.715h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 22.095h1.52v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 9.905h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M10.67 0.765h1.52v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 20.575h1.53v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 8.385h1.53v1.52H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M9.14 2.285h1.53v1.53H9.14Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 25.145h1.52v1.52H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 19.045h3.04v1.53H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 6.855h1.52v1.53H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M7.62 3.815h1.52v1.52H7.62Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 23.625h1.52v1.52H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 11.425h1.52v4.58H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M6.1 5.335h1.52v1.52H6.1Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 29.715H6.1v1.52H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 20.575H6.1v3.05H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 16.005H6.1v3.04H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M4.57 9.905H6.1v1.52H4.57Z" fill="currentColor" stroke-width="1"></path><path d="M3.05 26.665h1.52v3.05H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M3.05 11.425h1.52v1.53H3.05Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 23.625h1.53v3.04H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M1.52 12.955h1.53v3.05H1.52Z" fill="currentColor" stroke-width="1"></path><path d="M0 16.005h1.52v7.62H0Z" fill="currentColor" stroke-width="1"></path></g></svg></div><div style="flex:1"><div class="c-l1">GitHub</div><div class="c-l2">github.com/YuxuanCaiUrban</div></div><div class="c-arr">↗</div></a>
+            <a class="c-link" href="https://issuu.com/yuxuancai/docs/a5_" target="_blank" rel="noopener noreferrer"><div class="c-icon"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="m3.81 1.52 24.38 0 0 1.53 -22.85 0 0 1.52 22.85 0 0 1.53 -24.38 0 0 1.52 1.53 0 0 22.86 -1.53 0 0 1.52 25.91 0 0 -1.52 -22.86 0 0 -22.86 22.86 0 0 22.86 1.52 0 0 -24.38 -1.52 0 0 -4.58 1.52 0 0 -1.52L3.81 0l0 1.52z" fill="currentColor" stroke-width="1"></path><path d="M23.62 24.38h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="m25.15 12.19 -1.53 0 0 -1.52 -10.66 0 0 1.52 -1.53 0 0 1.53 -1.52 0 0 10.66 1.52 0 0 -6.09 1.53 0 0 -1.53 1.52 0 0 -1.52 7.62 0 0 1.52 1.52 0 0 1.53 1.53 0 0 6.09 1.52 0 0 -10.66 -1.52 0 0 -1.53z" fill="currentColor" stroke-width="1"></path><path d="M12.96 25.91h10.66v1.52H12.96Z" fill="currentColor" stroke-width="1"></path><path d="M20.57 21.33h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M20.57 18.29h1.53v1.52h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M16 22.86h4.57v1.52H16Z" fill="currentColor" stroke-width="1"></path><path d="M14.48 21.33H16v1.53h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M14.48 18.29H16v1.52h-1.52Z" fill="currentColor" stroke-width="1"></path><path d="M11.43 24.38h1.53v1.53h-1.53Z" fill="currentColor" stroke-width="1"></path><path d="M2.29 28.95h1.52v1.53H2.29Z" fill="currentColor" stroke-width="1"></path><path d="M2.29 1.52h1.52v1.53H2.29Z" fill="currentColor" stroke-width="1"></path><path d="m2.29 6.1 1.52 0 0 -1.53 -1.52 0 0 -1.52 -1.53 0 0 25.9 1.53 0 0 -22.85z" fill="currentColor" stroke-width="1"></path></g></svg></div><div style="flex:1"><div class="c-l1">Design Portfolio (Issuu)</div><div class="c-l2">issuu.com/yuxuancai/docs/a5_</div></div><div class="c-arr">↗</div></a>
           </div>
         </div>
         <div class="reveal">
@@ -1335,7 +1356,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
           </div>
         </div>
       </div>
-      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="mailto:yuxuanc@unc.edu">Email ↗</a></div></div>
+      <div class="page-footer"><div class="pf-left">© <span class="yr">2026</span> Yuxuan Cai · UNC Chapel Hill</div><div class="pf-right"><a href="mailto:yuxuanc@unc.edu">Email ↗</a><a href="https://www.streamlinehq.com/icons" target="_blank" rel="noopener noreferrer">Free icons from Streamline</a></div></div>
     </section>
 
     <!-- BLOG & TUTORIALS -->
@@ -1421,9 +1442,12 @@ const HOME=CITIES[0];
   // near layer stays the darkest plane (≈11% luminance) — it is the foreground
   // silhouette; depth ordering is near < mid < far < sky/ground
   const NEAR_FAM=[
-    ['#100e1c','#171426','#1e1a32','#252140','#3a3558'],  // blue-black
-    ['#120d18','#191322','#20182e','#28203c','#402c52'],  // purple-black
-    ['#130e12','#1a141c','#211a26','#292132','#443646']   // warm-black
+    // The top band stays dark so the roofline still reads against the sky, but
+    // the base is lifted well clear of black — that is where the plinth, string
+    // courses and pier rhythm live, and where street light would fall.
+    ['#0d0b18','#151222','#221e38','#332e52','#524b7a'],  // blue-black
+    ['#0f0a16','#171020','#261c36','#372850','#584070'],  // purple-black
+    ['#100c12','#18121c','#26202e','#352c44','#564a66']   // warm-black
   ];
   const RIM_MID='#7a4880', RIM_NEAR='#6a4a80';
   // NIGHT ground: dark base, brightness comes only from light pools and
@@ -1437,7 +1461,7 @@ const HOME=CITIES[0];
   const NEON=['#ff4d9d','#3ee6ff','#ffd23a','#5cffb0','#b07bff'];
   const AMBIENT='#ff4d9d';           // sunset ambient — what all glow converges toward
   const GLOW_OUT='#7a2a60';
-  const METAL='#6a5c80';
+  const METAL='#4a4060';   // structural metal, kept below window brightness
 
   const snap=v=>Math.round(v/PX)*PX;
   const rnd=s=>{const v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
@@ -1457,8 +1481,12 @@ const HOME=CITIES[0];
   // reference ratio floor ≈ 1.5-2× figure, door ≈ 1.2-1.4× figure
   let U={};
   function setScale(){
-    U={fig:PX*10, floor:PX*15, winW:PX*5, winH:PX*7, gapX:PX*3,
-       bay:PX*18, marginX:PX*5, ground:PX*14, cornice:PX*3, plinth:PX*3};
+    // Window density is what separates a lit city from a black slab with a few
+    // holes in it. A tighter floor pitch and narrower bays roughly double the
+    // window count per facade, so the same lit ratio reads as an inhabited
+    // building rather than an empty one.
+    U={fig:PX*10, floor:PX*10, winW:PX*4, winH:PX*5, gapX:PX*2,
+       bay:PX*13, marginX:PX*4, ground:PX*14, cornice:PX*3, plinth:PX*3};
   }
 
   function resize(){
@@ -1585,21 +1613,27 @@ const HOME=CITIES[0];
       return arr;
     };
 
-    // FAR — flat silhouettes, no internal detail (detail halves per layer back)
-    mkLayer(14,0,0.030,0.060,0.18,0.34,0.03).forEach(b=>{
+    // FAR — flat silhouettes, no internal detail (detail halves per layer back).
+    // Dense: this layer is what stops the sky reading as an empty field.
+    mkLayer(28,0,0.018,0.046,0.16,0.40,0.024).forEach(b=>{
       b.ramp=FAR;b.type='rect';buildings.push(b);
+    });
+    // A second, slightly nearer haze rank fills the seam between far and mid
+    mkLayer(16,0,0.026,0.058,0.24,0.50,0.03).forEach(b=>{
+      b.ramp=FAR;b.type='rect';b.seed+=53.1;buildings.push(b);
     });
     // MID — simplified structures, deliberately taller than near so the
     // skyline still reads above the foreground block
-    mkLayer(6,1,0.070,0.120,0.40,0.66,0.05).forEach((b,i)=>{
+    mkLayer(14,1,0.046,0.098,0.34,0.64,0.035).forEach((b,i)=>{
       b.ramp=MID;b.type=(i%3===1)?'stepped':'rect';buildings.push(b);
     });
-    // NEAR — hand-placed, not evenly spaced: two wide gaps let the mid/far
-    // layers through, and the sky negative space becomes a designed shape
-    [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.735,0.130,0.35],[0.880,0.140,0.26]]
+    // NEAR — hand-placed. Gaps still let the mid layer through, but they are
+    // now filled with lower blocks rather than left as bare sky.
+    [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.295,0.105,0.22],
+     [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
         buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:'rect',
-          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===2});
+          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
@@ -1665,7 +1699,7 @@ const HOME=CITIES[0];
     const bottom=gY-(near?U.ground:PX*3)-PX*2;
     const rows=Math.max(1,Math.floor((bottom-top)/pitchY));
     return {bays,bayW,x0,top,rows,pitchY,wW,wH,near,
-            winOff:near?[PX*3,PX*10]:[PX*2,PX*6]};
+            winOff:near?[PX*2,PX*7]:[PX*2,PX*5]};
   }
 
   // ── windows: lit ratio ≤35%, warm:cool 75:25, interiors on 1/6 of lit ──
@@ -1713,7 +1747,7 @@ const HOME=CITIES[0];
             if(iRoll<0.17){
               g.fillStyle=mix(colr,'#3a1830',0.55);
               if(iRoll<0.06){ // furniture silhouette
-                g.fillRect(wx+PX,wy+gm.wH-PX*3,PX*3,PX*3);
+                g.fillRect(wx+PX,wy+gm.wH-PX*2,PX*2,PX*2);
               } else if(iRoll<0.12){ // curtain down one side
                 g.fillRect(wx,wy+PX,PX,gm.wH-PX);
               } else { // ceiling lamp: bright core
@@ -1866,13 +1900,18 @@ const HOME=CITIES[0];
       steamSrcs.push({x:snap(b.x+b.w*0.22),y:b.y});
       return;
     }
-    const budget=Math.max(1,Math.floor(top[1]/(PX*22)));
+    // A roof carrying one lonely object reads as unfinished. Budget by width and
+    // let a roof stack several, which is what makes a skyline look inhabited.
+    const budget=Math.max(2,Math.floor(top[1]/(PX*13)));
     const kit=[];
-    if(rnd(b.seed*3.1)<0.45&&top[1]>PX*20)kit.push('water');
-    if(rnd(b.seed*5.7)<0.5)kit.push('antenna');
-    if(rnd(b.seed*7.3)<0.55&&top[1]>PX*16)kit.push('ac');
+    if(rnd(b.seed*3.1)<0.55&&top[1]>PX*18)kit.push('water');
+    if(rnd(b.seed*5.7)<0.7)kit.push('antenna');
+    if(rnd(b.seed*7.3)<0.75&&top[1]>PX*14)kit.push('ac');
+    if(rnd(b.seed*11.9)<0.5)kit.push('antenna');
+    if(rnd(b.seed*15.3)<0.45&&top[1]>PX*22)kit.push('ac');
+    if(rnd(b.seed*19.7)<0.35&&top[1]>PX*26)kit.push('water');
     kit.slice(0,budget).forEach((it,ii)=>{
-      const ox=snap(top[0]+PX*4+rnd(b.seed*9.7+ii*3)*Math.max(PX,top[1]-PX*16));
+      const ox=snap(top[0]+PX*3+rnd(b.seed*9.7+ii*3)*Math.max(PX,top[1]-PX*14));
       if(it==='water'){
         const tw=PX*8,th=PX*6;
         g.fillStyle=METAL;
@@ -2065,8 +2104,17 @@ const HOME=CITIES[0];
       }
     }
     // ── 3) one horizontal shop sign with real text
-    if(near[1]){
-      const b=near[1], fs=PX*10, txt='RAMEN', col=NEON[2];
+    // Host the widest near building whose sign would still land fully on screen:
+    // the outermost slots sit against the frame edge, and a clipped word reads
+    // as a mistake rather than as signage.
+    const shopTxt='VISION', shopFs=PX*10;
+    const shopW=Math.ceil(shopTxt.length*shopFs*0.62/PX)*PX+PX*6;
+    const shopHost=near.slice()
+      .sort((a,b)=>b.w-a.w)
+      .filter(b=>{const sx=b.x+(b.w-shopW)/2; return sx>PX*3 && sx+shopW<W-PX*3;})[0];
+    if(shopHost){
+      // the sign carries the site's own vocabulary, not a stock city-pop noun
+      const b=shopHost, fs=shopFs, txt=shopTxt, col=NEON[2];
       const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
       const bw=tw+PX*6,bh=fs+PX*6;
       const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*3);
@@ -2215,7 +2263,7 @@ const HOME=CITIES[0];
       pool.forEach(s=>{g.fillStyle=s[0];g.fillRect(p.x-s[1],gY,p.w+s[1]*2,s[2]);});
     });
     // road texture: a few coherent patches and manholes, not scattered specks
-    for(let i=0;i<7;i++){
+    for(let i=0;i<4;i++){
       const mx=snap(rnd(i*5.7)*W), my=snap(roadY+PX*5+rnd(i*9.1)*(roadH-PX*10));
       if(rnd(i*3.3)<0.4){
         g.fillStyle=mix(G_ROAD,'#000000',0.45);g.fillRect(mx,my,PX*8,PX*3);
@@ -2257,8 +2305,10 @@ const HOME=CITIES[0];
       const f=(ry-roadY)/(H-roadY);
       const row=Math.round(ry/PX);
       if(rnd(row*3.7)<0.18+f*0.22)continue;
-      const off=snap((rnd(row*11.3)-0.5)*PX*3);
-      const gw=snap(Math.max(PX*3,sunR*(0.55-f*0.30)));
+      // taper the column rather than jittering every row: a reflection should
+      // read as one shape, not as a field of loose horizontal chips
+      const off=snap((rnd(row*11.3)-0.5)*PX*1.2);
+      const gw=snap(Math.max(PX*3,sunR*(0.62-f*0.42)));
       g.globalAlpha=Math.max(0.03,0.18-f*0.13);
       g.fillStyle=row%3===0?'#ff6a86':'#ff9e5c';
       g.fillRect(snap(sunX+off-gw/2),ry,gw,PX);
@@ -2269,6 +2319,24 @@ const HOME=CITIES[0];
 
   // ── street-level props, scaled to the 10-logical-px figure ──
   function bakeStreetProps(g){
+    // A row of lamps down the whole pavement, so the street has a rhythm rather
+    // than one lit spot with darkness either side.
+    for(let i=0;i<7;i++){
+      const lx=snap(W*(0.06+i*0.145));
+      if(Math.abs(lx-W*0.80)<PX*30)continue;      // leave room for the prop cluster
+      g.fillStyle=METAL;
+      g.fillRect(lx,gY-PX*22,PX*2,PX*22);
+      g.fillRect(lx-PX*4,gY-PX*22,PX*7,PX*2);
+      g.fillStyle='#e8f8ff';g.fillRect(lx-PX*3,gY-PX*20,PX*4,PX*2);
+      [['rgba(170,220,255,0.11)',PX*6,PX*7],
+       ['rgba(170,220,255,0.05)',PX*11,PX*12]].forEach(p=>{
+        g.fillStyle=p[0];g.fillRect(lx-p[1],gY,p[1]*2,p[2]);
+      });
+      // a bin or a bollard beside every other lamp
+      g.fillStyle='#1c1626';
+      if(i%2===0)g.fillRect(lx+PX*6,gY-PX*5,PX*4,PX*5);
+      else{g.fillRect(lx+PX*7,gY-PX*4,PX*2,PX*4);g.fillRect(lx+PX*11,gY-PX*4,PX*2,PX*4);}
+    }
     const F=U.fig/10;                       // 1 logical px unit
     const sx=snap(W*0.80);
     // lamppost
@@ -2685,8 +2753,8 @@ function initResearchGlobe(){
       .backgroundColor('rgba(0,0,0,0)')
       .globeImageUrl('https://unpkg.com/three-globe/example/img/earth-night.jpg')
       .showAtmosphere(true).atmosphereColor('#3ee6ff').atmosphereAltitude(0.16)
-      .pointsData(CITIES).pointLat('lat').pointLng('lng').pointColor(d=>COL[d.type]).pointAltitude(0.012).pointRadius(d=>d.type==='home'?0.5:0.34).pointLabel('name')
-      .ringsData(CITIES.filter(c=>c.type!=='alma')).ringColor(d=>(tt=>`rgba(${d.type==='home'?'255,92,160':'62,230,255'},${1-tt})`)).ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(1400)
+      .pointsData(CITIES).pointLat('lat').pointLng('lng').pointColor(d=>COL[d.type]).pointAltitude(0.012).pointRadius(d=>d.type==='home'?0.55:d.type==='alma'?0.46:0.34).pointLabel('name')
+      .ringsData(CITIES).ringColor(d=>(tt=>`rgba(${d.type==='home'?'255,92,160':d.type==='alma'?'157,139,255':'62,230,255'},${(1-tt)*(d.type==='alma'?0.7:1)})`)).ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(1400)
       .arcsData(CITIES.filter(c=>c.type==='study').map(c=>({sLat:HOME.lat,sLng:HOME.lng,eLat:c.lat,eLng:c.lng}))).arcStartLat('sLat').arcStartLng('sLng').arcEndLat('eLat').arcEndLng('eLng').arcColor(()=>['rgba(255,92,160,0.55)','rgba(62,230,255,0.55)']).arcDashLength(0.45).arcDashGap(0.25).arcDashAnimateTime(2600).arcStroke(0.42).arcAltitudeAutoScale(0.42);
     fitResearchGlobe(); window.addEventListener('resize',fitResearchGlobe);
     rGlobe.pointOfView({lat:24,lng:-52,altitude:2.3},0);
@@ -3263,6 +3331,7 @@ function openDesignProjects() {
   
   if (filtered.length > 0) {
     selectProjectDetail(filtered[0].id, true);
+    if (window.signalReveal) window.signalReveal.initStickyPanel();
   }
   
   catView.style.display = 'none';
@@ -3407,6 +3476,7 @@ function openProjectCategory(catId) {
   
   if (filtered.length > 0) {
     selectProjectDetail(filtered[0].id, true);
+    if (window.signalReveal) window.signalReveal.initStickyPanel();
   }
   
   // The view swap must never depend on an animation finishing: an interrupted
@@ -3509,13 +3579,16 @@ function openProjectCategory(catId) {
     });
     
     // safety net — 0.4s exit tween plus margin
-    setTimeout(playEntranceAnimation, 550);
+    // The clicked card runs its signal decode first, so the picture visibly
+    // unlocks before the view moves on; the timer stays ahead of that beat.
+    setTimeout(playEntranceAnimation, 700);
     if (clickedCard) {
-      gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.25 });
+      gsap.to(clickedCard.querySelector('.proj-cat-meta'), { opacity: 0, y: -10, duration: 0.18, delay: 0.12 });
       gsap.to(clickedCard, {
         opacity: 0,
-        scale: 1.06,
-        duration: 0.4,
+        scale: 1.05,
+        duration: 0.24,
+        delay: 0.22,
         ease: 'power2.out',
         onComplete: playEntranceAnimation
       });
@@ -4203,6 +4276,225 @@ document.addEventListener('mousemove', e => {
 
 // ── INIT ──
 document.querySelectorAll('.yr').forEach(el=>{el.textContent=new Date().getFullYear();});
+// ── SIGNAL REVEAL ──────────────────────────────────────────────────────────
+// Project imagery starts as a scrambled pixel signal and decodes in a scan.
+// The overlay is a <canvas> holding a mosaic of the image with per-block noise;
+// decoding clears blocks in scan order, so the real <img> shows through. Only
+// clearRect runs per frame, which keeps it cheap even on the large panel.
+(function () {
+  'use strict';
+  if (typeof document === 'undefined') return;
+
+  var REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var BLOCK = 22;          // device px per mosaic block
+  // The mask quantises the picture onto the site's own ramp, so an un-decoded
+  // image reads as a signal in the house palette rather than colour confetti.
+  var RAMP = ['#0a0616', '#171232', '#2a1c50', '#4a2c6e', '#823f88', '#c85a94'];
+  var GLINT = '#3ee6ff';
+  var DURATION = 340;      // ms for a full decode
+  var SCAN = '#3ee6ff';
+
+  function rnd(i) { var v = Math.sin(i * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); }
+
+  function Reveal(wrap, img) {
+    this.wrap = wrap;
+    this.img = img;
+    this.cv = document.createElement('canvas');
+    this.cv.className = 'signal-reveal';
+    this.cv.style.opacity = '0';   // nothing is drawn until a decode is asked for
+    this.ctx = this.cv.getContext('2d');
+    this.raf = null;
+    this.blocks = [];
+    this.state = 'idle';
+    wrap.appendChild(this.cv);
+  }
+
+  // Paint the scrambled signal: a mosaic of the image with the colour of each
+  // block pushed around, so it reads as interference rather than a blur.
+  Reveal.prototype.build = function () {
+    var w = this.wrap.clientWidth, h = this.wrap.clientHeight;
+    if (!w || !h || !this.img.naturalWidth) return false;
+    var dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.cv.width = Math.round(w * dpr);
+    this.cv.height = Math.round(h * dpr);
+    this.cv.style.width = w + 'px';
+    this.cv.style.height = h + 'px';
+
+    var B = Math.max(6, Math.round(BLOCK * dpr));
+    var cols = Math.ceil(this.cv.width / B), rows = Math.ceil(this.cv.height / B);
+
+    // downscale the image to one pixel per block, then read it back
+    var tmp = document.createElement('canvas');
+    tmp.width = cols; tmp.height = rows;
+    var tg = tmp.getContext('2d');
+    try {
+      // cover-fit, matching object-fit: cover on the <img>
+      var ir = this.img.naturalWidth / this.img.naturalHeight, wr = cols / rows;
+      var sw = this.img.naturalWidth, sh = this.img.naturalHeight, sx = 0, sy = 0;
+      if (ir > wr) { sw = sh * wr; sx = (this.img.naturalWidth - sw) / 2; }
+      else { sh = sw / wr; sy = (this.img.naturalHeight - sh) / 2; }
+      tg.drawImage(this.img, sx, sy, sw, sh, 0, 0, cols, rows);
+      var data = tg.getImageData(0, 0, cols, rows).data;
+    } catch (e) {
+      return false;                       // tainted canvas — leave the image alone
+    }
+
+    this.ctx.clearRect(0, 0, this.cv.width, this.cv.height);
+    this.blocks.length = 0;
+    for (var y = 0; y < rows; y++) {
+      for (var x = 0; x < cols; x++) {
+        var i = (y * cols + x) * 4;
+        var n = rnd(x * 7.13 + y * 31.7);
+        // Luminance picks the ramp step, so the mosaic keeps the picture's
+        // structure and stays in the house palette. Only the odd block is
+        // nudged a step, to keep the field from looking mechanical.
+        var lum = (data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114) / 255;
+        var step = Math.min(RAMP.length - 1, Math.floor(Math.pow(lum, 0.85) * RAMP.length));
+        if (n > 0.94 && step < RAMP.length - 1) step++;
+        else if (n < 0.06 && step > 0) step--;
+        this.ctx.fillStyle = (lum > 0.72 && n > 0.7) ? GLINT : RAMP[step];
+        this.ctx.fillRect(x * B, y * B, B, B);
+        // decode order: left-to-right scan, roughened so the edge isn't a ruler
+        this.blocks.push({ x: x * B, y: y * B, t: x / cols * 0.78 + n * 0.22 });
+      }
+    }
+    this.B = B;
+    return true;
+  };
+
+  Reveal.prototype.stop = function () {
+    if (this.raf) cancelAnimationFrame(this.raf);
+    this.raf = null;
+    clearTimeout(this.fallback);
+  };
+
+  Reveal.prototype.encode = function () {
+    this.stop();
+    if (REDUCED) { this.cv.style.opacity = '0'; return; }
+    if (!this.build()) { this.cv.style.opacity = '0'; return; }
+    this.cv.style.opacity = '1';
+    this.wrap.classList.remove('decoded');
+    this.state = 'encoded';
+  };
+
+  Reveal.prototype.decode = function () {
+    if (REDUCED) { this.cv.style.opacity = '0'; this.wrap.classList.add('decoded'); return; }
+    if (this.state !== 'encoded' && !this.build()) {
+      this.cv.style.opacity = '0'; this.wrap.classList.add('decoded'); return;
+    }
+    if (this.state === 'idle' && !this.build()) return;
+    this.stop();
+    this.state = 'decoding';
+    this.wrap.classList.add('decoded');
+    var self = this, t0 = null, B = this.B;
+
+    function frame(ts) {
+      if (!t0) t0 = ts;
+      var p = Math.min(1, (ts - t0) / DURATION);
+      // clear every block whose threshold the scan has passed
+      for (var i = 0; i < self.blocks.length; i++) {
+        var b = self.blocks[i];
+        if (b.done || b.t > p) continue;
+        self.ctx.clearRect(b.x, b.y, B, B);
+        b.done = true;
+      }
+      // leading edge: a bright column just ahead of the wipe
+      if (p < 1) {
+        var ex = p * self.cv.width;
+        self.ctx.save();
+        self.ctx.globalCompositeOperation = 'source-over';
+        self.ctx.fillStyle = SCAN;
+        self.ctx.globalAlpha = 0.5;
+        self.ctx.fillRect(ex, 0, B, self.cv.height);
+        self.ctx.globalAlpha = 0.18;
+        self.ctx.fillRect(ex + B, 0, B, self.cv.height);
+        self.ctx.restore();
+        // wipe the previous frame's scan column so it doesn't smear
+        self.ctx.clearRect(ex - B * 1.2, 0, B * 1.2, self.cv.height);
+        for (var j = 0; j < self.blocks.length; j++) {
+          var c = self.blocks[j];
+          if (c.done && c.x >= ex - B * 2 && c.x <= ex + B * 2) {
+            self.ctx.clearRect(c.x, c.y, B, B);
+          }
+        }
+        self.raf = requestAnimationFrame(frame);
+      } else {
+        self.ctx.clearRect(0, 0, self.cv.width, self.cv.height);
+        self.cv.style.opacity = '0';
+        self.state = 'decoded';
+        self.raf = null;
+      }
+    }
+    this.cv.style.opacity = '1';
+    this.raf = requestAnimationFrame(frame);
+    // rAF is throttled in background tabs and low-power modes. Without this the
+    // mask could stay up and hide the picture for good, so the decode also
+    // finishes on a timer whether or not the animation ever ran a frame.
+    clearTimeout(this.fallback);
+    this.fallback = setTimeout(function () {
+      if (self.state === 'decoded') return;
+      self.stop();
+      self.ctx.clearRect(0, 0, self.cv.width, self.cv.height);
+      self.cv.style.opacity = '0';
+      self.state = 'decoded';
+    }, DURATION + 320);
+  };
+
+  // ── wiring ───────────────────────────────────────────────────────────────
+  var store = new WeakMap();
+
+  function get(wrap, img) {
+    var r = store.get(wrap);
+    if (!r) { r = new Reveal(wrap, img); store.set(wrap, r); }
+    r.img = img;
+    return r;
+  }
+
+  // The decode is the act of opening a category, not a hover flourish: a card
+  // shows its picture plainly until you commit to it, then unlocks on the way in.
+  function initCategoryCards() {
+    document.querySelectorAll('.proj-cat-card .proj-cat-img-wrap').forEach(function (wrap) {
+      var img = wrap.querySelector('img');
+      if (!img || wrap.dataset.srArmed) return;
+      wrap.dataset.srArmed = '1';
+      var r = get(wrap, img);
+      wrap.classList.add('decoded');            // resting state is the plain picture
+      wrap.closest('.proj-cat-card').addEventListener('click', function () {
+        r.encode();
+        setTimeout(function () { r.decode(); }, 0);   // not rAF: it is throttled in hidden tabs
+      }, true);                                 // capture: runs before the nav handler
+    });
+  }
+
+  // The detail panel swaps its image as you move down the project list, so the
+  // decode plays on each swap rather than on hover.
+  function initStickyPanel() {
+    var img = document.getElementById('proj-sticky-image');
+    if (!img) return;
+    var wrap = img.closest('.proj-sticky-img-wrap');
+    if (!wrap) return;
+    var r = get(wrap, img);
+    img.addEventListener('load', function () {
+      r.encode();
+      setTimeout(function () { r.decode(); }, 0);   // not rAF: it is throttled in hidden tabs
+    });
+    if (img.complete && img.naturalWidth) { r.encode(); r.decode(); }
+  }
+
+  window.signalReveal = {
+    initCategoryCards: initCategoryCards,
+    initStickyPanel: initStickyPanel,
+    refresh: function () { initCategoryCards(); initStickyPanel(); }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () { initCategoryCards(); });
+  } else {
+    initCategoryCards();
+  }
+})();
+
+
 runBootCeremony(() => {
   heroIntro();
 });
