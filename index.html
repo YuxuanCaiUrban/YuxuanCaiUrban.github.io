@@ -1615,21 +1615,27 @@ const HOME=CITIES[0];
       return arr;
     };
 
-    // FAR — flat silhouettes, no internal detail (detail halves per layer back)
-    mkLayer(14,0,0.030,0.060,0.18,0.34,0.03).forEach(b=>{
+    // FAR — flat silhouettes, no internal detail (detail halves per layer back).
+    // Dense: this layer is what stops the sky reading as an empty field.
+    mkLayer(28,0,0.018,0.046,0.16,0.40,0.024).forEach(b=>{
       b.ramp=FAR;b.type='rect';buildings.push(b);
+    });
+    // A second, slightly nearer haze rank fills the seam between far and mid
+    mkLayer(16,0,0.026,0.058,0.24,0.50,0.03).forEach(b=>{
+      b.ramp=FAR;b.type='rect';b.seed+=53.1;buildings.push(b);
     });
     // MID — simplified structures, deliberately taller than near so the
     // skyline still reads above the foreground block
-    mkLayer(6,1,0.070,0.120,0.40,0.66,0.05).forEach((b,i)=>{
+    mkLayer(14,1,0.046,0.098,0.34,0.64,0.035).forEach((b,i)=>{
       b.ramp=MID;b.type=(i%3===1)?'stepped':'rect';buildings.push(b);
     });
-    // NEAR — hand-placed, not evenly spaced: two wide gaps let the mid/far
-    // layers through, and the sky negative space becomes a designed shape
-    [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.735,0.130,0.35],[0.880,0.140,0.26]]
+    // NEAR — hand-placed. Gaps still let the mid layer through, but they are
+    // now filled with lower blocks rather than left as bare sky.
+    [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.295,0.105,0.22],
+     [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
         buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:'rect',
-          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===2});
+          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
@@ -1896,13 +1902,18 @@ const HOME=CITIES[0];
       steamSrcs.push({x:snap(b.x+b.w*0.22),y:b.y});
       return;
     }
-    const budget=Math.max(1,Math.floor(top[1]/(PX*22)));
+    // A roof carrying one lonely object reads as unfinished. Budget by width and
+    // let a roof stack several, which is what makes a skyline look inhabited.
+    const budget=Math.max(2,Math.floor(top[1]/(PX*13)));
     const kit=[];
-    if(rnd(b.seed*3.1)<0.45&&top[1]>PX*20)kit.push('water');
-    if(rnd(b.seed*5.7)<0.5)kit.push('antenna');
-    if(rnd(b.seed*7.3)<0.55&&top[1]>PX*16)kit.push('ac');
+    if(rnd(b.seed*3.1)<0.55&&top[1]>PX*18)kit.push('water');
+    if(rnd(b.seed*5.7)<0.7)kit.push('antenna');
+    if(rnd(b.seed*7.3)<0.75&&top[1]>PX*14)kit.push('ac');
+    if(rnd(b.seed*11.9)<0.5)kit.push('antenna');
+    if(rnd(b.seed*15.3)<0.45&&top[1]>PX*22)kit.push('ac');
+    if(rnd(b.seed*19.7)<0.35&&top[1]>PX*26)kit.push('water');
     kit.slice(0,budget).forEach((it,ii)=>{
-      const ox=snap(top[0]+PX*4+rnd(b.seed*9.7+ii*3)*Math.max(PX,top[1]-PX*16));
+      const ox=snap(top[0]+PX*3+rnd(b.seed*9.7+ii*3)*Math.max(PX,top[1]-PX*14));
       if(it==='water'){
         const tw=PX*8,th=PX*6;
         g.fillStyle=METAL;
@@ -2310,6 +2321,24 @@ const HOME=CITIES[0];
 
   // ── street-level props, scaled to the 10-logical-px figure ──
   function bakeStreetProps(g){
+    // A row of lamps down the whole pavement, so the street has a rhythm rather
+    // than one lit spot with darkness either side.
+    for(let i=0;i<7;i++){
+      const lx=snap(W*(0.06+i*0.145));
+      if(Math.abs(lx-W*0.80)<PX*30)continue;      // leave room for the prop cluster
+      g.fillStyle=METAL;
+      g.fillRect(lx,gY-PX*22,PX*2,PX*22);
+      g.fillRect(lx-PX*4,gY-PX*22,PX*7,PX*2);
+      g.fillStyle='#e8f8ff';g.fillRect(lx-PX*3,gY-PX*20,PX*4,PX*2);
+      [['rgba(170,220,255,0.11)',PX*6,PX*7],
+       ['rgba(170,220,255,0.05)',PX*11,PX*12]].forEach(p=>{
+        g.fillStyle=p[0];g.fillRect(lx-p[1],gY,p[1]*2,p[2]);
+      });
+      // a bin or a bollard beside every other lamp
+      g.fillStyle='#1c1626';
+      if(i%2===0)g.fillRect(lx+PX*6,gY-PX*5,PX*4,PX*5);
+      else{g.fillRect(lx+PX*7,gY-PX*4,PX*2,PX*4);g.fillRect(lx+PX*11,gY-PX*4,PX*2,PX*4);}
+    }
     const F=U.fig/10;                       // 1 logical px unit
     const sx=snap(W*0.80);
     // lamppost
