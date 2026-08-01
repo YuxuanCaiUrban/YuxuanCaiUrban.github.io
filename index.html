@@ -1463,6 +1463,18 @@ const HOME=CITIES[0];
   const GLOW_OUT='#7a2a60';
   const METAL='#4a4060';   // structural metal, kept below window brightness
 
+  // ── registered light-effect tones ──
+  // These used to be painted as low-alpha washes (0.05-0.16). The palette snap
+  // then quantized every one of them straight back to the base wall colour, so
+  // the lamp pools, shop spill, sign bleed and sill glow were being erased at
+  // bake time. Pre-blended solids survive the snap.
+  const LAMP_MID='#535a72', LAMP_OUT='#3d3c52';   // G_WALK toward #b4dcff .30/.14
+  const SHOP_MID='#6a5956', SHOP_OUT='#483b45';   // G_WALK toward #ffd8a0 .30/.14
+  const VEND_GLOW='#4a1b2c';                      // G_ROAD toward #d02438 .25
+  const SILL_WARM='#7d5f53', SILL_COOL='#5d6980'; // near-mid toward window light .4
+  const BLEED=['#722d5a','#2e637c','#725c37','#396b61','#563d7c']; // per NEON hue
+  const PHONE_GLOW='#8fd2ff';
+
   const snap=v=>Math.round(v/PX)*PX;
   const rnd=s=>{const v=Math.sin(s*127.1+311.7)*43758.5453;return v-Math.floor(v);};
   const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
@@ -1544,7 +1556,9 @@ const HOME=CITIES[0];
 
   // ════ SUN — banded disc, scanline gaps, dithered stepped halo ════
   function bakeSun(){
-    sunX=snap(W*0.655);      // sits in the gap between the hero and the right block
+    // Clear sky right of the GEOAI sign: at 0.655 the sun, the billboard and
+    // the kanban all fought for the same patch of sky and occluded each other.
+    sunX=snap(W*0.775);
     sunY=snap(gY*0.30);
     sunR=Math.max(PX*8,snap(Math.min(W,gY)*0.16));
     const R=sunR,haloR=snap(R*1.85);
@@ -1629,10 +1643,13 @@ const HOME=CITIES[0];
     });
     // NEAR — hand-placed. Gaps still let the mid layer through, but they are
     // now filled with lower blocks rather than left as bare sky.
+    // massing varies: a straight row of flat-topped rects read as cardboard —
+    // two get setback crowns, one gets a podium base with a slimmer tower
+    const nearTypes=['rect','stepped','rect','podium','stepped','rect'];
     [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.295,0.105,0.22],
      [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
-        buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:'rect',
+        buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:nearTypes[i],
           ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
@@ -1657,7 +1674,9 @@ const HOME=CITIES[0];
     for(let i=0;i<nCars;i++){
       const lane=i%2;
       traffic.push({x:R()*W,lane,speed:(0.5+R()*0.45)*(lane===0?1:-1),
-        body:['#241536','#2a173e','#1e1230'][Math.floor(R()*3)],
+        // car bodies were within ~12 RGB units of the road colour and vanished;
+        // these sit 25-30 units clear of #1e1828 while staying in the palette family
+        body:['#342850','#3a2f58','#2e2348'][Math.floor(R()*3)],
         trim:NEON[Math.floor(R()*NEON.length)],head:R()<0.8});
     }
   }
@@ -1672,6 +1691,12 @@ const HOME=CITIES[0];
     if(b.type==='hero'){
       const f=(y-b.y)/b.h;
       if(f<0.13){const tw=snap(b.w*0.52);return [b.x+snap((b.w-tw)/2),tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='podium'){
+      // two-storey full-width base, slimmer tower above it
+      const baseTop=gY-(U.floor*2+U.ground);
+      if(y<baseTop){const tw=snap(b.w*0.62);return [b.x+snap((b.w-tw)/2),tw];}
       return [b.x,b.w];
     }
     return [b.x,b.w];
@@ -1754,10 +1779,12 @@ const HOME=CITIES[0];
                 g.fillStyle='#fff4d8';g.fillRect(wx+PX*2,wy+PX,PX,PX);
               }
             }
-            // light spill onto the wall under the window
-            g.globalAlpha=0.14;g.fillStyle=colr;
-            g.fillRect(wx-PX,wy+gm.wH+PX,gm.wW+PX*2,PX);
-            g.globalAlpha=1;
+            // light spill onto the wall under the window — dithered cells of a
+            // registered tone (the 0.14 wash used to be quantised back to wall)
+            g.fillStyle=cold?SILL_COOL:SILL_WARM;
+            for(let sx2=wx-PX;sx2<wx+gm.wW+PX;sx2+=PX){
+              if(rnd(sx2*0.517+wy*0.293)<0.55)g.fillRect(sx2,wy+gm.wH+PX,PX,PX);
+            }
           }
           // flicker registry, hard-capped (animation budget)
           if(flickers.length<6&&rnd(b.seed+idx*7.1+r*3.7)<0.14&&(gm.near||!coveredByNear(wx,wy))){
@@ -1833,7 +1860,27 @@ const HOME=CITIES[0];
       const crownH=snap(b.h*0.13);
       g.fillRect(b.x,b.y+crownH,b.w,b.h-crownH);
       const tw=snap(b.w*0.52);
-      g.fillRect(b.x+snap((b.w-tw)/2),b.y,tw,crownH+PX);
+      const cx0=b.x+snap((b.w-tw)/2);
+      g.fillRect(cx0,b.y,tw,crownH+PX);
+      // shoulder datum: a shadow line + lit edge where the shoulders meet the
+      // crown, so the setback reads as architecture rather than a paint seam
+      g.fillStyle=R2[0];
+      g.fillRect(b.x,b.y+crownH,cx0-b.x,PX);
+      g.fillRect(cx0+tw,b.y+crownH,b.x+b.w-cx0-tw,PX);
+      g.fillStyle=R2[3];
+      g.fillRect(b.x,b.y+crownH+PX,cx0-b.x,PX);
+      g.fillRect(cx0+tw,b.y+crownH+PX,b.x+b.w-cx0-tw,PX);
+      g.fillStyle=R2[2];
+    } else if(b.type==='podium'){
+      const baseTop=gY-(U.floor*2+U.ground);
+      g.fillRect(b.x,baseTop,b.w,gY-baseTop);
+      const tw=snap(b.w*0.62), tx0=b.x+snap((b.w-tw)/2);
+      g.fillRect(tx0,b.y,tw,baseTop-b.y+PX);
+      // podium roof datum on the exposed shoulders, same treatment as the hero
+      g.fillStyle=R2[0];
+      g.fillRect(b.x,baseTop,tx0-b.x,PX);
+      g.fillRect(tx0+tw,baseTop,b.x+b.w-tx0-tw,PX);
+      g.fillStyle=R2[2];
     } else {
       g.fillRect(b.x,b.y,b.w,b.h);
     }
@@ -1923,8 +1970,21 @@ const HOME=CITIES[0];
         const ah=PX*(9+Math.floor(rnd(b.seed*13.1+ii)*8));
         g.fillStyle=METAL;
         g.fillRect(ox,b.y-ah,PX,ah);
-        g.fillRect(ox-PX*2,b.y-snap(ah*0.62),PX*5,PX);
-        g.fillRect(ox-PX,b.y-snap(ah*0.38),PX*3,PX);
+        if(rnd(b.seed*23.3+ii)<0.25){
+          // dish variant — a small disc at the pole top instead of crossbars
+          g.fillRect(ox-PX,b.y-ah,PX*2,PX*2);
+          g.fillStyle=RIM_MID;g.fillRect(ox-PX,b.y-ah,PX,PX);
+          g.fillStyle=METAL;
+        } else {
+          // 1-3 crossbars with jittered heights and widths — identical TV
+          // aerials on every roof read as a copy-paste tell
+          const nBar=1+Math.floor(rnd(b.seed*21.7+ii)*3);
+          for(let bi=0;bi<nBar;bi++){
+            const fy=[0.62,0.38,0.80][bi]+(rnd(b.seed*27.1+ii*5+bi)-0.5)*0.24;
+            const hw=PX*(1+Math.floor(rnd(b.seed*29.3+ii*7+bi)*3));
+            g.fillRect(ox-hw,b.y-snap(ah*fy),hw*2+PX,PX);
+          }
+        }
         if(rnd(b.seed*17.9+ii)<0.6)beacons.push({x:ox,y:b.y-ah-PX});
       } else {
         for(let k=0;k<2+Math.floor(rnd(b.seed+ii)*2);k++){
@@ -2124,7 +2184,9 @@ const HOME=CITIES[0];
                   box:{x:sx,y:sy,w:bw,h:bh}});
     }
     // ── 4) background signage: abstract marks only (below the legibility floor)
-    const absHosts=near.slice(2).concat(mid.slice(0,3));
+    // never give the VISION host a second abstract sign — the two boxes fuse
+    // into one garbled "EVISION" read
+    const absHosts=near.slice(2).filter(b=>b!==shopHost).concat(mid.slice(0,3));
     absHosts.forEach((b,i)=>{
       const col=NEON[(i*2+3)%NEON.length];
       const vert=i%2===0;
@@ -2165,17 +2227,19 @@ const HOME=CITIES[0];
       const dir=b.x+b.w/2<sunX?1:-1;
       g.fillStyle='rgba(0,0,0,0.45)';
       g.fillRect(o.x+dir*PX*2,o.y+PX*2,o.w,o.h);
-      // colour bleed — 1-2px of wall tint, no more. Quantising a wider, stronger
-      // tint snaps it to an opaque neon and the facade becomes a colour slab.
-      [[PX,0.13],[PX*2,0.06]].forEach(st=>{
-        g.globalAlpha=st[1];g.fillStyle=s.col;
+      // colour bleed — dithered cells of the registered wall-tint tone. The old
+      // low-alpha rings were snapped back to bare wall; dither gives the same
+      // falloff (dense near the panel, sparse further out) in solid pixels.
+      g.fillStyle=BLEED[Math.max(0,NEON.indexOf(s.col))];
+      [[PX,0.6],[PX*2,0.3]].forEach(st=>{
         const x0=o.x-st[0],y0=o.y-st[0],w0=o.w+st[0]*2,h0=o.h+st[0]*2;
-        g.fillRect(x0,y0,w0,st[0]);                    // top
-        g.fillRect(x0,y0+h0-st[0],w0,st[0]);           // bottom
-        g.fillRect(x0,y0,st[0],h0);                    // left
-        g.fillRect(x0+w0-st[0],y0,st[0],h0);           // right
+        for(let cy=y0;cy<y0+h0;cy+=PX)for(let cx=x0;cx<x0+w0;cx+=PX){
+          // ring cells only — skip everything interior to this ring
+          if(cx>=x0+PX&&cx<x0+w0-PX&&cy>=y0+PX&&cy<y0+h0-PX)continue;
+          if(rnd(cx*0.731+cy*0.377)>st[1])continue;
+          g.fillRect(cx,cy,PX,PX);
+        }
       });
-      g.globalAlpha=1;
       // conduit up to the roofline
       g.fillStyle=b.ramp[0];
       g.fillRect(snap(o.x+o.w*0.5),b.y+U.cornice,PX,o.y-b.y-U.cornice);
@@ -2196,8 +2260,8 @@ const HOME=CITIES[0];
 
   function bakeMid(){
     Lmid.width=W;Lmid.height=H;const g=Lmid.getContext('2d');
-    buildings.forEach(b=>{if(b.layer===1){bakeBuilding(g,b);bakeSignWall(g,b);}});
-    // elevated rail viaduct — thin deck on piers, reads as structure not fence
+    // elevated rail viaduct — baked FIRST so the mid towers stand in front of
+    // it; the deck used to slice across every facade at one height
     const railY=snap(gY*0.58);
     g.fillStyle=MID[0];
     for(let px2=snap(PX*8);px2<W;px2+=PX*34){
@@ -2207,6 +2271,7 @@ const HOME=CITIES[0];
     g.fillStyle=MID[1];g.fillRect(0,railY+PX*7,W,PX*3);
     g.fillStyle=MID[4];g.fillRect(0,railY+PX*7,W,PX);
     g.fillStyle='#0e0918';g.fillRect(0,railY+PX*10,W,PX);
+    buildings.forEach(b=>{if(b.layer===1){bakeBuilding(g,b);bakeSignWall(g,b);}});
   }
 
   function bakeNear(){
@@ -2255,12 +2320,16 @@ const HOME=CITIES[0];
       g.fillRect(x,roadY+PX*3,PX*4,snap(roadH*0.30));
       g.fillStyle=G_MARK;
     }
-    // shopfront light pools — painted on top of the ground plane, 3 hard steps
+    // shopfront light pools — 3 hard steps. Outer/mid are pre-blended solids
+    // (the old low-alpha washes were erased by the palette snap); the bright
+    // innermost step keeps its alpha since it survives quantisation on its own.
     lightPools.forEach(p=>{
-      const pool=p.konbini
-        ?[['rgba(255,242,205,0.30)',PX*2,PX*5],['rgba(255,230,180,0.17)',PX*9,PX*11],['rgba(255,215,160,0.08)',PX*18,PX*18]]
-        :[['rgba(255,224,175,0.20)',PX*2,PX*4],['rgba(255,212,162,0.11)',PX*8,PX*9],['rgba(255,200,150,0.05)',PX*15,PX*15]];
-      pool.forEach(s=>{g.fillStyle=s[0];g.fillRect(p.x-s[1],gY,p.w+s[1]*2,s[2]);});
+      const oR=p.konbini?PX*18:PX*15, oH=p.konbini?PX*18:PX*15;
+      const mR=p.konbini?PX*9:PX*8,  mH=p.konbini?PX*11:PX*9;
+      g.fillStyle=SHOP_OUT;g.fillRect(p.x-oR,gY,p.w+oR*2,oH);
+      g.fillStyle=SHOP_MID;g.fillRect(p.x-mR,gY,p.w+mR*2,mH);
+      g.fillStyle=p.konbini?'rgba(255,242,205,0.30)':'rgba(255,224,175,0.20)';
+      g.fillRect(p.x-PX*2,gY,p.w+PX*4,p.konbini?PX*5:PX*4);
     });
     // road texture: a few coherent patches and manholes, not scattered specks
     for(let i=0;i<4;i++){
@@ -2328,10 +2397,9 @@ const HOME=CITIES[0];
       g.fillRect(lx,gY-PX*22,PX*2,PX*22);
       g.fillRect(lx-PX*4,gY-PX*22,PX*7,PX*2);
       g.fillStyle='#e8f8ff';g.fillRect(lx-PX*3,gY-PX*20,PX*4,PX*2);
-      [['rgba(170,220,255,0.11)',PX*6,PX*7],
-       ['rgba(170,220,255,0.05)',PX*11,PX*12]].forEach(p=>{
-        g.fillStyle=p[0];g.fillRect(lx-p[1],gY,p[1]*2,p[2]);
-      });
+      // pre-blended solids: the old alpha washes were erased by the palette snap
+      g.fillStyle=LAMP_OUT;g.fillRect(lx-PX*11,gY,PX*22,PX*12);
+      g.fillStyle=LAMP_MID;g.fillRect(lx-PX*6,gY,PX*12,PX*7);
       // a bin or a bollard beside every other lamp
       g.fillStyle='#1c1626';
       if(i%2===0)g.fillRect(lx+PX*6,gY-PX*5,PX*4,PX*5);
@@ -2345,18 +2413,21 @@ const HOME=CITIES[0];
     g.fillRect(lampX,gY-PX*26,PX*2,PX*26);
     g.fillRect(lampX-PX*5,gY-PX*26,PX*8,PX*2);
     g.fillStyle='#e8f8ff';g.fillRect(lampX-PX*4,gY-PX*24,PX*5,PX*2);
-    // stepped light pool from the lamp — brightest directly beneath, 3 steps out
-    [['rgba(180,225,255,0.26)',PX*7],['rgba(175,220,255,0.14)',PX*13],
-     ['rgba(170,214,255,0.06)',PX*21]].forEach(p=>{
-      g.fillStyle=p[0];g.fillRect(lampX-p[1],gY,p[1]*2,PX*4+p[1]*0.6);
-    });
+    // stepped light pool — inner ring keeps its alpha (bright enough to survive
+    // the snap); the two outer rings are pre-blended solids
+    g.fillStyle=LAMP_OUT;g.fillRect(lampX-PX*21,gY,PX*42,PX*4+PX*21*0.6);
+    g.fillStyle=LAMP_MID;g.fillRect(lampX-PX*13,gY,PX*26,PX*4+PX*13*0.6);
+    g.fillStyle='rgba(180,225,255,0.26)';g.fillRect(lampX-PX*7,gY,PX*14,PX*4+PX*7*0.6);
     // vending machine (a "hero object" per waneella's clutter vocabulary)
     const vx=sx+PX*14;
     g.fillStyle='#b8b8c8';g.fillRect(vx,gY-PX*13,PX*7,PX);
     g.fillStyle='#a31022';g.fillRect(vx,gY-PX*12,PX*7,PX*12);
     g.fillStyle='#d02438';g.fillRect(vx+PX,gY-PX*10,PX*5,PX*5);
     g.fillStyle='#ffdba8';g.fillRect(vx+PX,gY-PX*10,PX*5,PX*2);
-    g.fillStyle='rgba(220,40,60,0.14)';g.fillRect(vx-PX*4,gY-PX*12,PX*15,PX*14);
+    // red spill: solid pool on the pavement, stronger wash on the wall behind
+    // (0.20 lands on the registered VEND_GLOW tone instead of being snapped away)
+    g.fillStyle=VEND_GLOW;g.fillRect(vx-PX*4,gY,PX*15,PX*4);
+    g.fillStyle='rgba(220,40,60,0.20)';g.fillRect(vx-PX*4,gY-PX*12,PX*15,PX*12);
     // bicycle leaning on the wall
     const bx2=sx-PX*20;
     g.fillStyle='#1a1626';
@@ -2364,19 +2435,29 @@ const HOME=CITIES[0];
     g.fillRect(bx2+PX,gY-PX*5,PX,PX);g.fillRect(bx2+PX*8,gY-PX*5,PX,PX);
     g.fillRect(bx2+PX*2,gY-PX*7,PX*7,PX);
     g.fillRect(bx2+PX*3,gY-PX*9,PX,PX*2);
+    // 1px rim light along the top tube so the bike separates from the wall
+    g.fillStyle=RIM_NEAR;g.fillRect(bx2+PX*2,gY-PX*8,PX*7,PX);
     // trash bags, non-uniform
     const tx=sx+PX*30;
     g.fillStyle='#16141c';
     g.fillRect(tx,gY-PX*4,PX*4,PX*4);
     g.fillRect(tx+PX*4,gY-PX*3,PX*3,PX*3);
     g.fillRect(tx+PX,gY-PX*5,PX*2,PX);
+    // lamp-side top caps — glossy plastic catching the streetlight
+    g.fillStyle=RIM_NEAR;
+    g.fillRect(tx,gY-PX*5,PX*2,PX);g.fillRect(tx+PX*4,gY-PX*4,PX*2,PX);
     // one waiting figure at the crossing (10 logical px)
     const fx=snap(W*0.30)+PX*34;
+    // soft pool under the figure so they sit on the pavement, not float on it
+    g.fillStyle=LAMP_OUT;g.fillRect(fx-PX*3,gY,PX*9,PX*3);
     g.fillStyle='#0d0a16';
     g.fillRect(fx,gY-PX*4,PX,PX*4);g.fillRect(fx+PX*2,gY-PX*4,PX,PX*4);
     g.fillRect(fx,gY-PX*8,PX*3,PX*4);
     g.fillRect(fx+PX,gY-PX*10,PX*2,PX*2);
-    g.fillStyle='rgba(120,210,255,0.45)';g.fillRect(fx+PX*3,gY-PX*7,PX,PX);
+    // sun-side (right) edge of the torso picks up the warm rim
+    g.fillStyle=RIM_NEAR;g.fillRect(fx+PX*2,gY-PX*8,PX,PX*2);
+    // phone screen — 2x2 solid so the quantiser keeps it
+    g.fillStyle=PHONE_GLOW;g.fillRect(fx+PX*3,gY-PX*7,PX*2,PX*2);
   }
 
   // ════ PALETTE SNAP ════
@@ -2403,6 +2484,12 @@ const HOME=CITIES[0];
     // bridge midtones — gives the quantiser somewhere to land between the
     // dark architecture and the bright light sources
     ['#5c4a70','#6e5a80','#463a58','#8a6c94','#3a3048'].forEach(add);
+    // light-effect tones (see their definition for why these must be registered)
+    [LAMP_MID,LAMP_OUT,SHOP_MID,SHOP_OUT,VEND_GLOW,SILL_WARM,SILL_COOL,PHONE_GLOW].forEach(add);
+    BLEED.forEach(add);
+    // street-prop object colours — without these the quantizer reassigned the
+    // vending machine to window-blue and road-grey and it read as a different object
+    ['#b8b8c8','#a31022','#d02438','#1a1626','#1c1626','#16141c'].forEach(add);
     add('#fff4fa');add('#fff6e0');
     ['#fff5c0','#ffdf9e','#ffb87e','#ff8f74','#ff5f82','#ff3a90','#f22a8c'].forEach(add);
     QP=list.map(hex2rgb);
