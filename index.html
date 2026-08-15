@@ -1447,7 +1447,23 @@ const HOME=CITIES[0];
   // ════ PALETTE — 44 colours, explicit ramps (see art-direction plan) ════
   // luminance-checked ramp: every band ≥11% relative luminance, so the sky is
   // never the thing dragging the frame into near-black (it was, in v3)
-  const SKY=['#201838','#261e40','#2c2248','#342850','#3e2c58','#4a3060','#5c3468','#703a6c'];
+  // Measured on the old palette: 82% of the frame sat between 0 and 20%
+  // luminance, and the mean of the sky, the building band and the ground were
+  // 0.153 / 0.168 / 0.142 — a spread of 0.026 across the entire picture, with
+  // the buildings coming out *lighter* than the sky they were supposed to be
+  // read against. That is what made the scene look flat however much form and
+  // material went into it: with no value separation the eye has nothing to
+  // read the structure by, and every silhouette collapses into its neighbour.
+  // The sky now climbs to a real glow at the horizon so the skyline has
+  // something to be a silhouette against. The top stays dark — the hero text
+  // sits over the upper left, and that is where its contrast comes from.
+  // Luminance ladder, 0.13 at the zenith to 0.53 at the horizon. The first
+  // attempt at this only moved the lower sky from 0.164 to 0.176 and changed
+  // nothing, because the buildings were still coming out lighter (0.169) than
+  // the sky above them (0.152) — a silhouette cannot read when the mass is
+  // brighter than what it stands against. The sky has to carry the top of the
+  // range for the skyline to exist at all.
+  const SKY=['#241c40','#2e2450','#3b2c62','#4c3576','#61408a','#7c4d9c','#9c5da8','#bd72ac'];
   const HORIZON=['#a8446a','#d97a72'];
   // ramps are ordered [darkest/plinth, shadow, base, lit]
   // A fourth rank behind FAR. Three planes stepped the palette twice and then
@@ -1910,6 +1926,36 @@ const HOME=CITIES[0];
     g.fillRect(cTop[0]-PX,b.y,cTop[1]+PX*2,U.cornice);
     g.fillStyle=R2[0];
     g.fillRect(cTop[0],b.y+U.cornice,cTop[1],PX);
+    // ── projecting kit ──
+    // The facades were flat planes: everything drawn on them lived inside the
+    // silhouette, so the outline stayed a clean rectangle no matter how much
+    // detail went on. Real blocks push things out past their own edge — a soil
+    // pipe, a run of balconies — and that broken edge is most of what separates
+    // a building from an extruded shape.
+    if(near){
+      const METAL2=mix(R2[4],'#000000',0.35);
+      if(rnd(b.seed*41.3)<0.75){                       // soil pipe on one flank
+        const px2=rnd(b.seed*43.7)<0.5?bx-PX:bx+bw;
+        const y0=b.y+U.cornice, y1=gY-U.plinth;
+        g.fillStyle=METAL2;
+        g.fillRect(px2,y0,PX,y1-y0);
+        for(let y2=y0+U.floor;y2<y1-PX*2;y2+=U.floor*2)  // collars
+          g.fillRect(px2-PX,snap(y2),PX*3,PX);
+      }
+      if(rnd(b.seed*47.1)<0.6){                        // balcony stack, one bay
+        const gb=facadeGeom(b);
+        const col=Math.floor(rnd(b.seed*53.9)*Math.max(1,gb.bays));
+        for(let r=1;r<gb.rows;r+=2){
+          const byy=snap(gb.top+r*gb.pitchY+gb.wH+PX);
+          if(byy>gY-U.ground)break;
+          const sp2=shapeSpan(b,byy);
+          const bxx=snap(sp2[0]+col*gb.bayW);
+          if(bxx<sp2[0]||bxx+gb.bayW>sp2[0]+sp2[1])continue;
+          g.fillStyle=R2[1];g.fillRect(bxx-PX,byy,gb.bayW+PX,PX*2);
+          g.fillStyle=METAL2;g.fillRect(bxx-PX,byy-PX*2,gb.bayW+PX,PX);
+        }
+      }
+    }
     // string courses every 3rd floor
     const gm=facadeGeom(b);
     for(let r=3;r<gm.rows;r+=3){
