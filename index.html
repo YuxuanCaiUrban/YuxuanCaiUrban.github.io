@@ -1254,6 +1254,21 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
               </div>
             </div>
           </div>
+
+          <div class="proj-cat-card reveal" data-cat="platforms" onclick="openProjectCategory('platforms')">
+            <div class="proj-cat-img-wrap">
+              <img src="assets/images/research/urban_platforms.jpg" alt="Platforms &amp; Infrastructure" loading="lazy">
+            </div>
+            <div class="proj-cat-meta">
+              <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M4 4h6v6H4Z" fill="currentColor" stroke-width="1"></path><path d="M22 4h6v6h-6Z" fill="currentColor" stroke-width="1"></path><path d="M4 22h6v6H4Z" fill="currentColor" stroke-width="1"></path><path d="M22 22h6v6h-6Z" fill="currentColor" stroke-width="1"></path><path d="M10 6h12v2H10Z" fill="currentColor" stroke-width="1"></path><path d="M10 24h12v2H10Z" fill="currentColor" stroke-width="1"></path><path d="M6 10h2v12H6Z" fill="currentColor" stroke-width="1"></path><path d="M24 10h2v12h-2Z" fill="currentColor" stroke-width="1"></path><path d="M14 14h4v4h-4Z" fill="currentColor" stroke-width="1"></path><path d="M10 10h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M20 10h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M10 20h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M20 20h2v2h-2Z" fill="currentColor" stroke-width="1"></path></g></svg></span>06 // PLATFORMS</div>
+              <h3 class="proj-cat-title">Platforms &amp; Infrastructure</h3>
+              <p class="proj-cat-desc">Open platforms I build and run for computational urban research — a community, a data registry, an experimentation layer, and a research program.</p>
+              <div class="proj-cat-go">
+                <span class="proj-cat-count"></span>
+                <span class="proj-cat-arr">→</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -3418,6 +3433,48 @@ const PROJECTS_DATA = [
     page: "projects/shanghai-biking-perception.html",
     links: {}
   },
+  // Platforms & Infrastructure — live sites rather than papers, so these carry a
+  // `site` link and lean on the procedural cover generator for their artwork.
+  {
+    id: "proj-platform-ccc",
+    category: "platforms",
+    title: "City Computing Collective: A Community for Computational Urban Research",
+    venue: "Founded 2026 · citycomputingcollective.com",
+    desc: "Founded an open community connecting urban science, GIS, planning, computer science, and local practice. Wrote the governance model, code of conduct, and contribution standards, and built structured intake for projects, datasets, collaborators, and opportunities. In its founding phase.",
+    tags: ["Research Community", "Open Governance", "Interdisciplinary"],
+    img: "assets/images/research/proj_platform_ccc.jpg",
+    links: { site: "https://citycomputingcollective.com", github: "https://github.com/citycomputingcollective" }
+  },
+  {
+    id: "proj-platform-urbanprobe",
+    category: "platforms",
+    title: "UrbanProbe: Open Infrastructure for Urban Data and Methods",
+    venue: "Launched 2026 · urbanprobe.com",
+    desc: "A registry for urban datasets, spatial indicators, map layers, and reproducible workflows — built on the premise that a resource should document its geography, resolution, license, provenance, and known limitations, not simply offer a download link.",
+    tags: ["Open Data", "Reproducibility", "Spatial Indicators"],
+    img: "assets/images/research/proj_platform_urbanprobe.jpg",
+    links: { site: "https://urbanprobe.com", github: "https://github.com/Hamsterradcc/urbanprobe.com" }
+  },
+  {
+    id: "proj-platform-xurbanai",
+    category: "platforms",
+    title: "XUrbanAI: An Experimentation Layer for Urban AI",
+    venue: "Launched 2026 · xurbanai.com",
+    desc: "A platform for urban AI models, research agents, and grounded benchmarks, built so that each project exposes its assumptions, training data, evaluation tasks, failure modes, and intended uses alongside the demo.",
+    tags: ["Urban AI", "Benchmarks", "Agents"],
+    img: "assets/images/research/proj_platform_xurbanai.jpg",
+    links: { site: "https://xurbanai.com", github: "https://github.com/Hamsterradcc/xurbanai.com" }
+  },
+  {
+    id: "proj-platform-usai",
+    category: "platforms",
+    title: "Urban Science AI Lab: A Research Program in the Open",
+    venue: "Founded 2026 · urbanscience.ai",
+    desc: "The research program framing this work — urban representation and multimodal learning, human-centered sensing, mobility and inequality, climate resilience, and urban agents — published so the agenda can be read, questioned, and built on.",
+    tags: ["Research Program", "Urban Science", "Responsible AI"],
+    img: "assets/images/research/proj_platform_usai.jpg",
+    links: { site: "https://urbanscience.ai" }
+  },
   // Design & Practice Projects
   {
     id: "proj-design-1",
@@ -3510,6 +3567,7 @@ function projImage(p) {
 function projLinks(p) {
   let h = '';
   if (p.page) h += `<a href="${p.page}" class="proj-sticky-link-btn proj-detail-cta">Full details →</a>`;
+  if (p.links.site) h += `<a href="${p.links.site}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn proj-detail-cta">Visit site ↗</a>`;
   if (p.links.paper) h += `<a href="${p.links.paper}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Paper ↗</a>`;
   if (p.links.github) h += `<a href="${p.links.github}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">GitHub ↗</a>`;
   if (p.links.award) h += `<a href="${p.links.award}" target="_blank" rel="noopener noreferrer" class="proj-sticky-link-btn">Award Link ↗</a>`;
@@ -3519,15 +3577,20 @@ function projLinks(p) {
 
 // The category cards advertise how much sits behind them, which replaces
 // the old block of instructions telling the reader to click.
+// Not every category counts papers: the platforms sit behind the same card
+// shape but what they hold is live sites, so each category names its own unit.
+const CATEGORY_UNIT = { platforms: ['platform', 'platforms'] };
 function labelProjectCategories() {
   document.querySelectorAll('.proj-cat-card[data-cat]').forEach(card => {
     const cat = card.getAttribute('data-cat');
     const n = PROJECTS_DATA.filter(p => p.category === cat).length;
+    const unit = CATEGORY_UNIT[cat] || ['paper', 'papers'];
     const el = card.querySelector('.proj-cat-count');
-    if (el) el.textContent = n + (n === 1 ? ' paper' : ' papers');
+    if (el) el.textContent = n + ' ' + (n === 1 ? unit[0] : unit[1]);
   });
 }
 labelProjectCategories();
+if (typeof window.applyPubCovers === 'function') window.applyPubCovers();
 
 function switchProjectsTab(tabId) {
   document.querySelectorAll('.proj-tab').forEach(btn => btn.classList.remove('active'));
@@ -3761,7 +3824,8 @@ function openProjectCategory(catId) {
     llm: "LLM Planning Simulation",
     mobility: "Urban Mobility & Streets",
     nature: "Urban Nature & Vitality",
-    health: "Environment, Health & Equity"
+    health: "Environment, Health & Equity",
+    platforms: "Platforms & Infrastructure"
   };
   titleEl.textContent = categoryNames[catId] || "Category Projects";
   
