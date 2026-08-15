@@ -1435,6 +1435,11 @@ const HOME=CITIES[0];
   const SKY=['#201838','#261e40','#2c2248','#342850','#3e2c58','#4a3060','#5c3468','#703a6c'];
   const HORIZON=['#a8446a','#d97a72'];
   // ramps are ordered [darkest/plinth, shadow, base, lit]
+  // A fourth rank behind FAR. Three planes stepped the palette twice and then
+  // met the sky with a hard edge; atmospheric perspective wants each receding
+  // rank less saturated and pulled further toward the sky's hue, so this one
+  // sits between FAR and the horizon haze and closes that gap.
+  const HAZE=['#3c3356','#463a62','#50406c'];
   const FAR=['#342a48','#3e3054','#48385e'];
   const MID=['#241d3c','#2a2348','#302852','#38305e','#4c4272'];
   // [dark marks, top band, mid band, bottom band, highlight] — the 3 middle
@@ -1637,6 +1642,13 @@ const HOME=CITIES[0];
       return arr;
     };
 
+    // HAZE — the furthest rank, pushed first so it stays behind everything in
+    // layer 0 (the sort is stable, so push order is depth order within a layer).
+    // Low and dense: it reads as the city continuing past the point where you
+    // can resolve it, which is what the hard sky edge used to deny.
+    mkLayer(22,0,0.014,0.036,0.10,0.26,0.02).forEach(b=>{
+      b.ramp=HAZE;b.type='rect';b.seed+=91.7;buildings.push(b);
+    });
     // FAR — flat silhouettes, no internal detail (detail halves per layer back).
     // Dense: this layer is what stops the sky reading as an empty field.
     mkLayer(28,0,0.018,0.046,0.16,0.40,0.024).forEach(b=>{
@@ -1743,13 +1755,23 @@ const HOME=CITIES[0];
     const R2=b.ramp;
     const gm=facadeGeom(b);
     const recess=R2[0], sill=R2[3];
+    const temper=rnd(b.seed*37.1);         // this block's occupancy temperament
     let litCount=0,total=0;
     for(let r=0;r<gm.rows;r++){
       const wy=snap(gm.top+r*gm.pitchY);
       if(wy+gm.wH>gY)continue;
       const fr=rnd(b.seed+r*13.7);
-      // floor modes — dark 35% / sparse 30% / cluster 25% / busy 10% → ~24% lit
-      let mode; if(fr<0.35)mode=0; else if(fr<0.65)mode=1; else if(fr<0.90)mode=2; else mode=3;
+      // Floor modes — dark / sparse / cluster / busy, nominally 35/30/25/10.
+      // Drawing every facade from that one distribution gave the whole skyline
+      // a single uniform density, and uniform density reads as noise: with
+      // everything equally busy nothing is busy. Each building now has a
+      // temperament, so a quiet block can sit next to a lit one and let it
+      // register — the "leave some areas empty" rule, applied per building
+      // rather than per floor. The lit modes keep their relative split.
+      const darkP=temper<0.30?0.62:temper<0.80?0.35:0.20;
+      let mode;
+      if(fr<darkP)mode=0;
+      else{const q=(fr-darkP)/(1-darkP);mode=q<0.46?1:q<0.85?2:3;}
       const cs=Math.floor(rnd(b.seed+r*29.3)*gm.bays*2);
       const cl=2+Math.floor(rnd(b.seed+r*31.9)*2);
       for(let bay=0;bay<gm.bays;bay++){
