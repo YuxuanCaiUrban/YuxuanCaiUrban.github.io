@@ -3034,21 +3034,42 @@ const HOME=CITIES[0];
       const y=snap(near?roadY+roadH*0.72:roadY+roadH*0.28);
       const x=snap(car.x);
       const L=snap(PX*13*S), bH=snap(PX*4*S), cH=snap(PX*3*S);
-      // wheels
+      // Detail stays at one logical pixel whichever lane the car is in: scaling
+      // it too got rounded straight back to PX by snap(), so the near car paid
+      // for the multiply and looked identical.
+      const u=PX;
+      const cabX=x+snap(PX*3*S), cabW=snap(PX*7*S);
+      // ── wheels straddle the body's lower edge. Sitting entirely beneath it
+      // they read as two shadow gaps under a brick rather than as wheels.
       ctx.fillStyle='#0e0a16';
-      ctx.fillRect(x+snap(PX*2*S),y+bH,snap(PX*3*S),snap(PX*S));
-      ctx.fillRect(x+L-snap(PX*5*S),y+bH,snap(PX*3*S),snap(PX*S));
-      // body + cabin
+      const wx1=x+u*2, wx2=x+L-u*5;
+      ctx.fillRect(wx1,y+bH-u,u*3,u*2);
+      ctx.fillRect(wx2,y+bH-u,u*3,u*2);
+      // ── body
       ctx.fillStyle=car.body;
       ctx.fillRect(x,y,L,bH);
-      ctx.fillRect(x+snap(PX*3*S),y-cH,snap(PX*7*S),cH);
-      // windscreen + side glass
-      ctx.fillStyle='#8fd8f0';ctx.globalAlpha=0.65;
-      ctx.fillRect(x+snap(PX*4*S),y-cH+snap(PX*S),snap(PX*5*S),cH-snap(PX*S));
+      // hubs, once the body is down, so they sit inside the arch
+      ctx.fillStyle='#3a3450';
+      ctx.fillRect(wx1+u,y+bH,u,u);ctx.fillRect(wx2+u,y+bH,u,u);
+      // ── cabin, stepped in at the roof. A flat-topped block the same width as
+      // its base is the single thing that made these read as toys.
+      ctx.fillStyle=car.body;
+      ctx.fillRect(cabX+u,y-cH,cabW-u*2,u);
+      ctx.fillRect(cabX,y-cH+u,cabW,cH-u);
+      // ── glass, split by a pillar rather than one slab pane
+      const wq=Math.max(u,snap((cabW-u*3)/2));
+      ctx.fillStyle='#8fd8f0';ctx.globalAlpha=0.6;
+      ctx.fillRect(cabX+u,y-cH+u,wq,Math.max(u,cH-u*2));
+      ctx.fillRect(cabX+u*2+wq,y-cH+u,wq,Math.max(u,cH-u*2));
       ctx.globalAlpha=1;
-      // trim strip
-      ctx.globalAlpha=0.9;ctx.fillStyle=car.trim;
-      ctx.fillRect(x,y+snap(PX*S),L,snap(PX*S));ctx.globalAlpha=1;
+      // ── bumpers: the ends darken instead of running square into the road
+      ctx.globalAlpha=0.5;ctx.fillStyle='#0e0a16';
+      ctx.fillRect(x,y+bH-u,u,u);ctx.fillRect(x+L-u,y+bH-u,u,u);
+      ctx.globalAlpha=1;
+      // ── trim: a short accent along the lower body. At full length and 0.9
+      // alpha it was a neon strip running the whole car and it owned the shape.
+      ctx.globalAlpha=0.4;ctx.fillStyle=car.trim;
+      ctx.fillRect(x+u*2,y+bH-u*2,L-u*4,u);ctx.globalAlpha=1;
       // head / tail lamps + cone
       if(car.head){
         ctx.fillStyle='#ffeab0';
