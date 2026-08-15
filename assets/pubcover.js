@@ -18,7 +18,8 @@
     mobility: { key: '#ffd23a', warm: '#ffb066', label: 'URBAN MOBILITY' },
     nature:   { key: '#5cffb0', warm: '#8ce6c0', label: 'URBAN NATURE' },
     health:   { key: '#ff8c3c', warm: '#ffb877', label: 'ENVIRONMENT, HEALTH & EQUITY' },
-    design:   { key: '#b07bff', warm: '#d08cff', label: 'DESIGN & PRACTICE' }
+    design:   { key: '#b07bff', warm: '#d08cff', label: 'DESIGN & PRACTICE' },
+    platforms:{ key: '#6f8cff', warm: '#93a7ff', label: 'PLATFORMS & INFRASTRUCTURE' }
   };
   var BG = ['#0a0618', '#100a24', '#161030', '#1c163c'];
   var BAYER = [0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5];
@@ -155,6 +156,30 @@
     g.globalAlpha = 1;
   }
 
+  function motifStack(g, x, y, w, h, PX, rnd, col) {   // layered platforms
+    var layers = 4;
+    var lh = Math.max(PX * 3, Math.round(h / (layers * 2.1) / PX) * PX);
+    for (var i = 0; i < layers; i++) {
+      var ly = y + Math.round((i * (h - lh)) / (layers - 1) / PX) * PX;
+      var inset = PX * i * 2;
+      var lw = w - inset * 2;
+      if (lw < PX * 8) break;
+      g.fillStyle = col;
+      g.globalAlpha = 0.07;
+      g.fillRect(x + inset, ly, lw, lh);              // the slab body
+      g.globalAlpha = 0.18 + i * 0.22;
+      g.fillRect(x + inset, ly, lw, PX);              // its lit top edge
+      g.globalAlpha = 0.85;
+      for (var n = 0; n < 3; n++) {                   // services riding the slab
+        var span = lw - PX * 6;
+        if (span <= 0) break;
+        var nx = x + inset + PX * 2 + Math.round((rnd() * span) / PX) * PX;
+        g.fillRect(nx, ly - PX, PX * 2, PX * 2);
+      }
+    }
+    g.globalAlpha = 1;
+  }
+
   window.makePubCover = function (opts) {
     opts = opts || {};
     var W = opts.w || 800, H = opts.h || 450;
@@ -196,6 +221,7 @@
               : opts.category === 'mobility' ? motifRoutes
               : opts.category === 'nature' ? motifScatter
               : opts.category === 'health' ? motifBars
+              : opts.category === 'platforms' ? motifStack
               : motifGrid;
     motif(g, mx, my, mw, mh, PX, rnd, acc.key);
 
