@@ -1529,7 +1529,15 @@ const HOME=CITIES[0];
   // PX_CSS_CAP, floored at 320 so phones keep the framing they already have and
   // capped at COLS_MAX so the bake's per-block quantiser stays affordable
   // (its cost is columns x rows, i.e. quadratic in this number).
-  const COLS_MIN=320, COLS_MAX=640, PX_CSS_CAP=4;
+  // COLS_MAX was 640, which met PX_CSS_CAP exactly at 2560 and then stopped
+  // holding it: a 3440 ultrawide fell back to 5.4 CSS px per logical pixel and
+  // a 4K panel to 6.0, so the wider the display the coarser the art — the exact
+  // problem the adaptive grid was added to fix, reintroduced by its own bound.
+  // 1024 keeps the cap honest out to 4096px. Measured at 3840x1620: 960 columns,
+  // 4.0 CSS px, bake 590-750ms against 450ms at 640 columns. Bake runs once per
+  // resize behind a 150ms debounce, never per frame, so ~200ms buys a third off
+  // the pixel size on every large display.
+  const COLS_MIN=320, COLS_MAX=1024, PX_CSS_CAP=4;
 
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
