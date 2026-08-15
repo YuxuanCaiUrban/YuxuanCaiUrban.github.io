@@ -1465,9 +1465,18 @@ const HOME=CITIES[0];
     // The top band stays dark so the roofline still reads against the sky, but
     // the base is lifted well clear of black — that is where the plinth, string
     // courses and pier rhythm live, and where street light would fall.
+    // Six families, not three. The reference's street reads as a street partly
+    // because no two buildings on it are made of the same thing — render, tile,
+    // brick, concrete, painted steel. Cycling three ramps across six near
+    // blocks meant every building had a twin two doors down, and the eye finds
+    // that repeat immediately. These stay inside the night palette; they differ
+    // in what the base and the pier rhythm are made of, not in brightness.
     ['#0d0b18','#151222','#221e38','#332e52','#524b7a'],  // blue-black
     ['#0f0a16','#171020','#261c36','#372850','#584070'],  // purple-black
-    ['#100c12','#18121c','#26202e','#352c44','#564a66']   // warm-black
+    ['#100c12','#18121c','#26202e','#352c44','#564a66'],  // warm-black
+    ['#0a0d14','#111620','#1c2634','#2a3a4c','#46607a'],  // slate / wet concrete
+    ['#140b12','#1e121a','#30202c','#452e40','#6a4860'],  // oxblood brick
+    ['#0c1014','#131a1e','#1e2c2e','#2c4240','#466a62']   // green-black tile
   ];
   const RIM_MID='#7a4880', RIM_NEAR='#6a4a80';
   // NIGHT ground: dark base, brightness comes only from light pools and
@@ -1684,18 +1693,21 @@ const HOME=CITIES[0];
     // MID — simplified structures, deliberately taller than near so the
     // skyline still reads above the foreground block
     mkLayer(14,1,0.046,0.098,0.34,0.64,0.035).forEach((b,i)=>{
-      b.ramp=MID;b.type=(i%3===1)?'stepped':'rect';buildings.push(b);
+      // six forms rotating instead of two, so the mid rank stops reading as one
+      // extruded box repeated across the frame
+      b.ramp=MID;b.type=['rect','stepped','offset','rect','ziggurat','slab'][i%6];
+      buildings.push(b);
     });
     // NEAR — hand-placed. Gaps still let the mid layer through, but they are
     // now filled with lower blocks rather than left as bare sky.
     // massing varies: a straight row of flat-topped rects read as cardboard —
     // two get setback crowns, one gets a podium base with a slimmer tower
-    const nearTypes=['rect','stepped','rect','podium','stepped','rect'];
+    const nearTypes=['notch','offset','crown','podium','ziggurat','slab'];
     [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.295,0.105,0.22],
      [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
         buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:nearTypes[i],
-          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===4});
+          ramp:NEAR_FAM[[0,3,1,5,2,4][i]],seed:11.3+i*17.7,shop:i===1||i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
@@ -1728,8 +1740,38 @@ const HOME=CITIES[0];
 
   // usable span of a building at height y (tiered shapes)
   function shapeSpan(b,y){
+    const f=(y-b.y)/b.h;
+    // Every original form set its upper mass back symmetrically about the centre
+    // line. However much the heights varied, the silhouettes were all the same
+    // gesture, and a skyline of one gesture reads as one building repeated. The
+    // forms below break that: a mass shoved to one end, a shaft rising off the
+    // end of a slab, a crown parked off-centre, a stack of unequal setbacks.
+    const lean=rnd(b.seed*7.73)<0.5?0:1;      // deterministic per building
+    if(b.type==='ziggurat'){
+      if(f<0.15){const tw=snap(b.w*0.38);return [b.x+snap((b.w-tw)/2),tw];}
+      if(f<0.33){const tw=snap(b.w*0.60);return [b.x+snap((b.w-tw)/2),tw];}
+      if(f<0.55){const tw=snap(b.w*0.82);return [b.x+snap((b.w-tw)/2),tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='offset'){
+      if(f<0.42){const tw=snap(b.w*0.56);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='slab'){
+      if(f<0.54){const tw=snap(b.w*0.40);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='crown'){
+      if(f<0.13){const tw=snap(b.w*0.32);
+        return [lean?b.x+snap(b.w*0.58):b.x+snap(b.w*0.10),tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='notch'){
+      // a slot cut down one side: full width low, a bite taken out above
+      if(f<0.62){const tw=snap(b.w*0.72);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
     if(b.type==='stepped'){
-      const f=(y-b.y)/b.h;
       if(f<0.30){const tw=snap(b.w*0.62);return [b.x+snap((b.w-tw)/2),tw];}
       return [b.x,b.w];
     }
