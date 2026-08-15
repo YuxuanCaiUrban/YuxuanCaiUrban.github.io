@@ -2648,6 +2648,43 @@ const HOME=CITIES[0];
     }
     g.globalAlpha=1;
     bakeStreetProps(g);
+    bakeQuay(g);
+  }
+
+  // ── foreground plane ──
+  // The scene ran from far haze to the near kerb and then stopped: below the
+  // road the frame was open water, so the nearest depth plane was missing and
+  // nothing framed the composition. Atmospheric perspective wants its closest
+  // rank to be the darkest and the highest-contrast, and to carry no interior
+  // detail at all — read as pure silhouette. A quay rail supplies exactly that.
+  function bakeQuay(g){
+    const INK='#06030d';
+    const deck=snap(H-PX*4);                 // the surface we are standing on
+    const railTop=snap(H-PX*24);             // tall enough to register as a plane
+    g.fillStyle=INK;
+    g.fillRect(0,deck,W,H-deck);
+    g.fillRect(0,railTop,W,PX*2);            // one heavy top rail, nothing else
+    // A second horizontal rail closed the gaps into rectangles and the whole
+    // thing read as brickwork. Posts alone keep the plane open: you look
+    // through a railing, which is what makes it sit in front of the water
+    // rather than replacing it.
+    for(let x=snap(PX*5);x<W;x+=PX*26)
+      g.fillRect(x,railTop,PX*2,deck-railTop);
+    // two bollards and a slack chain — the one curve in a field of verticals
+    const bx=[snap(W*0.15),snap(W*0.30)];
+    bx.forEach(x=>{
+      g.fillRect(x-PX*3,railTop-PX*3,PX*6,deck-railTop+PX*3);
+      g.fillRect(x-PX*4,railTop-PX*3,PX*8,PX*2);
+    });
+    const span=bx[1]-bx[0];
+    for(let x=0;x<=span;x+=PX){
+      const f=span?x/span:0;
+      g.fillRect(snap(bx[0]+x),snap(railTop+PX+4*f*(1-f)*PX*7),PX,PX);
+    }
+    // one dim line catching the city's glow along the rail, so the foreground
+    // belongs to the palette without competing with the skyline for attention
+    g.fillStyle=mix(RIM_NEAR,'#000000',0.5);
+    g.fillRect(0,railTop-PX,W,PX);
   }
 
   // ── street-level props, scaled to the 10-logical-px figure ──
