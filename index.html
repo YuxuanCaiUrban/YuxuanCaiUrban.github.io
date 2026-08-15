@@ -1501,12 +1501,22 @@ const HOME=CITIES[0];
        bay:PX*13, marginX:PX*4, ground:PX*14, cornice:PX*3, plinth:PX*3};
   }
 
+  // A fixed 320-column grid keeps the composition identical on every screen, but
+  // it pins the count, not the apparent size: one logical pixel lands at ~1.3 CSS
+  // px on a phone and swells to 8 on a 2560 monitor and 12 on 4K, so the same art
+  // reads as fine detail on the small screen and as mush on the big one. Columns
+  // therefore grow with the viewport until a logical pixel is back under
+  // PX_CSS_CAP, floored at 320 so phones keep the framing they already have and
+  // capped at COLS_MAX so the bake's per-block quantiser stays affordable
+  // (its cost is columns x rows, i.e. quadratic in this number).
+  const COLS_MIN=320, COLS_MAX=640, PX_CSS_CAP=4;
+
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
     const devW=Math.max(320,Math.round(window.innerWidth*DPR));
     const devH=Math.max(240,Math.round(window.innerHeight*DPR));
-    // ~320 logical columns (1041uuu works at 250 wide; Saint11's base is 320x180)
-    PX=Math.max(2,Math.round(devW/320));
+    const cols=Math.min(COLS_MAX,Math.max(COLS_MIN,Math.round(devW/(PX_CSS_CAP*DPR))));
+    PX=Math.max(2,Math.round(devW/cols));
     W=cv.width=devW;
     H=cv.height=devH;
     gY=snap(H*0.78);          // low horizon: ground gets 22%
@@ -2107,13 +2117,28 @@ const HOME=CITIES[0];
 
   // dark backing panel — opaque, never glows
   function signPanel(g,bw,bh){g.fillStyle='#0a0510';g.fillRect(0,0,bw,bh);}
-  // emissive layer: tube frame + white-hot inner line + optional real text
+  // emissive layer: a tube that was bent, not a stroked rectangle. Four square
+  // corners joined by a continuous outline is exactly what a CSS border looks
+  // like; chamfering each corner and stepping the tube through the turn is what
+  // makes it read as glass. The white-hot core also moves inside the tube —
+  // the old version laid one bright bar across the top of the panel, which on a
+  // vertical sign read as a stray white shelf rather than as a highlight.
   function signEmit(g,bw,bh,col,txt,fs,vertical){
+    const ch=PX*2;
     g.fillStyle=col;
-    g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);
-    g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
-    g.fillStyle='#fff4fa';g.globalAlpha=0.6;
-    g.fillRect(PX,PX,bw-PX*2,PX);
+    g.fillRect(ch,0,bw-ch*2,PX);                  // top run
+    g.fillRect(ch,bh-PX,bw-ch*2,PX);              // bottom run
+    g.fillRect(0,ch,PX,bh-ch*2);                  // left run
+    g.fillRect(bw-PX,ch,PX,bh-ch*2);              // right run
+    g.fillRect(PX,PX,PX,PX);                      // the four bends
+    g.fillRect(bw-PX*2,PX,PX,PX);
+    g.fillRect(PX,bh-PX*2,PX,PX);
+    g.fillRect(bw-PX*2,bh-PX*2,PX,PX);
+    // core: brightest along the top run, fading down the left, where a tube lit
+    // from the upper left would actually catch
+    g.fillStyle='#fff4fa';
+    g.globalAlpha=0.55;g.fillRect(ch+PX,PX,bw-(ch+PX)*2,PX);
+    g.globalAlpha=0.24;g.fillRect(PX,ch+PX,PX,bh-(ch+PX)*2);
     g.globalAlpha=1;
     if(!txt)return;
     g.font=signFont(fs);g.textBaseline='top';g.fillStyle=col;
@@ -2136,13 +2161,31 @@ const HOME=CITIES[0];
       const fs=PX*10, txt='URBAN AI', col=NEON[1];
       const tw=Math.ceil(txt.length*fs*0.62/PX)*PX;
       const bw=tw+PX*8,bh=fs+PX*8;
-      const legH=PX*10;
+      const legH=PX*14;
       const sx=snap(hero.x+(hero.w-bw)/2), sy=Math.max(PX*4,hero.y-bh-legH);
       const spr=makeSprite(bw,bh+legH,col,g=>{
-        g.fillStyle='#1a1028';
-        g.fillRect(PX*3,bh,PX*2,legH);g.fillRect(bw-PX*5,bh,PX*2,legH);
-        for(let y=bh+PX*3;y<bh+legH;y+=PX*5){g.fillRect(PX*3,y,bw-PX*8,PX);}
+        const STL='#1a1028', BRC='#241838';
         signPanel(g,bw,bh);
+        // A billboard is carried by a frame. Two bare posts with rungs strung
+        // between them read as a table; legs with a base beam, feet and
+        // X-bracing read as the steel that actually holds a hoarding up.
+        const lx=PX*4, rx=bw-PX*6, bot=bh+legH;
+        g.fillStyle=STL;
+        g.fillRect(PX*2,bh,bw-PX*4,PX);                 // catwalk under the panel
+        g.fillRect(lx,bh,PX*2,legH);                    // legs
+        g.fillRect(rx,bh,PX*2,legH);
+        g.fillRect(lx-PX*2,bot-PX,PX*5,PX);             // feet
+        g.fillRect(rx-PX,bot-PX,PX*5,PX);
+        g.fillStyle=BRC;                                // two bays of X-bracing
+        const x0=lx+PX*2, span=rx-x0, bayH=(legH-PX*3)/2;
+        for(let i=0;i<2;i++){
+          const yA=bh+PX*2+i*bayH, yB=yA+bayH;
+          for(let s=0;s<=span;s+=PX){
+            const f=span?s/span:0;
+            g.fillRect(snap(x0+s),snap(yA+(yB-yA)*f),PX,PX);
+            g.fillRect(snap(x0+s),snap(yB-(yB-yA)*f),PX,PX);
+          }
+        }
       },g=>signEmit(g,bw,bh,col,txt,fs,false));
       signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:hero,
                   box:{x:sx,y:sy,w:bw,h:bh},roof:true});
@@ -2151,13 +2194,29 @@ const HOME=CITIES[0];
     // 5-glyph column at 7px cap height needs ~55 logical px of clear facade
     if(hero){
       const b=hero, fs=PX*10, txt='GEOAI', col=NEON[0];
-      const bw=fs+PX*6, bh=txt.length*(fs+PX)+PX*6;
+      // a kanban is a lit box with a housing, not a coloured strip glued to the
+      // wall: the panel sits between two end caps, and the caps are what the
+      // wall brackets actually bolt to
+      const capH=PX*3;
+      const panelH=txt.length*(fs+PX)+PX*6;
+      const bw=fs+PX*6, bh=panelH+capH*2;
       if(b.h>bh+U.ground){
         const side=b.sideDir>0?'l':'r';
         const sx=side==='r'?b.x+b.w-PX*2:b.x-bw+PX*2;
         const sy=snap(b.y+U.cornice+PX*8);
-        const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),
-                             g=>signEmit(g,bw,bh,col,txt,fs,true));
+        const spr=makeSprite(bw,bh,col,g=>{
+          g.save();g.translate(0,capH);signPanel(g,bw,panelH);g.restore();
+          g.fillStyle='#1a1028';
+          g.fillRect(-PX,0,bw+PX*2,capH);
+          g.fillRect(-PX,bh-capH,bw+PX*2,capH);
+          g.fillStyle='#241838';
+          g.fillRect(-PX,capH-PX,bw+PX*2,PX);
+          g.fillRect(-PX,bh-capH,bw+PX*2,PX);
+        },g=>{
+          g.save();g.translate(0,capH);
+          signEmit(g,bw,panelH,col,txt,fs,true);
+          g.restore();
+        });
         signs.push({spr,x:sx,y:sy,ph:1.7,cx:sx+bw/2,w:bw,col,host:b,
                     box:{x:sx,y:sy,w:bw,h:bh},
                     bracket:{x:side==='r'?b.x+b.w-PX*3:b.x+PX,y:sy+PX*3,w:PX*4}});
@@ -2186,33 +2245,53 @@ const HOME=CITIES[0];
     // ── 5) protruding pictogram signs (袖看板) — signage that reads as a
     // PICTURE rather than a word, so the scene's text budget stays at the
     // three brand signs while the street stops being three words on a wall
+    // 12x12 pictograms. The old set was 8x8, which is below the size where a
+    // drawing reads as a drawing: a bowl and a cup differed by two pixels. At 12
+    // there is room for a rim, a handle, a stem — and because the logical grid is
+    // now finer, the sign is physically smaller than the 8x8 version it replaces.
     const ICONS={
-      ramen:['..1..1..','.1..1...','........','11111111','.111111.','.111111.','..1111..','........'],
-      cup:  ['..1.1...','.1..1...','........','.11111..','.11111.1','.11111.1','.11111..','..111...'],
-      glass:['1111111.','.11111..','..111...','...1....','...1....','...1....','..111...','.11111..'],
-      arrow:['........','...11...','...11...','...11...','.111111.','..1111..','...11...','........']
+      ramen:['..1...1.....','.1...1......','..1...1.....','............',
+             '............','111111111111','.1111111111.','.1111111111.',
+             '..11111111..','...111111...','....1111....','............'],
+      cup:  ['..1...1.....','.1...1......','............','............',
+             '.11111111...','.1......1.11','.1......1..1','.1......1.11',
+             '..1....1....','...1111.....','............','.1111111111.'],
+      glass:['.1111111111.','.1111111111.','..11111111..','...111111...',
+             '....1111....','.....11.....','.....11.....','.....11.....',
+             '.....11.....','.....11.....','...111111...','..11111111..'],
+      arrow:['....1111....','....1111....','....1111....','....1111....',
+             '....1111....','.1111111111.','..11111111..','...111111...',
+             '....1111....','.....11.....','............','............'],
+      mast: ['.....11.....','.....11.....','....1111....','....1111....',
+             '...11..11...','...11..11...','..11111111..','..11....11..',
+             '.11......11.','.11......11.','11........11','11........11'],
+      bulb: ['....1111....','...111111...','..11111111..','..11111111..',
+             '..11111111..','...111111...','....1111....','....1111....',
+             '...111111...','....1111....','...111111...','....1111....']
     };
+    const ICON_N=12;
     const drawIcon=(g,name,x0,y0)=>{
       ICONS[name].forEach((row,r)=>{
         for(let c=0;c<row.length;c++)
           if(row[c]==='1')g.fillRect(x0+c*PX,y0+r*PX,PX,PX);
       });
     };
-    // hand-drawn 4x4 katakana-ish glyphs — random strokes read as damage, a
-    // small set of deliberate radicals reads as writing you can't quite read
-    const KATA=[
-      ['11.1','..11','.1..','1.1.'],
-      ['.1..','1111','.1..','.1.1'],
-      ['1.1.','1.1.','1111','..1.'],
-      ['1111','1..1','..1.','.1..'],
-      ['.11.','..1.','.1..','1..1'],
-      ['1.11','1.1.','1.1.','..1.']
-    ];
-    const drawKata=(g,idx,x0,y0)=>{
-      KATA[idx%KATA.length].forEach((row,r)=>{
-        for(let c=0;c<4;c++)
-          if(row[c]==='1')g.fillRect(x0+c*PX,y0+r*PX,PX,PX);
-      });
+    // Filler for signage below the legibility floor. The old filler was
+    // pseudo-katakana — invented glyphs in a script nobody actually writes,
+    // which put fake Japanese on every strip in the scene. Distant lettering
+    // resolves to bars at letter rhythm long before it resolves to characters,
+    // so the marks are now plainly abstract and claim no language at all.
+    const drawMarks=(g,x0,y0,len,thick,seed,vertical)=>{
+      let p=0,k=0;
+      while(p<len){
+        const w=PX*(1+Math.floor(rnd(seed+k*3.7)*3));
+        if(p+w>len)break;
+        if(rnd(seed+k*5.3)>0.22){
+          if(vertical)g.fillRect(x0,y0+p,thick,w);
+          else g.fillRect(x0+p,y0,w,thick);
+        }
+        p+=w+PX;k++;
+      }
     };
     // a sign that lands on another sign reads as a bug, not as density — the
     // host layout shifts with viewport width, so check instead of trusting it
@@ -2225,20 +2304,23 @@ const HOME=CITIES[0];
     // [host, icon, neon index, height above ground floor, side]
     // side 'c' = flat wall mount, no bracket — used where the frame margin
     // otherwise runs out of signage before the edge
+    // every sign gets its own pictogram: the old table used the cocktail glass
+    // twice, and two identical signs a few buildings apart read as a copy-paste
+    // slip rather than as two bars on the same street
     const picto=[[near[0],'ramen',0,PX*8,'r'],[near[1],'cup',3,PX*8,'r'],
                  [near[3],'glass',4,PX*2,'r'],[hero,'arrow',1,PX*2,'l'],
-                 [near[5],'glass',4,PX*4,'c']];
+                 [near[5],'mast',2,PX*4,'c']];
     picto.forEach((spec,pi)=>{
       const b=spec[0];if(!b)return;
       const col=NEON[spec[2]];
-      // icon-plus-text layout, like a real sode-kanban: pictogram on top and
-      // glyph cells beneath. Cell count adapts to the facade space available,
-      // collapsing to icon-only on short hosts.
+      // icon-only sode-kanban, square. The glyph cells that used to hang under
+      // the pictogram were pseudo-katakana — writing in no language, which is
+      // set dressing this site has no reason to carry — so the sign is now just
+      // the picture, and loses the column of cells that made it tall.
       const topLim=b.y+U.cornice+PX*2;
       const baseY=gY-U.ground-spec[3];
-      const cells=Math.max(0,Math.min(2,Math.floor((baseY-topLim-PX*12)/(PX*5))));
-      const bw=PX*12,bh=PX*12+cells*PX*5;
-      const sy=snap(baseY-bh);
+      const bw=PX*(ICON_N+6),bh=bw;      // 3px of quiet margin around the icon:
+      const sy=snap(baseY-bh);           // at 2 the tube frame crowded the drawing
       let side=spec[4];
       let sx=side==='c'?snap(b.x+(b.w-bw)/2)
             :side==='r'?b.x+b.w-PX*2:b.x-bw+PX*2;
@@ -2250,12 +2332,7 @@ const HOME=CITIES[0];
       if(sy<topLim||sx<PX||sx+bw>W-PX)return;
       const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
         signEmit(g,bw,bh,col,null,0,false);
-        g.fillStyle=col;drawIcon(g,spec[1],PX*2,PX*2);
-        for(let c=0;c<cells;c++){
-          if(c===0){g.fillRect(PX*2,PX*10+Math.floor(PX*0.5),PX*8,PX);}  // rule under the icon
-          drawKata(g,Math.floor(rnd(b.seed*13.7+c*7.1+pi)*KATA.length),
-                   PX*4,PX*12+c*PX*5);
-        }
+        g.fillStyle=col;drawIcon(g,spec[1],PX*3,PX*3);
       });
       signs.push({spr,x:sx,y:sy,ph:2.2+pi*1.3,cx:sx+bw/2,w:bw,col,host:b,
                   kind:'picto',box:{x:sx,y:sy,w:bw,h:bh},
@@ -2283,15 +2360,10 @@ const HOME=CITIES[0];
       if(vert&&bh<PX*18)return;
       const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
         signEmit(g,bw,bh,col,null,0,false);
-        // illegible glyph blocks — reads as signage without degrading into noise
+        // abstract marks — reads as signage without degrading into noise
         g.fillStyle=col;g.globalAlpha=0.9;
-        if(vert){
-          for(let y=PX*3;y+PX*4<=bh-PX*2;y+=PX*6)
-            drawKata(g,Math.floor(rnd(b.seed*3.9+y)*KATA.length),PX,y);
-        } else {
-          for(let x=PX*2;x+PX*4<=bw-PX*2;x+=PX*6)
-            drawKata(g,Math.floor(rnd(b.seed*5.1+x)*KATA.length),x,PX*2);
-        }
+        if(vert) drawMarks(g,PX*2,PX*3,bh-PX*6,bw-PX*4,b.seed*3.9,true);
+        else     drawMarks(g,PX*3,PX*3,bw-PX*6,bh-PX*6,b.seed*5.1,false);
         g.globalAlpha=1;
       });
       signs.push({spr,x:sx,y:sy,ph:i*1.9+0.4,cx:sx+bw/2,w:bw,col,host:b,
@@ -2329,12 +2401,9 @@ const HOME=CITIES[0];
       const sx=snap(span[0]+(span[1]-span[0]-bw)/2), sy=snap(gY-U.ground-bh-PX);
       const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
         g.fillStyle=col;
-        // a run of glyph cells with an occasional word gap — fascia text
-        let x=PX*2,k=0;
-        while(x+PX*4<=bw-PX*2){
-          drawKata(g,Math.floor(rnd(b.seed*7.7+k*13.1)*KATA.length),x,PX*2);
-          x+=PX*5+(rnd(b.seed*9.1+k*5.1)<0.3?PX*2:0);k++;
-        }
+        // a run of abstract marks at letter rhythm — fascia text seen from across
+        // the street, where the shapes have not resolved into characters yet
+        drawMarks(g,PX*2,PX*2,bw-PX*4,bh-PX*4,b.seed*7.7,false);
       });
       signs.push({spr,x:sx,y:sy,ph:3.4+li*2.1,cx:sx+bw/2,w:bw,col,host:b,
                   box:{x:sx,y:sy,w:bw,h:bh}});
