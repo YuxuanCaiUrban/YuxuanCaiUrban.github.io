@@ -2718,7 +2718,50 @@ const HOME=CITIES[0];
     }
     g.globalAlpha=1;
     bakeStreetProps(g);
+    bakeFrameMass(g);
     bakeQuay(g);
+  }
+
+  // ── side framing ──
+  // Reference cityscapes almost always wall the frame in: a dark building mass
+  // cropped by the left and right edges, closer than anything else and carrying
+  // almost no light. It does two jobs at once — it supplies a depth rank in
+  // front of the near buildings, and it stops the composition from bleeding off
+  // the sides, which is what made this skyline read as a backdrop rather than a
+  // place you are standing in. Kept narrow and near-black so it frames the city
+  // without taking any attention from it.
+  function bakeFrameMass(g){
+    const INK='#08040f', EDGE='#170f26';
+    [0,1].forEach(side=>{
+      const wMass=snap(W*(side?0.055:0.07));
+      const x0=side?W-wMass:0;
+      const topY=snap(gY-(side?0.80:0.92)*gY);
+      g.fillStyle=INK;
+      g.fillRect(x0,topY,wMass,gY-topY);
+      // the inner edge catches a sliver of the city's glow, which is the only
+      // thing separating the mass from the sky behind it
+      g.fillStyle=EDGE;
+      g.fillRect(side?x0:x0+wMass-PX,topY,PX,gY-topY);
+      // a parapet lip, so the top edge is not a plain horizontal cut
+      g.fillRect(x0,topY,wMass,PX);
+      g.fillStyle=INK;
+      g.fillRect(side?x0+PX*2:x0+wMass-PX*5,topY-PX*3,PX*3,PX*3);
+      // a handful of windows: an unlit black slab reads as a hole in the canvas,
+      // a few lit ones say building. Deliberately sparse — this is the darkest
+      // plane in the scene and it has to stay that way.
+      const bay=PX*9, rows=Math.floor((gY-topY-U.ground)/(PX*12));
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<Math.floor(wMass/bay)-1;c++){
+          const s=rnd(side*31.7+r*7.3+c*13.1);
+          if(s<0.72)continue;
+          const wx=snap(x0+PX*3+c*bay), wy=snap(topY+PX*6+r*PX*12);
+          g.fillStyle=s>0.93?WIN_COLD[0]:WIN_WARM[2];
+          g.globalAlpha=0.55;
+          g.fillRect(wx,wy,PX*4,PX*5);
+          g.globalAlpha=1;
+        }
+      }
+    });
   }
 
   // ── foreground plane ──
