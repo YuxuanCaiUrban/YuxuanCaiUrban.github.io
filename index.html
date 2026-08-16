@@ -1472,7 +1472,16 @@ const HOME=CITIES[0];
   // sits between FAR and the horizon haze and closes that gap.
   const HAZE=['#3c3356','#463a62','#50406c'];
   const FAR=['#342a48','#3e3054','#48385e'];
-  const MID=['#241d3c','#2a2348','#302852','#38305e','#4c4272'];
+  // Lifting the sky fixed the ORDER (sky above buildings) but not the amount:
+  // the two bands came out 0.176 against 0.168, a separation of 0.008, which is
+  // no separation at all. Both references make the same point from opposite
+  // directions — one puts dark buildings on a bright sky, the other bright
+  // buildings on a dark sky — and what they share is a large gap, not a
+  // particular polarity. The mid rank is what stands against the sky across
+  // most of the frame, so it takes the cut; FAR stays where it is, because
+  // atmospheric perspective wants the distance to converge on the sky, not
+  // separate from it.
+  const MID=['#191428','#1e1933','#221c3b','#282243','#362f52'];
   // [dark marks, top band, mid band, bottom band, highlight] — the 3 middle
   // entries are a top→bottom value gradient (street light warms the base)
   // near layer stays the darkest plane (≈11% luminance) — it is the foreground
@@ -1921,9 +1930,19 @@ const HOME=CITIES[0];
     g.fillStyle=R2[0];g.fillRect(bx,pTop,bw,U.plinth);
     g.fillStyle=R2[3];g.fillRect(bx,pTop,bw,PX);
     // cornice — overhangs, then casts a 1px shadow on the facade below
+    // Measured at the silhouette edge — the sky immediately above each roofline
+    // against the wall immediately below it — the wall came out 0.027 BRIGHTER
+    // than the sky, so the skyline had no silhouette to read at exactly the
+    // line where a skyline is read. The cause was here: the cornice was filled
+    // full width in R2[3], the lightest tone in the ramp, laying a bright band
+    // along the top of every building. A cornice at night is a dark overhang;
+    // what catches light is its underside lip, and that sits against the wall
+    // rather than against the sky, so it costs the silhouette nothing.
     const cTop=shapeSpan(b,b.y+PX);
-    g.fillStyle=R2[3];
+    g.fillStyle=R2[1];
     g.fillRect(cTop[0]-PX,b.y,cTop[1]+PX*2,U.cornice);
+    g.fillStyle=R2[3];
+    g.fillRect(cTop[0]-PX,b.y+U.cornice-PX,cTop[1]+PX*2,PX);
     g.fillStyle=R2[0];
     g.fillRect(cTop[0],b.y+U.cornice,cTop[1],PX);
     // ── projecting kit ──
