@@ -1447,7 +1447,23 @@ const HOME=CITIES[0];
   // ════ PALETTE — 44 colours, explicit ramps (see art-direction plan) ════
   // luminance-checked ramp: every band ≥11% relative luminance, so the sky is
   // never the thing dragging the frame into near-black (it was, in v3)
-  const SKY=['#201838','#261e40','#2c2248','#342850','#3e2c58','#4a3060','#5c3468','#703a6c'];
+  // Measured on the old palette: 82% of the frame sat between 0 and 20%
+  // luminance, and the mean of the sky, the building band and the ground were
+  // 0.153 / 0.168 / 0.142 — a spread of 0.026 across the entire picture, with
+  // the buildings coming out *lighter* than the sky they were supposed to be
+  // read against. That is what made the scene look flat however much form and
+  // material went into it: with no value separation the eye has nothing to
+  // read the structure by, and every silhouette collapses into its neighbour.
+  // The sky now climbs to a real glow at the horizon so the skyline has
+  // something to be a silhouette against. The top stays dark — the hero text
+  // sits over the upper left, and that is where its contrast comes from.
+  // Luminance ladder, 0.13 at the zenith to 0.53 at the horizon. The first
+  // attempt at this only moved the lower sky from 0.164 to 0.176 and changed
+  // nothing, because the buildings were still coming out lighter (0.169) than
+  // the sky above them (0.152) — a silhouette cannot read when the mass is
+  // brighter than what it stands against. The sky has to carry the top of the
+  // range for the skyline to exist at all.
+  const SKY=['#241c40','#2e2450','#3b2c62','#4c3576','#61408a','#7c4d9c','#9c5da8','#bd72ac'];
   const HORIZON=['#a8446a','#d97a72'];
   // ramps are ordered [darkest/plinth, shadow, base, lit]
   // A fourth rank behind FAR. Three planes stepped the palette twice and then
@@ -1456,7 +1472,16 @@ const HOME=CITIES[0];
   // sits between FAR and the horizon haze and closes that gap.
   const HAZE=['#3c3356','#463a62','#50406c'];
   const FAR=['#342a48','#3e3054','#48385e'];
-  const MID=['#241d3c','#2a2348','#302852','#38305e','#4c4272'];
+  // Lifting the sky fixed the ORDER (sky above buildings) but not the amount:
+  // the two bands came out 0.176 against 0.168, a separation of 0.008, which is
+  // no separation at all. Both references make the same point from opposite
+  // directions — one puts dark buildings on a bright sky, the other bright
+  // buildings on a dark sky — and what they share is a large gap, not a
+  // particular polarity. The mid rank is what stands against the sky across
+  // most of the frame, so it takes the cut; FAR stays where it is, because
+  // atmospheric perspective wants the distance to converge on the sky, not
+  // separate from it.
+  const MID=['#191428','#1e1933','#221c3b','#282243','#362f52'];
   // [dark marks, top band, mid band, bottom band, highlight] — the 3 middle
   // entries are a top→bottom value gradient (street light warms the base)
   // near layer stays the darkest plane (≈11% luminance) — it is the foreground
@@ -1465,9 +1490,18 @@ const HOME=CITIES[0];
     // The top band stays dark so the roofline still reads against the sky, but
     // the base is lifted well clear of black — that is where the plinth, string
     // courses and pier rhythm live, and where street light would fall.
+    // Six families, not three. The reference's street reads as a street partly
+    // because no two buildings on it are made of the same thing — render, tile,
+    // brick, concrete, painted steel. Cycling three ramps across six near
+    // blocks meant every building had a twin two doors down, and the eye finds
+    // that repeat immediately. These stay inside the night palette; they differ
+    // in what the base and the pier rhythm are made of, not in brightness.
     ['#0d0b18','#151222','#221e38','#332e52','#524b7a'],  // blue-black
     ['#0f0a16','#171020','#261c36','#372850','#584070'],  // purple-black
-    ['#100c12','#18121c','#26202e','#352c44','#564a66']   // warm-black
+    ['#100c12','#18121c','#26202e','#352c44','#564a66'],  // warm-black
+    ['#0a0d14','#111620','#1c2634','#2a3a4c','#46607a'],  // slate / wet concrete
+    ['#140b12','#1e121a','#30202c','#452e40','#6a4860'],  // oxblood brick
+    ['#0c1014','#131a1e','#1e2c2e','#2c4240','#466a62']   // green-black tile
   ];
   const RIM_MID='#7a4880', RIM_NEAR='#6a4a80';
   // NIGHT ground: dark base, brightness comes only from light pools and
@@ -1529,7 +1563,15 @@ const HOME=CITIES[0];
   // PX_CSS_CAP, floored at 320 so phones keep the framing they already have and
   // capped at COLS_MAX so the bake's per-block quantiser stays affordable
   // (its cost is columns x rows, i.e. quadratic in this number).
-  const COLS_MIN=320, COLS_MAX=640, PX_CSS_CAP=4;
+  // COLS_MAX was 640, which met PX_CSS_CAP exactly at 2560 and then stopped
+  // holding it: a 3440 ultrawide fell back to 5.4 CSS px per logical pixel and
+  // a 4K panel to 6.0, so the wider the display the coarser the art — the exact
+  // problem the adaptive grid was added to fix, reintroduced by its own bound.
+  // 1024 keeps the cap honest out to 4096px. Measured at 3840x1620: 960 columns,
+  // 4.0 CSS px, bake 590-750ms against 450ms at 640 columns. Bake runs once per
+  // resize behind a 150ms debounce, never per frame, so ~200ms buys a third off
+  // the pixel size on every large display.
+  const COLS_MIN=320, COLS_MAX=1024, PX_CSS_CAP=4;
 
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
@@ -1676,18 +1718,21 @@ const HOME=CITIES[0];
     // MID — simplified structures, deliberately taller than near so the
     // skyline still reads above the foreground block
     mkLayer(14,1,0.046,0.098,0.34,0.64,0.035).forEach((b,i)=>{
-      b.ramp=MID;b.type=(i%3===1)?'stepped':'rect';buildings.push(b);
+      // six forms rotating instead of two, so the mid rank stops reading as one
+      // extruded box repeated across the frame
+      b.ramp=MID;b.type=['rect','stepped','offset','rect','ziggurat','slab'][i%6];
+      buildings.push(b);
     });
     // NEAR — hand-placed. Gaps still let the mid layer through, but they are
     // now filled with lower blocks rather than left as bare sky.
     // massing varies: a straight row of flat-topped rects read as cardboard —
     // two get setback crowns, one gets a podium base with a slimmer tower
-    const nearTypes=['rect','stepped','rect','podium','stepped','rect'];
+    const nearTypes=['notch','offset','crown','podium','ziggurat','slab'];
     [[0.005,0.150,0.40],[0.170,0.120,0.29],[0.295,0.105,0.22],
      [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
         buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:nearTypes[i],
-          ramp:NEAR_FAM[i%3],seed:11.3+i*17.7,shop:i===1||i===4});
+          ramp:NEAR_FAM[[0,3,1,5,2,4][i]],seed:11.3+i*17.7,shop:i===1||i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
@@ -1720,8 +1765,38 @@ const HOME=CITIES[0];
 
   // usable span of a building at height y (tiered shapes)
   function shapeSpan(b,y){
+    const f=(y-b.y)/b.h;
+    // Every original form set its upper mass back symmetrically about the centre
+    // line. However much the heights varied, the silhouettes were all the same
+    // gesture, and a skyline of one gesture reads as one building repeated. The
+    // forms below break that: a mass shoved to one end, a shaft rising off the
+    // end of a slab, a crown parked off-centre, a stack of unequal setbacks.
+    const lean=rnd(b.seed*7.73)<0.5?0:1;      // deterministic per building
+    if(b.type==='ziggurat'){
+      if(f<0.15){const tw=snap(b.w*0.38);return [b.x+snap((b.w-tw)/2),tw];}
+      if(f<0.33){const tw=snap(b.w*0.60);return [b.x+snap((b.w-tw)/2),tw];}
+      if(f<0.55){const tw=snap(b.w*0.82);return [b.x+snap((b.w-tw)/2),tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='offset'){
+      if(f<0.42){const tw=snap(b.w*0.56);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='slab'){
+      if(f<0.54){const tw=snap(b.w*0.40);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='crown'){
+      if(f<0.13){const tw=snap(b.w*0.32);
+        return [lean?b.x+snap(b.w*0.58):b.x+snap(b.w*0.10),tw];}
+      return [b.x,b.w];
+    }
+    if(b.type==='notch'){
+      // a slot cut down one side: full width low, a bite taken out above
+      if(f<0.62){const tw=snap(b.w*0.72);return [lean?b.x+b.w-tw:b.x,tw];}
+      return [b.x,b.w];
+    }
     if(b.type==='stepped'){
-      const f=(y-b.y)/b.h;
       if(f<0.30){const tw=snap(b.w*0.62);return [b.x+snap((b.w-tw)/2),tw];}
       return [b.x,b.w];
     }
@@ -1855,11 +1930,51 @@ const HOME=CITIES[0];
     g.fillStyle=R2[0];g.fillRect(bx,pTop,bw,U.plinth);
     g.fillStyle=R2[3];g.fillRect(bx,pTop,bw,PX);
     // cornice — overhangs, then casts a 1px shadow on the facade below
+    // Measured at the silhouette edge — the sky immediately above each roofline
+    // against the wall immediately below it — the wall came out 0.027 BRIGHTER
+    // than the sky, so the skyline had no silhouette to read at exactly the
+    // line where a skyline is read. The cause was here: the cornice was filled
+    // full width in R2[3], the lightest tone in the ramp, laying a bright band
+    // along the top of every building. A cornice at night is a dark overhang;
+    // what catches light is its underside lip, and that sits against the wall
+    // rather than against the sky, so it costs the silhouette nothing.
     const cTop=shapeSpan(b,b.y+PX);
-    g.fillStyle=R2[3];
+    g.fillStyle=R2[1];
     g.fillRect(cTop[0]-PX,b.y,cTop[1]+PX*2,U.cornice);
+    g.fillStyle=R2[3];
+    g.fillRect(cTop[0]-PX,b.y+U.cornice-PX,cTop[1]+PX*2,PX);
     g.fillStyle=R2[0];
     g.fillRect(cTop[0],b.y+U.cornice,cTop[1],PX);
+    // ── projecting kit ──
+    // The facades were flat planes: everything drawn on them lived inside the
+    // silhouette, so the outline stayed a clean rectangle no matter how much
+    // detail went on. Real blocks push things out past their own edge — a soil
+    // pipe, a run of balconies — and that broken edge is most of what separates
+    // a building from an extruded shape.
+    if(near){
+      const METAL2=mix(R2[4],'#000000',0.35);
+      if(rnd(b.seed*41.3)<0.75){                       // soil pipe on one flank
+        const px2=rnd(b.seed*43.7)<0.5?bx-PX:bx+bw;
+        const y0=b.y+U.cornice, y1=gY-U.plinth;
+        g.fillStyle=METAL2;
+        g.fillRect(px2,y0,PX,y1-y0);
+        for(let y2=y0+U.floor;y2<y1-PX*2;y2+=U.floor*2)  // collars
+          g.fillRect(px2-PX,snap(y2),PX*3,PX);
+      }
+      if(rnd(b.seed*47.1)<0.6){                        // balcony stack, one bay
+        const gb=facadeGeom(b);
+        const col=Math.floor(rnd(b.seed*53.9)*Math.max(1,gb.bays));
+        for(let r=1;r<gb.rows;r+=2){
+          const byy=snap(gb.top+r*gb.pitchY+gb.wH+PX);
+          if(byy>gY-U.ground)break;
+          const sp2=shapeSpan(b,byy);
+          const bxx=snap(sp2[0]+col*gb.bayW);
+          if(bxx<sp2[0]||bxx+gb.bayW>sp2[0]+sp2[1])continue;
+          g.fillStyle=R2[1];g.fillRect(bxx-PX,byy,gb.bayW+PX,PX*2);
+          g.fillStyle=METAL2;g.fillRect(bxx-PX,byy-PX*2,gb.bayW+PX,PX);
+        }
+      }
+    }
     // string courses every 3rd floor
     const gm=facadeGeom(b);
     for(let r=3;r<gm.rows;r+=3){
@@ -2710,7 +2825,50 @@ const HOME=CITIES[0];
     }
     g.globalAlpha=1;
     bakeStreetProps(g);
+    bakeFrameMass(g);
     bakeQuay(g);
+  }
+
+  // ── side framing ──
+  // Reference cityscapes almost always wall the frame in: a dark building mass
+  // cropped by the left and right edges, closer than anything else and carrying
+  // almost no light. It does two jobs at once — it supplies a depth rank in
+  // front of the near buildings, and it stops the composition from bleeding off
+  // the sides, which is what made this skyline read as a backdrop rather than a
+  // place you are standing in. Kept narrow and near-black so it frames the city
+  // without taking any attention from it.
+  function bakeFrameMass(g){
+    const INK='#08040f', EDGE='#170f26';
+    [0,1].forEach(side=>{
+      const wMass=snap(W*(side?0.055:0.07));
+      const x0=side?W-wMass:0;
+      const topY=snap(gY-(side?0.80:0.92)*gY);
+      g.fillStyle=INK;
+      g.fillRect(x0,topY,wMass,gY-topY);
+      // the inner edge catches a sliver of the city's glow, which is the only
+      // thing separating the mass from the sky behind it
+      g.fillStyle=EDGE;
+      g.fillRect(side?x0:x0+wMass-PX,topY,PX,gY-topY);
+      // a parapet lip, so the top edge is not a plain horizontal cut
+      g.fillRect(x0,topY,wMass,PX);
+      g.fillStyle=INK;
+      g.fillRect(side?x0+PX*2:x0+wMass-PX*5,topY-PX*3,PX*3,PX*3);
+      // a handful of windows: an unlit black slab reads as a hole in the canvas,
+      // a few lit ones say building. Deliberately sparse — this is the darkest
+      // plane in the scene and it has to stay that way.
+      const bay=PX*9, rows=Math.floor((gY-topY-U.ground)/(PX*12));
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<Math.floor(wMass/bay)-1;c++){
+          const s=rnd(side*31.7+r*7.3+c*13.1);
+          if(s<0.72)continue;
+          const wx=snap(x0+PX*3+c*bay), wy=snap(topY+PX*6+r*PX*12);
+          g.fillStyle=s>0.93?WIN_COLD[0]:WIN_WARM[2];
+          g.globalAlpha=0.55;
+          g.fillRect(wx,wy,PX*4,PX*5);
+          g.globalAlpha=1;
+        }
+      }
+    });
   }
 
   // ── foreground plane ──
