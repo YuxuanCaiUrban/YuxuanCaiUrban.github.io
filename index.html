@@ -2053,6 +2053,19 @@ const HOME=CITIES[0];
       // hard edge between the two planes
       g.fillStyle=R2[0];
       g.fillRect(b.sideDir>0?b.x+b.w-PX:b.x,b.y,PX,b.h);
+      // dim slit windows on the flank — a 400px sheet of flat fill beside the
+      // billboard read as an unfinished cutout, not as a building in shadow
+      for(let dx2=PX*2;dx2<sw-PX;dx2+=PX*4){
+        const f2=(dx2+PX)/sw;
+        const xs=b.sideDir>0?sx0+dx2:sx0+sw-PX-dx2;
+        const top2=snap(b.y+f2*b.h*0.10)+PX*4, bot2=snap(gY-f2*U.plinth*0.8)-U.ground;
+        for(let fy=top2;fy+PX*2<bot2;fy+=PX*7){
+          const rr=rnd(b.seed+dx2*1.3+fy*0.7);
+          if(rr<0.45)continue;
+          g.fillStyle=rr>0.92?'#eda45c':R2[2];
+          g.fillRect(snap(xs),snap(fy),PX,PX*2);
+        }
+      }
     }
     g.fillStyle=R2[2];
     if(b.type==='stepped'){
@@ -2681,7 +2694,11 @@ const HOME=CITIES[0];
       const bh=vert?snap(Math.min(b.h*0.28,PX*30)):PX*8;
       const sx=vert?(b.x+b.w/2<W/2?b.x+b.w-PX*2:b.x-bw+PX*2)
                    :snap(b.x+(b.w-bw)/2);
-      const sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
+      let sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
+      // don't let the elevated rail bisect a sign — hop above the guideway
+      const railB=snap(gY*0.50);
+      if(b.layer===1&&sy<railB+PX*12&&sy+bh>railB+PX*2)
+        sy=snap(Math.max(b.y+U.cornice+PX*2,railB-bh-PX*3));
       if(sy+bh>gY-U.ground+PX*2)return;
       // yield to pictograms only — brushing against a brand sign is fine (the
       // GEOAI base sub-sign reads as intentional layering, not a collision)
@@ -2846,12 +2863,23 @@ const HOME=CITIES[0];
     const railY=snap(gY*0.50);
     g.fillStyle=MID[0];
     for(let px2=snap(PX*14);px2<W;px2+=PX*44){
-      g.fillRect(px2,railY+PX*9,PX*3,gY-railY-PX*9);
-      g.fillRect(px2-PX*2,railY+PX*8,PX*7,PX*2);
+      g.fillRect(px2,railY+PX*9,PX*4,gY-railY-PX*9);
+      g.fillRect(px2-PX*2,railY+PX*8,PX*8,PX*2);
     }
     g.fillStyle=MID[1];g.fillRect(0,railY+PX*7,W,PX*3);
     g.fillStyle=MID[4];g.fillRect(0,railY+PX*7,W,PX);
     g.fillStyle='#0e0918';g.fillRect(0,railY+PX*10,W,PX);
+    // a ruled line reads as a fence; girder ticks below and catenary masts
+    // above are what make it read as a guideway something rides on
+    g.fillStyle='#0e0918';
+    for(let gx=snap(PX*6);gx<W;gx+=PX*11)g.fillRect(gx,railY+PX*10,PX,PX);
+    g.fillStyle=MID[0];
+    for(let mx=snap(PX*25);mx<W;mx+=PX*44){
+      g.fillRect(mx,railY+PX*3,PX,PX*4);
+      g.fillRect(mx-PX,railY+PX*3,PX*3,PX);
+    }
+    g.fillStyle=mix(MID[0],'#000000',0.25);
+    g.fillRect(0,railY+PX*4,W,PX);           // contact wire
   }
 
   function bakeNear(){
@@ -3231,7 +3259,7 @@ const HOME=CITIES[0];
     const carL=PX*34, gap=PX*3, nCars=3;
     const len=nCars*carL+(nCars-1)*gap;
     const span=W+len+snap(W*1.5);              // long off-screen dwell
-    const x0=snap(W*0.15-((t*1.2*PX)%span));   // right to left, metro pace; starts on-screen
+    const x0=snap(W*0.30-((t*1.2*PX)%span));   // right to left, metro pace; starts on-screen
     const topY=deckY-PX*8;
     for(let c=0;c<nCars;c++){
       const x=snap(x0+c*(carL+gap));
@@ -3247,10 +3275,17 @@ const HOME=CITIES[0];
       ctx.fillRect(x+PX*11,topY+PX*3,PX*2,PX*4);
       ctx.fillRect(x+carL-PX*13,topY+PX*3,PX*2,PX*4);
     }
-    // headlight on the leading (left) end
-    const hx=snap(x0-PX);
-    if(hx>-PX*2&&hx<W)
-      {ctx.fillStyle='#fff2cf';ctx.fillRect(hx,topY+PX*5,PX,PX*2);}
+    // cab nose on the leading (left) end — a window band that starts mid-air
+    // reads as a clipped sprite, not as a train with a front
+    if(x0>-PX*6&&x0<W+PX*6){
+      ctx.fillStyle='#232041';
+      ctx.fillRect(snap(x0-PX*3),topY+PX,PX*3,PX*7);
+      ctx.fillRect(snap(x0-PX*4),topY+PX*3,PX,PX*5);
+      ctx.fillStyle='#cfe8f4';
+      ctx.fillRect(snap(x0-PX*2),topY+PX*3,PX*2,PX*2);   // cab windscreen
+      ctx.fillStyle='#fff2cf';
+      ctx.fillRect(snap(x0-PX*4),topY+PX*6,PX,PX);       // headlight
+    }
   }
 
   function drawBeacons(){
@@ -3305,8 +3340,10 @@ const HOME=CITIES[0];
         ctx.fillStyle='#160b24';
         ctx.fillRect(s.bracket.x,s.bracket.y,s.bracket.w,PX);
       }
-      // paper and cloth don't flicker — dropouts are for gas and diodes
-      if(s.dim){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
+      // paper and cloth don't flicker — dropouts are for gas and diodes.
+      // Rooftop brand signs don't either: the flagship spending frames hazy
+      // read as a rendering bug in every review of a frozen frame.
+      if(s.dim||s.roof){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
       // state machine: mostly on, occasional single-step dropout, phase-offset
       const c=step4()+Math.floor(s.ph*7);
       const dip=(c%37===0)||(c%53===0);
