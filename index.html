@@ -2705,7 +2705,26 @@ const HOME=CITIES[0];
       if(hitsSign(sx,sy,bw,bh,PX*4,'picto'))return;
       // a single glyph cell reads as one big letter; demand at least two
       if(vert&&bh<PX*18)return;
-      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
+      // Two sign languages instead of one (from the monitor-wall reference).
+      // Every background sign was the same recipe — dark panel, tube frame,
+      // lit marks — so the street read as one shop franchised down the block.
+      // Roughly a third are screens now, and a screen is the tube sign's
+      // negative: a lit field with DARK text, its header in the accent colour,
+      // no tube at all. The marks are punched out of the emissive field with
+      // destination-out, so the dark bezel shows through as letters and the
+      // bloom still comes from the field alone.
+      const SCREEN='#8fc8ff';
+      const scr=rnd(b.seed*9.7+i*3.1)<0.38;
+      const spr=scr?makeSprite(bw,bh,SCREEN,g=>signPanel(g,bw,bh),g=>{
+        g.fillStyle=SCREEN;g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
+        g.fillStyle=col;
+        if(vert)g.fillRect(PX,PX,bw-PX*2,PX*3);
+        else    g.fillRect(PX,PX,bw-PX*2,PX*2);
+        g.save();g.globalCompositeOperation='destination-out';
+        if(vert) drawMarks(g,PX*2,PX*6,bh-PX*8,bw-PX*4,b.seed*3.9,true);
+        else     drawMarks(g,PX*2,PX*4,bw-PX*4,PX*2,b.seed*5.1,false);
+        g.restore();
+      }):makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
         signEmit(g,bw,bh,col,null,0,false);
         // abstract marks — reads as signage without degrading into noise
         g.fillStyle=col;g.globalAlpha=0.9;
