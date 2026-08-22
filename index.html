@@ -1509,6 +1509,7 @@ const HOME=CITIES[0];
   const G_WALK='#2a2236', G_WALK2='#241d30', G_ROAD='#1e1828', G_MARK='#6a5478', G_KERB='#3a3048';
   const WIN_WARM=['#ffdba8','#ffc47e','#eda45c'];
   const WIN_COLD=['#b0dcf0','#7cb4e4'];
+  const WIN_ACC=['#7fe8c8','#ff8f7a'];   // rare teal/coral cells on distant towers
   // unlit glass reflects the sky — never near-black, this is where midtones live
   const WIN_DARK=['#2a2440','#241f38','#302a48'];
   const TV_COOL='#c8ecff';
@@ -1586,6 +1587,32 @@ const HOME=CITIES[0];
   }
 
   const signFont=s=>'bold '+s+'px "Share Tech Mono","Courier New",monospace';
+
+  // 5x7 bitmap caps for the three worded signs. A vector font thresholded to
+  // 1-bit lands its stems wherever the rasterizer put them — half on, half off
+  // the PX grid — and the re-pixelize pass turned that into ragged letters.
+  // Hand-set glyphs are PX-exact by construction.
+  const FONT5={
+    A:['01110','10001','10001','11111','10001','10001','10001'],
+    B:['11110','10001','10001','11110','10001','10001','11110'],
+    E:['11111','10000','10000','11110','10000','10000','11111'],
+    G:['01111','10000','10000','10111','10001','10001','01110'],
+    I:['11111','00100','00100','00100','00100','00100','11111'],
+    N:['10001','11001','11001','10101','10011','10011','10001'],
+    O:['01110','10001','10001','10001','10001','10001','01110'],
+    R:['11110','10001','10001','11110','10100','10010','10001'],
+    S:['01111','10000','10000','01110','00001','00001','11110'],
+    U:['10001','10001','10001','10001','10001','10001','01110'],
+    V:['10001','10001','10001','10001','10001','01010','00100'],
+    ' ':['00000','00000','00000','00000','00000','00000','00000']
+  };
+  function drawText5(g,txt,x,y,fp){
+    for(let i=0;i<txt.length;i++){
+      const gl=FONT5[txt[i]]||FONT5[' '];
+      for(let r=0;r<7;r++)for(let c=0;c<5;c++)
+        if(gl[r][c]==='1')g.fillRect(x+i*fp*6+c*fp,y+r*fp,fp,fp);
+    }
+  }
 
   // ════ SKY — 8 quantized bands, dither only at the seams ════
   function bakeSky(){
@@ -1732,7 +1759,7 @@ const HOME=CITIES[0];
      [0.630,0.098,0.24],[0.735,0.130,0.35],[0.880,0.140,0.26]]
       .forEach((s,i)=>{
         buildings.push({xf:s[0],wf:s[1],hf:s[2],layer:2,type:nearTypes[i],
-          ramp:NEAR_FAM[[0,3,1,5,2,4][i]],seed:11.3+i*17.7,shop:i===1||i===4});
+          ramp:NEAR_FAM[[0,3,1,5,2,4][i]],seed:11.3+i*17.7,shop:i===1||i===4,claw:i===4});
       });
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
@@ -1825,10 +1852,12 @@ const HOME=CITIES[0];
   // ════ FACADE GRID — pier rhythm is the dominant grid, windows nest inside ════
   function facadeGeom(b){
     const near=b.layer===2;
-    const bayW=near?U.bay:PX*11;
-    const marginX=near?U.marginX:PX*3;
-    const pitchY=near?U.floor:PX*8;
-    const wW=near?U.winW:PX*3, wH=near?U.winH:PX*4;
+    // mid towers carry a dense curtain of small cells — reference pieces
+    // (BOMB998) have no bare wall: the window grid IS the facade texture
+    const bayW=near?U.bay:PX*8;
+    const marginX=near?U.marginX:PX*2;
+    const pitchY=near?U.floor:PX*6;
+    const wW=near?U.winW:PX*2, wH=near?U.winH:PX*3;
     const usable=b.w-marginX*2;
     const bays=Math.max(1,Math.floor(usable/bayW));
     const x0=b.x+snap((b.w-bays*bayW)/2);
@@ -1836,7 +1865,7 @@ const HOME=CITIES[0];
     const bottom=gY-(near?U.ground:PX*3)-PX*2;
     const rows=Math.max(1,Math.floor((bottom-top)/pitchY));
     return {bays,bayW,x0,top,rows,pitchY,wW,wH,near,
-            winOff:near?[PX*2,PX*7]:[PX*2,PX*5]};
+            winOff:near?[PX*2,PX*7]:[PX,PX*4+PX]};
   }
 
   // ── windows: lit ratio ≤35%, warm:cool 75:25, interiors on 1/6 of lit ──
@@ -1858,7 +1887,10 @@ const HOME=CITIES[0];
       // temperament, so a quiet block can sit next to a lit one and let it
       // register — the "leave some areas empty" rule, applied per building
       // rather than per floor. The lit modes keep their relative split.
-      const darkP=temper<0.30?0.62:temper<0.80?0.35:0.20;
+      let darkP=temper<0.30?0.62:temper<0.80?0.35:0.20;
+      // distance compresses the dark floors away — the reference skylines
+      // (BOMB998) read roughly half lit on the mid towers
+      if(!gm.near)darkP*=0.55;
       let mode;
       if(fr<darkP)mode=0;
       else{const q=(fr-darkP)/(1-darkP);mode=q<0.46?1:q<0.85?2:3;}
@@ -1877,6 +1909,12 @@ const HOME=CITIES[0];
           g.fillRect(wx,wy,gm.wW,gm.wH);
           g.fillStyle=recess;g.fillRect(wx,wy,gm.wW,PX);       // reveal shadow at the head
           g.fillStyle=sill;g.fillRect(wx,wy+gm.wH,gm.wW,PX);   // sill catches light
+          // wall AC unit beside ~1 in 10 near windows — the single most
+          // ubiquitous object on the reference facades
+          if(gm.near&&rnd(b.seed+idx*43.1+r*17.3)<0.10&&wx+gm.wW+PX*4<span[0]+span[1]-PX*2){
+            g.fillStyle=METAL;g.fillRect(wx+gm.wW+PX,wy+PX,PX*3,PX*2);
+            g.fillStyle=recess;g.fillRect(wx+gm.wW+PX,wy+PX*3,PX*3,PX);
+          }
           let lit=false;
           if(mode===1)lit=rnd(b.seed+r*7.7+idx*3.1)<0.15;
           else if(mode===2)lit=idx>=cs&&idx<cs+cl;
@@ -1885,7 +1923,11 @@ const HOME=CITIES[0];
           litCount++;
           const cold=rnd(b.seed+r*3.3+idx*11.1)<0.25;
           const pal=cold?WIN_COLD:WIN_WARM;
-          const colr=pal[Math.floor(rnd(b.seed+idx*17.3+r)*pal.length)];
+          let colr=pal[Math.floor(rnd(b.seed+idx*17.3+r)*pal.length)];
+          // distant towers sprinkle rare accent cells (teal/coral) the way the
+          // reference skylines do — never on near facades, where it reads odd
+          if(!gm.near&&rnd(b.seed+idx*29.3+r*7.9)<0.08)
+            colr=rnd(b.seed+idx*31.7)<0.5?WIN_ACC[0]:WIN_ACC[1];
           g.fillStyle=colr;g.fillRect(wx,wy,gm.wW,gm.wH);
           if(gm.near){
             // interior: only 1 in 6 lit windows gets a room
@@ -2011,6 +2053,19 @@ const HOME=CITIES[0];
       // hard edge between the two planes
       g.fillStyle=R2[0];
       g.fillRect(b.sideDir>0?b.x+b.w-PX:b.x,b.y,PX,b.h);
+      // dim slit windows on the flank — a 400px sheet of flat fill beside the
+      // billboard read as an unfinished cutout, not as a building in shadow
+      for(let dx2=PX*2;dx2<sw-PX;dx2+=PX*4){
+        const f2=(dx2+PX)/sw;
+        const xs=b.sideDir>0?sx0+dx2:sx0+sw-PX-dx2;
+        const top2=snap(b.y+f2*b.h*0.10)+PX*4, bot2=snap(gY-f2*U.plinth*0.8)-U.ground;
+        for(let fy=top2;fy+PX*2<bot2;fy+=PX*7){
+          const rr=rnd(b.seed+dx2*1.3+fy*0.7);
+          if(rr<0.45)continue;
+          g.fillStyle=rr>0.92?'#eda45c':R2[2];
+          g.fillRect(snap(xs),snap(fy),PX,PX*2);
+        }
+      }
     }
     g.fillStyle=R2[2];
     if(b.type==='stepped'){
@@ -2108,6 +2163,14 @@ const HOME=CITIES[0];
       beacons.push({x:sx-PX,y:b.y-PX*24,fast:true});
       steamSrcs.push({x:snap(b.x+b.w*0.22),y:b.y});
       return;
+    }
+    // parapet railing — the reference roofs almost all carry one, and the
+    // broken 1px comb it puts on the skyline is cheap silhouette detail
+    if(rnd(b.seed*61.7)<0.55&&top[1]>PX*10){
+      g.fillStyle=mix(R2[0],'#000000',0.30);
+      g.fillRect(top[0],b.y-PX*3,top[1],PX);
+      for(let px3=top[0];px3<top[0]+top[1];px3+=PX*6)
+        g.fillRect(snap(px3),b.y-PX*3,PX,PX*3);
     }
     // A roof carrying one lonely object reads as unfinished. Budget by width and
     // let a roof stack several, which is what makes a skyline look inhabited.
@@ -2236,6 +2299,55 @@ const HOME=CITIES[0];
     lightPools.push({x:b.x,w:b.w,konbini});
   }
 
+  // ── claw-machine corner (from the arcade-storefront reference) ──
+  // Two cabinets parked against one shopfront, a player at the near one, a cat
+  // asleep on the far one. The machines carry their own light, so unlike the
+  // smoker they need no lit pane behind them — the glass IS the light source,
+  // which is also why the figure in front of it silhouettes for free. Scale
+  // check: a real claw cabinet is about a person's height, and these are 11
+  // logical px against the 10px figure.
+  function bakeClawCorner(g,b){
+    const u=PX, BODY='#241028', INKF='#0b0616';
+    const top=gY-u*11;
+    if(b.w<u*32)return;                       // needs room for two cabinets
+    // The doorway is taller than a cabinet (14u ground floor against 11u), so
+    // a cluster straddling it shows a bright cream head poking out between the
+    // machines, which reads as a third mystery kiosk. Its x is seeded exactly
+    // like bakeStorefront's, so recompute it and park the cluster clear of it.
+    const dx=snap(b.x+u*4+rnd(b.seed*11.3)*Math.max(u,b.w-u*14));
+    let cx=snap(b.x+u*4);
+    if(cx+u*20>dx-u*2&&cx<dx+u*7)cx=snap(dx+u*8);
+    if(cx+u*22>b.x+b.w)cx=snap(Math.max(b.x+u*2,dx-u*24));
+    const cab=(x0,glow,marq,blobs)=>{
+      g.fillStyle=INKF; g.fillRect(x0,gY-u*2,u*9,u*2);         // plinth
+      g.fillStyle=BODY; g.fillRect(x0,top,u*9,u*9);            // body
+      g.fillStyle=marq; g.fillRect(x0,top,u*9,u);              // marquee
+      g.fillStyle=glow; g.fillRect(x0+u,top+u*2,u*7,u*5);      // lit glass
+      g.fillStyle=BODY;                                        // claw on its rod
+      g.fillRect(x0+u*4,top+u*2,u,u*2);
+      g.fillRect(x0+u*3,top+u*4,u,u); g.fillRect(x0+u*5,top+u*4,u,u);
+      blobs.forEach((c,i)=>{                                   // plush heap
+        g.fillStyle=c; g.fillRect(x0+u*(1+i*2),top+u*6,u*2,u);
+      });
+      g.fillStyle=INKF; g.fillRect(x0,gY-u*4,u*9,u);           // control ledge
+    };
+    cab(cx,      '#ff9ec8','#ff3a90',['#ff5f82','#fff5c0','#ffb87e']);
+    cab(cx+u*11, '#7cb4e4','#3ee6ff',['#7cb4e4','#fff5c0','#ff5f82']);
+    // the player, back to us, against the pink glass
+    const fx=cx+u*2;
+    g.fillStyle=INKF;
+    g.fillRect(fx+u,gY-u*10,u*2,u*2);                          // head
+    g.fillRect(fx,gY-u*8,u*4,u*4);                             // torso
+    g.fillRect(fx+u*4,gY-u*5,u,u);                             // hand on the stick
+    g.fillRect(fx,gY-u*4,u,u*4); g.fillRect(fx+u*3,gY-u*4,u,u*4);
+    // the cat, flat out on the far marquee
+    const cb=cx+u*11;
+    g.fillRect(cb+u*3,top-u,u*3,u);                            // body
+    g.fillRect(cb+u*6,top-u*2,u*2,u);                          // head
+    g.fillRect(cb+u*6,top-u*3,u,u);                            // one ear up
+    g.fillRect(cb+u*2,top-u*2,u,u);                            // tail curled
+  }
+
   function bakeFireEscape(g,b){
     const side=rnd(b.seed*13.7)<0.5?0:1;
     const fw=PX*9;
@@ -2300,7 +2412,44 @@ const HOME=CITIES[0];
     g.globalAlpha=1;
     g.drawImage(body,0,0);
     g.drawImage(emit,0,0);
+    pixelizeSprite(spr);
     return {img:spr,pad:P};
+  }
+
+  // Re-pixelize a composited sprite onto the logical grid. Font-rendered text
+  // carries 1-2px strokes and the glow rings carry smooth alpha — both finer
+  // than the scene's PX grid, which is what made the signs read as stickers
+  // pasted on the pixel art. Blocks holding opaque pixels get a majority vote
+  // (text stays binary); pure-halo blocks get their alpha posterized to three
+  // hard steps. One pass per sprite at build time, nothing per frame.
+  function pixelizeSprite(cv){
+    const w=cv.width,h=cv.height,g=cv.getContext('2d');
+    let id;try{id=g.getImageData(0,0,w,h);}catch(e){return;}
+    const d=id.data;
+    const out=g.createImageData(w,h),o=out.data;
+    for(let by=0;by<h;by+=PX)for(let bx=0;bx<w;bx+=PX){
+      const x1=Math.min(w,bx+PX),y1=Math.min(h,by+PX);
+      let r=0,gr=0,b=0,a=0,n=0,hard=0;
+      for(let y=by;y<y1;y++)for(let x=bx;x<x1;x++){
+        const i=(y*w+x)*4,al=d[i+3];
+        if(al>200)hard++;
+        r+=d[i]*al;gr+=d[i+1]*al;b+=d[i+2]*al;a+=al;n++;
+      }
+      if(!a)continue;
+      let al2;
+      if(hard>0)al2=hard>=n*0.45?255:0;          // text and panels stay binary
+      else{
+        const av=a/n;
+        al2=av<18?0:av<55?38:av<110?80:140;       // halo: three hard steps
+      }
+      if(!al2)continue;
+      const rr=Math.round(r/a),gg=Math.round(gr/a),bb=Math.round(b/a);
+      for(let y=by;y<y1;y++)for(let x=bx;x<x1;x++){
+        const i=(y*w+x)*4;
+        o[i]=rr;o[i+1]=gg;o[i+2]=bb;o[i+3]=al2;
+      }
+    }
+    g.putImageData(out,0,0);
   }
 
   // dark backing panel — opaque, never glows
@@ -2329,13 +2478,15 @@ const HOME=CITIES[0];
     g.globalAlpha=0.24;g.fillRect(PX,ch+PX,PX,bh-(ch+PX)*2);
     g.globalAlpha=1;
     if(!txt)return;
-    g.font=signFont(fs);g.textBaseline='top';g.fillStyle=col;
+    g.fillStyle=col;
+    const fp=Math.max(PX,Math.floor(fs/(7*PX))*PX);
     if(vertical){
-      g.textAlign='center';
-      for(let i=0;i<txt.length;i++)g.fillText(txt[i],bw/2,PX*3+i*(fs+PX));
-      g.textAlign='left';
+      const gx=snap((bw-fp*5)/2);
+      for(let i=0;i<txt.length;i++)
+        drawText5(g,txt[i],gx,PX*3+i*(fs+PX)+snap((fs-fp*7)/2),fp);
     } else {
-      g.fillText(txt,PX*3,PX*3);
+      const tw2=txt.length*fp*6-fp;
+      drawText5(g,txt,snap((bw-tw2)/2),snap((bh-fp*7)/2),fp);
     }
   }
 
@@ -2535,7 +2686,7 @@ const HOME=CITIES[0];
     // ── 4) background signage: abstract marks only (below the legibility floor)
     // never give the VISION host a second abstract sign — the two boxes fuse
     // into one garbled "EVISION" read
-    const absHosts=near.slice(2).filter(b=>b!==shopHost).concat(mid.slice(0,3));
+    const absHosts=near.slice(2).filter(b=>b!==shopHost).concat(mid.slice(0,6));
     absHosts.forEach((b,i)=>{
       const col=NEON[(i*2+3)%NEON.length];
       const vert=i%2===0;
@@ -2543,7 +2694,11 @@ const HOME=CITIES[0];
       const bh=vert?snap(Math.min(b.h*0.28,PX*30)):PX*8;
       const sx=vert?(b.x+b.w/2<W/2?b.x+b.w-PX*2:b.x-bw+PX*2)
                    :snap(b.x+(b.w-bw)/2);
-      const sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
+      let sy=snap(b.y+U.cornice+PX*6+rnd(b.seed*3.3)*b.h*0.25);
+      // don't let the elevated rail bisect a sign — hop above the guideway
+      const railB=snap(gY*0.50);
+      if(b.layer===1&&sy<railB+PX*12&&sy+bh>railB+PX*2)
+        sy=snap(Math.max(b.y+U.cornice+PX*2,railB-bh-PX*3));
       if(sy+bh>gY-U.ground+PX*2)return;
       // yield to pictograms only — brushing against a brand sign is fine (the
       // GEOAI base sub-sign reads as intentional layering, not a collision)
@@ -2700,18 +2855,31 @@ const HOME=CITIES[0];
 
   function bakeMid(){
     Lmid.width=W;Lmid.height=H;const g=Lmid.getContext('2d');
-    // elevated rail viaduct — baked FIRST so the mid towers stand in front of
-    // it; the deck used to slice across every facade at one height
-    const railY=snap(gY*0.58);
+    buildings.forEach(b=>{if(b.layer===1){bakeBuilding(g,b);bakeSignWall(g,b);}});
+    // elevated rail — IN FRONT of the mid towers and high enough to ride the
+    // near rooflines, so the metro actually shows (at the old street height
+    // every window of viaduct was walled off behind the near row). The near
+    // layer still bakes over it, so piers vanish behind the near buildings.
+    const railY=snap(gY*0.50);
     g.fillStyle=MID[0];
-    for(let px2=snap(PX*8);px2<W;px2+=PX*34){
+    for(let px2=snap(PX*14);px2<W;px2+=PX*44){
       g.fillRect(px2,railY+PX*9,PX*4,gY-railY-PX*9);
       g.fillRect(px2-PX*2,railY+PX*8,PX*8,PX*2);
     }
     g.fillStyle=MID[1];g.fillRect(0,railY+PX*7,W,PX*3);
     g.fillStyle=MID[4];g.fillRect(0,railY+PX*7,W,PX);
     g.fillStyle='#0e0918';g.fillRect(0,railY+PX*10,W,PX);
-    buildings.forEach(b=>{if(b.layer===1){bakeBuilding(g,b);bakeSignWall(g,b);}});
+    // a ruled line reads as a fence; girder ticks below and catenary masts
+    // above are what make it read as a guideway something rides on
+    g.fillStyle='#0e0918';
+    for(let gx=snap(PX*6);gx<W;gx+=PX*11)g.fillRect(gx,railY+PX*10,PX,PX);
+    g.fillStyle=MID[0];
+    for(let mx=snap(PX*25);mx<W;mx+=PX*44){
+      g.fillRect(mx,railY+PX*3,PX,PX*4);
+      g.fillRect(mx-PX,railY+PX*3,PX*3,PX);
+    }
+    g.fillStyle=mix(MID[0],'#000000',0.25);
+    g.fillRect(0,railY+PX*4,W,PX);           // contact wire
   }
 
   function bakeNear(){
@@ -2825,6 +2993,9 @@ const HOME=CITIES[0];
     }
     g.globalAlpha=1;
     bakeStreetProps(g);
+    // the arcade corner bakes after the props: prop anchors shift with viewport
+    // width, and twice now one has parked itself on top of a cabinet
+    buildings.forEach(b=>{if(b.layer===2&&b.claw)bakeClawCorner(g,b);});
     bakeQuay(g);
   }
 
@@ -2905,7 +3076,15 @@ const HOME=CITIES[0];
     // red spill: solid pool on the pavement, stronger wash on the wall behind
     // (0.20 lands on the registered VEND_GLOW tone instead of being snapped away)
     g.fillStyle=VEND_GLOW;g.fillRect(vx-PX*4,gY,PX*15,PX*4);
-    g.fillStyle='rgba(220,40,60,0.20)';g.fillRect(vx-PX*4,gY-PX*12,PX*15,PX*12);
+    // Wall bleed follows the sign doctrine: a thin dithered rim, never a slab.
+    // The old 0.20 wash was a 15x12 rectangle of tinted wall which the
+    // quantizer snapped into a hard-edged red box around the machine.
+    g.fillStyle=VEND_GLOW;
+    for(let by2=gY-PX*12;by2<gY-PX;by2+=PX){
+      const r2=Math.round(by2/PX);
+      if((r2&1)===0)g.fillRect(vx-PX,by2,PX,PX);
+      else g.fillRect(vx+PX*7,by2,PX,PX);
+    }
     // bicycle leaning on the wall
     const bx2=sx-PX*20;
     g.fillStyle='#1a1626';
@@ -2952,6 +3131,7 @@ const HOME=CITIES[0];
     add(RIM_MID);add(RIM_NEAR);
     [G_WALK,G_WALK2,G_ROAD,G_MARK,G_KERB].forEach(add);
     WIN_WARM.forEach(add);WIN_COLD.forEach(add);WIN_DARK.forEach(add);
+    WIN_ACC.forEach(add);add(METAL);
     add(TV_COOL);add(METAL);add(GLOW_OUT);add(AMBIENT);
     // three glow steps per neon so the stepped rings survive quantisation
     NEON.forEach(n=>{
@@ -2973,7 +3153,7 @@ const HOME=CITIES[0];
     // is four device pixels of saturated orange with nothing else near it in the
     // palette, so the quantizer snapped it into the wall behind him and he lost
     // the one thing that told you what he was doing.
-    ['#ff8c3c','#0b0616','#06030d'].forEach(add);
+    ['#ff8c3c','#0b0616','#06030d','#241028','#ff9ec8'].forEach(add);
     ['#fff5c0','#ffdf9e','#ffb87e','#ff8f74','#ff5f82','#ff3a90','#f22a8c'].forEach(add);
     QP=list.map(hex2rgb);
     QLUT=new Int16Array(32768).fill(-1);
@@ -3073,17 +3253,39 @@ const HOME=CITIES[0];
   }
 
   function drawTrain(){
-    const railY=snap(gY*0.56);
-    const span=W+340*DPR;
-    const trainX=snap(((t*1.2*DPR)%span)-220*DPR);
-    ctx.fillStyle='#120c20';ctx.fillRect(trainX,railY-PX*2,PX*40,PX*10);
-    ctx.fillStyle='#1a1230';ctx.fillRect(trainX,railY-PX*2,PX*40,PX*3);
-    for(let wi=0;wi<7;wi++){
-      ctx.fillStyle=wi%3===0?'#cc44ff':'#ff6ec7';
-      ctx.fillRect(trainX+PX*3+wi*PX*5,railY,PX*3,PX*5);
+    // a metro threading BEHIND the mid towers on the viaduct deck (bakeMid
+    // lays the deck before the towers, so the train must composite there too)
+    const deckY=snap(gY*0.50)+PX*7;
+    const carL=PX*34, gap=PX*3, nCars=3;
+    const len=nCars*carL+(nCars-1)*gap;
+    const span=W+len+snap(W*1.5);              // long off-screen dwell
+    const x0=snap(W*0.30-((t*1.2*PX)%span));   // right to left, metro pace; starts on-screen
+    const topY=deckY-PX*8;
+    for(let c=0;c<nCars;c++){
+      const x=snap(x0+c*(carL+gap));
+      if(x>W||x+carL<0)continue;
+      ctx.fillStyle='#232041';ctx.fillRect(x,topY,carL,PX*8);
+      ctx.fillStyle='#2e2b52';ctx.fillRect(x,topY,carL,PX*2);      // roof band
+      ctx.fillStyle='#141126';ctx.fillRect(x,topY+PX*7,carL,PX);   // skirt
+      // continuous lit window band, broken by mullions and door pockets
+      ctx.fillStyle='#cfe8f4';ctx.fillRect(x+PX*2,topY+PX*3,carL-PX*4,PX*3);
+      ctx.fillStyle='#232041';
+      for(let mx=x+PX*7;mx<x+carL-PX*4;mx+=PX*6)ctx.fillRect(snap(mx),topY+PX*3,PX,PX*3);
+      ctx.fillStyle='#1b1834';
+      ctx.fillRect(x+PX*11,topY+PX*3,PX*2,PX*4);
+      ctx.fillRect(x+carL-PX*13,topY+PX*3,PX*2,PX*4);
     }
-    ctx.globalAlpha=0.12;ctx.fillStyle='#b43cff';
-    ctx.fillRect(trainX,railY+PX*8,PX*40,PX*3);ctx.globalAlpha=1;
+    // cab nose on the leading (left) end — a window band that starts mid-air
+    // reads as a clipped sprite, not as a train with a front
+    if(x0>-PX*6&&x0<W+PX*6){
+      ctx.fillStyle='#232041';
+      ctx.fillRect(snap(x0-PX*3),topY+PX,PX*3,PX*7);
+      ctx.fillRect(snap(x0-PX*4),topY+PX*3,PX,PX*5);
+      ctx.fillStyle='#cfe8f4';
+      ctx.fillRect(snap(x0-PX*2),topY+PX*3,PX*2,PX*2);   // cab windscreen
+      ctx.fillStyle='#fff2cf';
+      ctx.fillRect(snap(x0-PX*4),topY+PX*6,PX,PX);       // headlight
+    }
   }
 
   function drawBeacons(){
@@ -3138,8 +3340,10 @@ const HOME=CITIES[0];
         ctx.fillStyle='#160b24';
         ctx.fillRect(s.bracket.x,s.bracket.y,s.bracket.w,PX);
       }
-      // paper and cloth don't flicker — dropouts are for gas and diodes
-      if(s.dim){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
+      // paper and cloth don't flicker — dropouts are for gas and diodes.
+      // Rooftop brand signs don't either: the flagship spending frames hazy
+      // read as a rendering bug in every review of a frozen frame.
+      if(s.dim||s.roof){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
       // state machine: mostly on, occasional single-step dropout, phase-offset
       const c=step4()+Math.floor(s.ph*7);
       const dip=(c%37===0)||(c%53===0);
