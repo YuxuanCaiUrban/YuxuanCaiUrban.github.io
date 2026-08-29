@@ -1572,13 +1572,30 @@ const HOME=CITIES[0];
   // 4.0 CSS px, bake 590-750ms against 450ms at 640 columns. Bake runs once per
   // resize behind a 150ms debounce, never per frame, so ~200ms buys a third off
   // the pixel size on every large display.
-  const COLS_MIN=320, COLS_MAX=1024, PX_CSS_CAP=4;
+  // The column count is the scene's ZOOM, not just its graininess. Buildings are
+  // placed in fractions of the width, but every architectural unit is PX*n, and
+  // PX is W/cols — so a floor occupies 10/cols of the frame. Letting cols follow
+  // the viewport to hold a constant CSS pixel size therefore let the zoom float:
+  // 400 columns on a 1600px laptop against 960 on a 4K panel meant the same
+  // building stood 17 storeys tall on one and 42 on the other. The laptop got
+  // four huge blocks and two enormous signs with no skyline behind them, which
+  // is not a coarser version of the artwork — it is a different artwork.
+  //
+  // Composition comes first now, the way the original fixed 320-column grid had
+  // it, but at a density actually tuned for the art. Desktops hold a constant
+  // 640 columns until the display is wide enough to add detail without changing
+  // the zoom much; phones keep their own floor, since 640 columns across 390 CSS
+  // px would put a logical pixel below half a device pixel.
+  const COLS_MAX=768, PX_CSS_CAP=4;
+  const colsFloor=cssW=>cssW<720?320:cssW<1024?480:640;
 
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
-    const devW=Math.max(320,Math.round(window.innerWidth*DPR));
+    const cssW=Math.max(320,window.innerWidth);
+    const devW=Math.max(320,Math.round(cssW*DPR));
     const devH=Math.max(240,Math.round(window.innerHeight*DPR));
-    const cols=Math.min(COLS_MAX,Math.max(COLS_MIN,Math.round(devW/(PX_CSS_CAP*DPR))));
+    const cols=Math.min(COLS_MAX,Math.max(colsFloor(cssW),
+                        Math.round(devW/(PX_CSS_CAP*DPR))));
     PX=Math.max(2,Math.round(devW/cols));
     W=cv.width=devW;
     H=cv.height=devH;
