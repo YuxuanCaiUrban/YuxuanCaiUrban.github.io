@@ -2003,7 +2003,10 @@ const HOME=CITIES[0];
   function bakeMarks(g,b){
     const R2=b.ramp;
     const near=b.layer===2;
-    const span=shapeSpan(b,b.y+b.h*0.5);
+    // Anchor to the BASE span, not mid-height: a slab form is narrow at half
+    // height, which drew its plinth short and put its soil pipe up the middle
+    // of the wide lower facade.
+    const span=shapeSpan(b,gY-PX);
     const bx=span[0],bw=span[1];
     // plinth — darker base band with a lit top edge
     const pTop=gY-U.plinth;
@@ -2025,6 +2028,21 @@ const HOME=CITIES[0];
     g.fillRect(cTop[0]-PX,b.y+U.cornice-PX,cTop[1]+PX*2,PX);
     g.fillStyle=R2[0];
     g.fillRect(cTop[0],b.y+U.cornice,cTop[1],PX);
+    // ── shoulder datums on the generic forms ──
+    // The hero and podium draw a shadow line and a lit edge where the wide mass
+    // meets the narrow one; the generic forms had nothing, so each step read as
+    // a paint seam. Wherever the span widens going down, mark the exposed roof.
+    if(!/^(rect|stepped|hero|podium)$/.test(b.type)){
+      for(let y=b.y+PX;y<gY;y+=PX){
+        const a=shapeSpan(b,y-PX), c=shapeSpan(b,y);
+        if(c[1]<=a[1])continue;
+        const segs=[];
+        if(c[0]<a[0])segs.push([c[0],a[0]-c[0]]);
+        if(c[0]+c[1]>a[0]+a[1])segs.push([a[0]+a[1],c[0]+c[1]-a[0]-a[1]]);
+        segs.forEach(sg=>{g.fillStyle=R2[0];g.fillRect(sg[0],y,sg[1],PX);
+                          g.fillStyle=R2[3];g.fillRect(sg[0],y+PX,sg[1],PX);});
+      }
+    }
     // ── projecting kit ──
     // The facades were flat planes: everything drawn on them lived inside the
     // silhouette, so the outline stayed a clean rectangle no matter how much
@@ -2035,7 +2053,11 @@ const HOME=CITIES[0];
       const METAL2=mix(R2[4],'#000000',0.35);
       if(rnd(b.seed*41.3)<0.75){                       // soil pipe on one flank
         const px2=rnd(b.seed*43.7)<0.5?bx-PX:bx+bw;
-        const y0=b.y+U.cornice, y1=gY-U.plinth;
+        const y1=gY-U.plinth;
+        // start the pipe where the body first reaches this flank
+        let y0=b.y+U.cornice;
+        for(;y0<y1;y0+=PX){const sp=shapeSpan(b,y0);
+          if(px2<bx?sp[0]<=bx:sp[0]+sp[1]>=bx+bw)break;}
         g.fillStyle=METAL2;
         g.fillRect(px2,y0,PX,y1-y0);
         for(let y2=y0+U.floor;y2<y1-PX*2;y2+=U.floor*2)  // collars
@@ -2077,27 +2099,33 @@ const HOME=CITIES[0];
     const R2=b.ramp;
     // ── 1. silhouette + value planes ──
     if(b.layer===2){
-      // 3/4 side face receding toward the centre vanishing point at eye level
-      const sw=b.sideW;
-      const sx0=b.sideDir>0?b.x+b.w:b.x-sw;
+      // 3/4 side face receding toward the centre vanishing point at eye level.
+      // Drawn only where the body actually reaches its outer edge at that row,
+      // so a set-back top does not leave a flank hanging in the air beside it —
+      // which is exactly what the asymmetric forms did.
+      const sw=b.sideW, outer=b.sideDir>0;
+      const sx0=outer?b.x+b.w:b.x-sw;
+      const reaches=y=>{const sp=shapeSpan(b,y);
+        return outer?sp[0]+sp[1]>=b.x+b.w-PX:sp[0]<=b.x+PX;};
       g.fillStyle=R2[1];
       for(let dx=0;dx<sw;dx+=PX){
         const f=(dx+PX)/sw;
-        const x=b.sideDir>0?sx0+dx:sx0+sw-PX-dx;
+        const x=outer?sx0+dx:sx0+sw-PX-dx;
         const top=snap(b.y+f*b.h*0.10);        // roofline drops toward the VP
         const bot=snap(gY-f*U.plinth*0.8);     // base rises toward the VP
-        g.fillRect(x,top,PX,bot-top);
+        for(let y=top;y<bot;y+=PX)if(reaches(y))g.fillRect(x,y,PX,PX);
       }
-      // hard edge between the two planes
+      // hard edge between the two planes, likewise only where there is a plane
       g.fillStyle=R2[0];
-      g.fillRect(b.sideDir>0?b.x+b.w-PX:b.x,b.y,PX,b.h);
+      for(let y=b.y;y<gY;y+=PX)if(reaches(y))g.fillRect(outer?b.x+b.w-PX:b.x,y,PX,PX);
       // dim slit windows on the flank — a 400px sheet of flat fill beside the
       // billboard read as an unfinished cutout, not as a building in shadow
       for(let dx2=PX*2;dx2<sw-PX;dx2+=PX*4){
         const f2=(dx2+PX)/sw;
-        const xs=b.sideDir>0?sx0+dx2:sx0+sw-PX-dx2;
+        const xs=outer?sx0+dx2:sx0+sw-PX-dx2;
         const top2=snap(b.y+f2*b.h*0.10)+PX*4, bot2=snap(gY-f2*U.plinth*0.8)-U.ground;
         for(let fy=top2;fy+PX*2<bot2;fy+=PX*7){
+          if(!reaches(fy))continue;
           const rr=rnd(b.seed+dx2*1.3+fy*0.7);
           if(rr<0.45)continue;
           g.fillStyle=rr>0.92?'#eda45c':R2[2];
@@ -2137,7 +2165,12 @@ const HOME=CITIES[0];
       g.fillRect(tx0+tw,baseTop,b.x+b.w-tx0-tw,PX);
       g.fillStyle=R2[2];
     } else {
-      g.fillRect(b.x,b.y,b.w,b.h);
+      // Generic silhouette, row by row from shapeSpan. This branch used to fill
+      // the whole bounding rectangle and leave the value pass to repaint inside
+      // the span — so a setback was never removed, only recoloured. The wide
+      // rectangle stayed underneath as a mismatched panel, which is why the
+      // offset / slab / crown / notch / ziggurat forms read as unfinished.
+      for(let y=b.y;y<gY;y+=PX){const sp=shapeSpan(b,y);g.fillRect(sp[0],y,sp[1],PX);}
     }
     // vertical value gradient: street-level light warms the base, the top
     // cools toward the night sky (Slynyrd's cyberpunk facade rule), 3 hard
@@ -2178,9 +2211,9 @@ const HOME=CITIES[0];
     }
     // ── 2. sun-side rim light (1px, hue-shifted, not a value lerp) ──
     const sunSide=b.x+b.w/2<sunX?'r':'l';
-    const sp=shapeSpan(b,b.y+b.h*0.5);
     g.fillStyle=b.layer===1?RIM_MID:RIM_NEAR;
-    g.fillRect(sunSide==='r'?sp[0]+sp[1]-PX:sp[0],b.y+U.cornice,PX,gY-b.y-U.cornice);
+    for(let y=b.y+U.cornice;y<gY;y+=PX){const sp=shapeSpan(b,y);
+      g.fillRect(sunSide==='r'?sp[0]+sp[1]-PX:sp[0],y,PX,PX);}
     // ── 3. architectural marks, windows, roof, ground floor ──
     bakeMarks(g,b);
     bakeWindows(g,b);
