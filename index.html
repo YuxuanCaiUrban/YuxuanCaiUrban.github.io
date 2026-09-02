@@ -1444,7 +1444,6 @@ const HOME=CITIES[0];
   if(!cv||!ctx)return;
 
   let W=0,H=0,PX=2,DPR=1,gY=0,t=0;
-  const ICON_IMG={};                 // category icons, rasterised from the Projects grid
   let walkers=[];
   const mouse={x:-999,y:-999};
   let glowX=-999,glowY=-999;
@@ -1636,6 +1635,10 @@ const HOME=CITIES[0];
     // added for the emblem captions (VLM / ECO) and the konbini 24H box — the
     // font only ever carried the letters of the three brand words
     'H':['10001','10001','10001','11111','10001','10001','10001'],
+    'T':['11111','00100','00100','00100','00100','00100','00100'],
+    'Y':['10001','10001','01010','00100','00100','00100','00100'],
+    'P':['11110','10001','10001','11110','10000','10000','10000'],
+    'D':['11110','10001','10001','10001','10001','10001','11110'],
     'L':['10000','10000','10000','10000','10000','10000','11111'],
     'M':['10001','11011','10101','10101','10001','10001','10001'],
     'C':['01110','10001','10000','10000','10000','10001','01110'],
@@ -2931,41 +2934,38 @@ const HOME=CITIES[0];
       signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#7a2545',host:b,dim:true});
     }
 
-    // ── 9) rooftop emblem billboards — the big signs go on the crowns. Every
-    // sign so far sat at one altitude just above the shopfronts, which is what
-    // made the street read as a toolbar; the references put the largest plates
-    // on rooflines. The emblem is one of the site's own research-direction
-    // icons, so the skyline advertises the work.
+    // ── 9) rooftop letters — the big signs go on the crowns, and in every
+    // reference the crown carries WORDS (iCUP, PROTO, L.A. BANK), not a glyph.
+    // The first pass here hung the Projects icons up there and they read as
+    // app tiles on a stick. These are the site's own words as standing tube
+    // letters on a steel rail: no plate, two tones, light against the sky.
     const crownHosts=mid.filter(b=>b.h>=PX*44&&!coveredByNear(b.x+b.w/2,b.y-PX*8))
       .sort((a,b)=>a.x-b.x);
     const pickL=crownHosts.filter(b=>b.x+b.w/2<W*0.44).sort((a,b)=>b.h-a.h)[0];
     const pickR=crownHosts.filter(b=>b.x>W*0.58).sort((a,b)=>b.h-a.h)[0];
-    [[pickL,'vlm'],[pickR,'nature']].forEach(spec=>{
+    [[pickL,'SENSE',NEON[0]],[pickR,'CITY',NEON[1]]].forEach(spec=>{
       const b=spec[0];if(!b)return;
-      const cat=spec[1], col=ICON_TINT[cat], img=ICON_IMG[cat];
-      const ico=PX*21, fs=PX*7;
-      const cap={vlm:'VLM',llm:'SIM',mobility:'GEO',nature:'ECO',health:'ENV',platforms:'LAB'}[cat];
-      const bw=Math.min(snap(b.w*0.9),PX*32), bh=ico+fs+PX*9, legH=PX*5;
-      const sx=snap(b.x+(b.w-bw)/2), sy=b.y-bh-legH;
-      if(sy<PX*3||hitsSign(sx,sy,bw,bh+legH))return;
-      const spr=makeSprite(bw,bh+legH,col,g=>{
-        g.fillStyle='#1a1028';
-        g.fillRect(PX*3,bh,PX*2,legH);g.fillRect(bw-PX*5,bh,PX*2,legH);
-        g.fillRect(PX*3,bh+legH-PX,bw-PX*6,PX);
-        g.fillRect(0,0,bw,bh);                                       // bezel
-        g.fillStyle='#0a0510';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);     // face
+      const txt=spec[1], col=spec[2];
+      // cap height 14 logical px; drop to 7 only if the word would overhang
+      // the tower by more than a third
+      let fp=PX*2; let tw=(txt.length*6-1)*fp;
+      if(tw>b.w*1.35){fp=PX;tw=(txt.length*6-1)*fp;}
+      const bw=tw+PX*4, bh=fp*7+PX*2, railH=PX*4;
+      const sx=snap(b.x+(b.w-bw)/2), sy=b.y-bh-railH;
+      if(sy<PX*3||hitsSign(sx,sy,bw,bh+railH))return;
+      const spr=makeSprite(bw,bh+railH,col,g=>{
+        g.fillStyle='#1a1028';                                   // rail and posts
+        g.fillRect(PX,bh+railH-PX,bw-PX*2,PX);
+        g.fillRect(PX*2,bh,PX,railH);g.fillRect(bw-PX*3,bh,PX,railH);
+        g.fillRect(snap(bw/2)-PX,bh,PX,railH);
       },g=>{
-        g.fillStyle=col;                                               // thin inset ring
-        g.fillRect(PX*2,PX*2,bw-PX*4,PX);g.fillRect(PX*2,bh-PX*3,bw-PX*4,PX);
-        g.fillRect(PX*2,PX*2,PX,bh-PX*4);g.fillRect(bw-PX*3,PX*2,PX,bh-PX*4);
-        const ix=snap((bw-ico)/2), iy=PX*4;
-        if(img){g.imageSmoothingEnabled=false;g.drawImage(img,ix,iy,ico,ico);}
-        else{g.fillStyle=mix(col,'#fff4fa',0.5);drawIcon(g,'bulb',ix+snap(ico/2)-PX*5,iy+snap(ico/2)-PX*5);}
-        g.fillStyle=mix(col,'#fff4fa',0.35);
-        drawText5(g,cap,snap((bw-(cap.length*6-1)*PX)/2),iy+ico+PX*2,PX);
+        g.fillStyle=col;                                          // the glass
+        [[fp>PX?PX:PX,0],[-PX,0],[0,PX],[0,-PX]].forEach(o=>drawText5(g,txt,PX*2+o[0],PX+o[1],fp));
+        g.fillStyle=mix(col,'#fff4fa',0.55);                      // the gas
+        drawText5(g,txt,PX*2,PX,fp);
       });
       signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,roof:true,
-                  kind:'emblem',box:{x:sx,y:sy,w:bw,h:bh}});
+                  kind:'rooftext',box:{x:sx,y:sy,w:bw,h:bh}});
     });
 
     // ── 10) LED dot-matrix marquee — a 5-row, 12-column amber matrix on the
@@ -3039,8 +3039,8 @@ const HOME=CITIES[0];
         const spr=makeSprite(bw,bh,col,g=>disc(g,r,'#0a0510'),g=>{
           disc(g,r,col);disc(g,r-PX,'#0a0510');                          // tube ring
           disc(g,r-PX*2,mix(col,'#fff4fa',0.55));disc(g,r-PX*3,'#0a0510'); // hot core ring
-          g.fillStyle=mix(col,'#fff4fa',0.55);                            // centre mark
-          g.fillRect(PX+r-PX,PX+r-PX*3,PX*2,PX*6);g.fillRect(PX+r-PX*3,PX+r-PX,PX*6,PX*2);
+          g.fillStyle=mix(col,'#fff4fa',0.55);                            // centre mark: a small diamond
+          g.fillRect(PX+r-PX,PX+r-PX*2,PX*2,PX);g.fillRect(PX+r-PX*2,PX+r-PX,PX*4,PX*2);g.fillRect(PX+r-PX,PX+r+PX,PX*2,PX);
         });
         signs.push({spr,x:sx,y:sy,ph:4.4,cx:sx+bw/2,w:bw,col,host:b,
                     kind:'round',box:{x:sx,y:sy,w:bw,h:bh}});
@@ -3831,23 +3831,6 @@ const HOME=CITIES[0];
 
   function rebuild(){resize();bakeAll();draw();}
   window.cityRebuild=rebuild;
-  // The Projects grid already carries six 32x32 pixel icons, one per research
-  // direction. Rasterised once here, they become the emblems on the rooftop
-  // billboards — the city advertises the work. Image decode is async, so the
-  // first bake may run without them; the load callback rebakes once.
-  const ICON_TINT={vlm:'#3ee6ff',llm:'#ff4d9d',mobility:'#ffd23a',nature:'#5cffb0',health:'#ff8c3c',platforms:'#6f8cff'};
-  (function loadCatIcons(){
-    let pending=0;
-    document.querySelectorAll('.proj-cat-card[data-cat] .cat-ico svg').forEach(svg=>{
-      const cat=svg.closest('[data-cat]').getAttribute('data-cat');
-      if(!ICON_TINT[cat]||ICON_IMG[cat])return;
-      const src=svg.outerHTML.replace(/currentColor/g,ICON_TINT[cat]);
-      const im=new Image();pending++;
-      im.onload=()=>{ICON_IMG[cat]=im;if(--pending===0)rebuild();};
-      im.onerror=()=>{if(--pending===0)rebuild();};
-      im.src='data:image/svg+xml;utf8,'+encodeURIComponent(src);
-    });
-  })();
 
   let rsTimer=null;
   window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(rebuild,150);});
