@@ -81,7 +81,11 @@ a{color:inherit}
   background-image:linear-gradient(rgba(255,150,200,0.05) 1px,transparent 1px),linear-gradient(90deg,rgba(255,150,200,0.05) 1px,transparent 1px);
   background-size:48px 48px;mask-image:radial-gradient(circle at 50% 40%,#000 0%,transparent 75%)}
 .hero-vignette{position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:radial-gradient(120% 90% at 30% 50%,rgba(5,7,14,0.86) 0%,rgba(5,7,14,0.30) 42%,transparent 70%)}
+  /* Tightened and lightened. At 0.86 over a 120%-wide radius this was not a
+     scrim behind the text, it was a second darkening pass over half the
+     picture — and it landed on the busiest part of the skyline. It now stays
+     dense enough to carry white type but lets go much sooner. */
+  background:radial-gradient(78% 84% at 26% 52%,rgba(5,7,14,0.80) 0%,rgba(5,7,14,0.42) 34%,transparent 68%)}
 
 .topbar{position:absolute;top:0;left:0;right:0;z-index:6;height:64px;display:flex;align-items:center;justify-content:space-between;
   padding:0 clamp(20px,4vw,48px);}
@@ -1463,7 +1467,24 @@ const HOME=CITIES[0];
   // the sky above them (0.152) — a silhouette cannot read when the mass is
   // brighter than what it stands against. The sky has to carry the top of the
   // range for the skyline to exist at all.
-  const SKY=['#241c40','#2e2450','#3b2c62','#4c3576','#61408a','#7c4d9c','#9c5da8','#bd72ac'];
+  // Measured against a reference cityscape: 42% of its pixels sit above 30%
+  // luminance and it holds a big cluster at 60-70% (its sky). Ours had 9.4%
+  // above 30% and 0.8% at 60-70% — the whole picture was crammed under 30%,
+  // a dark mass with scattered neon dots and no mid-tone body at all. That,
+  // not pixel size and not detail density (ours measures MORE local texture
+  // than the reference, 22.6% against 18.5%), is what reads as coarse.
+  //
+  // The sky is 48% of the frame and was sitting at 0.19. It carries the
+  // mid-tones now: 0.26 at the zenith climbing to 0.60 at the horizon, so
+  // roughly half the picture finally has tonal body and the skyline has
+  // something bright to be a silhouette against.
+  // Front-loaded: the skyline tops out around 40% of gY, so only bands 0-3 are
+  // ever really seen. A ramp spread evenly over all eight put the whole visible
+  // sky inside 0.26-0.38 and it read as one flat mauve wash. The climb happens
+  // early now — 0.16 at the zenith to 0.44 by band 3 — so the part you actually
+  // look at carries the range, the top stays dark enough for white type, and
+  // the bands below the roofline still reach a warm horizon.
+  const SKY=['#2b2348','#3a2e5c','#4d3b73','#664a8e','#8259a4','#9d68b4','#b878bf','#cf8ac9'];
   const HORIZON=['#a8446a','#d97a72'];
   // ramps are ordered [darkest/plinth, shadow, base, lit]
   // A fourth rank behind FAR. Three planes stepped the palette twice and then
@@ -1572,13 +1593,30 @@ const HOME=CITIES[0];
   // 4.0 CSS px, bake 590-750ms against 450ms at 640 columns. Bake runs once per
   // resize behind a 150ms debounce, never per frame, so ~200ms buys a third off
   // the pixel size on every large display.
-  const COLS_MIN=320, COLS_MAX=1024, PX_CSS_CAP=4;
+  // The column count is the scene's ZOOM, not just its graininess. Buildings are
+  // placed in fractions of the width, but every architectural unit is PX*n, and
+  // PX is W/cols — so a floor occupies 10/cols of the frame. Letting cols follow
+  // the viewport to hold a constant CSS pixel size therefore let the zoom float:
+  // 400 columns on a 1600px laptop against 960 on a 4K panel meant the same
+  // building stood 17 storeys tall on one and 42 on the other. The laptop got
+  // four huge blocks and two enormous signs with no skyline behind them, which
+  // is not a coarser version of the artwork — it is a different artwork.
+  //
+  // Composition comes first now, the way the original fixed 320-column grid had
+  // it, but at a density actually tuned for the art. Desktops hold a constant
+  // 640 columns until the display is wide enough to add detail without changing
+  // the zoom much; phones keep their own floor, since 640 columns across 390 CSS
+  // px would put a logical pixel below half a device pixel.
+  const COLS_MAX=768, PX_CSS_CAP=4;
+  const colsFloor=cssW=>cssW<720?320:cssW<1024?480:640;
 
   function resize(){
     DPR=Math.max(1,Math.min(3,window.devicePixelRatio||1));
-    const devW=Math.max(320,Math.round(window.innerWidth*DPR));
+    const cssW=Math.max(320,window.innerWidth);
+    const devW=Math.max(320,Math.round(cssW*DPR));
     const devH=Math.max(240,Math.round(window.innerHeight*DPR));
-    const cols=Math.min(COLS_MAX,Math.max(COLS_MIN,Math.round(devW/(PX_CSS_CAP*DPR))));
+    const cols=Math.min(COLS_MAX,Math.max(colsFloor(cssW),
+                        Math.round(devW/(PX_CSS_CAP*DPR))));
     PX=Math.max(2,Math.round(devW/cols));
     W=cv.width=devW;
     H=cv.height=devH;
