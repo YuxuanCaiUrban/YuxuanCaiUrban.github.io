@@ -103,6 +103,9 @@ a{color:inherit}
 .hero-tag{font-family:var(--display);font-weight:500;font-size:clamp(18px,2.2vw,26px);line-height:1.3;margin:22px 0 6px;color:var(--text)}
 .hero-tag em{font-style:normal;color:var(--accent)}
 .hero-sub{color:var(--muted);font-size:15px;max-width:440px}
+/* the city behind the type got busy on purpose; the type carries its own
+   dark halo so legibility never depends on which sign lands where */
+.hero-content .eyebrow,.hero-name,.hero-tag,.hero-sub{text-shadow:0 1px 2px rgba(5,7,14,.9),0 0 12px rgba(5,7,14,.8)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 
 .hero-stats{position:absolute;z-index:5;left:clamp(20px,5vw,72px);bottom:clamp(20px,5vh,56px);display:flex;gap:34px}
@@ -2587,6 +2590,11 @@ const HOME=CITIES[0];
   }
 
   function placeSigns(){
+    // Lit plates must stay out from behind the hero type. The text block is
+    // read from the DOM, so this follows the layout on every viewport.
+    const hcEl=document.querySelector('.hero-content');
+    const tz=hcEl?(r=>({x:r.left*DPR,y:r.top*DPR,w:r.width*DPR,h:r.height*DPR}))(hcEl.getBoundingClientRect()):null;
+    const inText=(x,y,w,h)=>!!tz&&x<tz.x+tz.w&&x+w>tz.x&&y<tz.y+tz.h&&y+h>tz.y;
     const hero=buildings.filter(b=>b.hero)[0];
     const near=buildings.filter(b=>b.layer===2&&!b.hero).sort((a,b)=>a.x-b.x);
     const mid=buildings.filter(b=>b.layer===1&&b.h>=PX*40).sort((a,b)=>a.x-b.x);
@@ -3059,7 +3067,7 @@ const HOME=CITIES[0];
     // strips take a random slot on every host and the hosts differ by viewport,
     // so any fixed height collides somewhere. Scan upward from kMin on each host
     // in turn; first slot that is inside the facade and clear of every box wins.
-    const findSlot=(hosts,bw,bh,kMin,side)=>{
+    const findSlot=(hosts,bw,bh,kMin,side,lit)=>{
       for(const hb of hosts){
         if(!hb)continue;
         const kMax=Math.floor((hb.h-U.ground-U.cornice-PX*3-bh)/PX);
@@ -3071,6 +3079,7 @@ const HOME=CITIES[0];
           if(ty<=hb.y+U.cornice+PX*2)break;
           for(const sd of sides){
             const tx=sd==='l'?hb.x+PX*2:sd==='r'?hb.x+hb.w-bw-PX*2:snap(hb.x+(hb.w-bw)/2);
+            if(lit&&inText(tx,ty,bw,bh))continue;
             if(!hitsSign(tx,ty,bw,bh,PX*2))return {b:hb,sx:tx,sy:ty};
           }
         }
@@ -3118,6 +3127,7 @@ const HOME=CITIES[0];
       for(const bh of [PX*52,PX*40]){
         for(let sy=snap(b.y+U.cornice+PX*5);sy+bh<gY-U.ground;sy+=PX*6){
           if(coveredByNear(sx,sy+bh*0.4)||coveredByNear(sx+bw,sy+bh*0.4))break;
+          if(inText(sx,sy,bw,bh))continue;                   // never behind the name
           if(!hitsSign(sx,sy,bw,bh,PX*2)){posterHost=b;posterBH=bh;posterSY=sy;break outer;}
         }
       }
@@ -3203,7 +3213,7 @@ const HOME=CITIES[0];
     // redraws the field every frame)
     {
       const bw=PX*26, bh=PX*12;
-      const slot=findSlot([near[4],near[1],near[3],near[0]],bw,bh,30,'c');
+      const slot=findSlot([near[4],near[1],near[3],near[0]],bw,bh,30,'c',true);
       const host=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
       if(host){
         const spr=makeSprite(bw,bh,NEON[0],g=>{g.fillStyle='#2a2440';g.fillRect(0,0,bw,bh);g.fillStyle='#0e0918';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);},()=>{});
@@ -3216,7 +3226,7 @@ const HOME=CITIES[0];
     // exactly how a board reads from across the street.
     {
       const col=NEON[1], bw=PX*22, bh=PX*23;
-      const slot=findSlot([near[1],near[3],near[0],near[4],hero,near[2]],bw,bh,22,'c');
+      const slot=findSlot([near[1],near[3],near[0],near[4],hero,near[2]],bw,bh,22,'c',true);
       const host=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
       if(host){
         const spr=makeSprite(bw,bh,col,g=>{
