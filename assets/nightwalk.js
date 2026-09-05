@@ -13,8 +13,10 @@
   const cta=document.querySelector('.hero-cta');
   if(!screen||!stage||!window.cityTour)return;
   const api=window.cityTour;
+  const topbar=document.querySelector('.topbar');
   const MOBILE_BP=640;                                   // must match nightwalk.css
-  const isMobile=()=>window.innerWidth<=MOBILE_BP;
+  // a landscape phone is short, not narrow: either dimension puts us in the phone layout
+  const isMobile=()=>window.innerWidth<=MOBILE_BP||window.innerHeight<=MOBILE_BP;
 
   // ── the route ──────────────────────────────────────────────────────────
   // anchors are resolved at run time against the live sign list: placement
@@ -24,7 +26,7 @@
     {id:'urban', label:'URBAN AI', anchor:[{txt:'URBAN AI'},{roof:true,kind:undefined}], zoom:2, ay:0.40,
      copy:'This city is a model. Every lit word on it is a research direction; I will point at six.',
      to:{page:'research',name:'Research'}},
-    {id:'vision', label:'VISION', anchor:[{txt:'VISION'}], zoom:3,
+    {id:'vision', label:'VISION', anchor:[{txt:'VISION'}], zoom:3, ground:true,
      copy:'VISION. Cameras on every corner, and models that learn to read a street the way people do.',
      cat:'vlm'},
     {id:'sense', label:'SENSE', anchor:[{txt:'SENSE'}], zoom:2, ay:0.44,
@@ -36,13 +38,13 @@
     {id:'open', label:'OPEN DATA', anchor:[{txt:'OPEN DATA'},{kind:'led'}], zoom:3,
      copy:'OPEN DATA. The ticker never stops: probes, APIs and datasets, all of it built in the open.',
      cat:'platforms'},
-    {id:'geo', label:'GEOAI', anchor:[{txt:'GEOAI'}], zoom:2, ay:0.28,
+    {id:'geo', label:'GEOAI', anchor:[{txt:'GEOAI'}], zoom:2, ay:0.28, ground:true,
      copy:'GEOAI. The bikes under this sign are the data. Where people actually go, block by block.',
      cat:'mobility'},
-    {id:'green', label:'GREEN', anchor:[{txt:'GREEN'}], zoom:3, ay:0.38,
+    {id:'green', label:'GREEN', anchor:[{txt:'GREEN'}], zoom:3, ay:0.38, ground:true,
      copy:'GREEN. The only trees on the street, and who gets to sit under them. Vitality is measurable.',
      cat:'nature'},
-    {id:'street', label:'24H', anchor:[{txt:'24H'}], zoom:3, ay:0.36, flip:true,
+    {id:'street', label:'24H', anchor:[{txt:'24H'}], zoom:3, ay:0.36, flip:true, ground:true,
      copy:'24H. The walk home. That is the whole city; the rest of this page is the work.',
      to:{page:'projects',name:'All projects'}, finale:true},
   ];
@@ -83,9 +85,9 @@
           '<button class="nw-close" type="button" aria-label="Leave the walk" title="Leave (Esc)">×</button></div>'+
         '<div class="nw-text" aria-hidden="true"></div>'+
         '<div class="nw-live" aria-live="polite"></div>'+
-        '<div class="nw-card" hidden></div>'+
-        '<div class="nw-foot"><div class="nw-dots" aria-hidden="true"></div>'+
-          '<button class="nw-more" type="button" hidden aria-expanded="false">Details ▾</button>'+
+        '<div class="nw-card" id="nw-card" hidden></div>'+
+        '<div class="nw-foot"><div class="nw-dots" role="group" aria-label="Stops"></div>'+
+          '<button class="nw-more" type="button" hidden aria-expanded="false" aria-controls="nw-card">Details ▾</button>'+
           '<button class="nw-go" type="button" hidden></button>'+
           '<div class="nw-hint"><kbd>space</kbd> next · <kbd>esc</kbd> leave</div></div>'+
       '</div>'+
@@ -93,7 +95,7 @@
   screen.appendChild(bandT);screen.appendChild(bandB);screen.appendChild(cap);
   const port=cap.querySelector('.nw-port'),textEl=cap.querySelector('.nw-text'),liveEl=cap.querySelector('.nw-live'),
         dotsEl=cap.querySelector('.nw-dots'),goBtn=cap.querySelector('.nw-go'),closeBtn=cap.querySelector('.nw-close'),
-        cardEl=cap.querySelector('.nw-card'),moreBtn=cap.querySelector('.nw-more'),
+        cardEl=cap.querySelector('.nw-card'),moreBtn=cap.querySelector('.nw-more'),hintEl=cap.querySelector('.nw-hint'),
         labelEl=cap.querySelector('.nw-label'),stopnoEl=cap.querySelector('.nw-stopno');
 
   let enterBtn=null;
@@ -171,9 +173,15 @@
     const mobile=isMobile();
     const z=mobile?Math.min(stop.zoom,2):stop.zoom;
     const b=boxOf(stop.sign);
-    const cx=(b.x+b.w/2)*vw/g.W, cy=(b.y+b.h/2)*vh/g.H;
-    const ay=mobile?0.60:(stop.ay||0.42);           // caption sits below on desktop, above on phones
+    const cx=(b.x+b.w/2)*vw/g.W, cy=(b.y+b.h/2)*vh/g.H, hh=(b.h/2)*vh/g.H*z;
+    // desktop: the sign sits above the bottom-docked caption. phones: below the
+    // top-docked one, however tall it is right now (the Details card grows it)
+    let ay=stop.ay||0.42;
+    if(mobile){const cb=cap.getBoundingClientRect().bottom;ay=Math.min(0.84,Math.max(0.5,(cb+20+hh)/vh));}
     let tx=vw*0.5-z*cx, ty=vh*ay-z*cy;
+    // stops whose detail sits on the pavement keep the ground line in frame,
+    // whatever the window's aspect ratio
+    if(stop.ground&&!mobile){const gcss=g.gY*vh/g.H;ty=Math.min(ty,vh-16-z*gcss);}
     tx=Math.min(0,Math.max(vw-z*vw,tx));
     ty=Math.min(0,Math.max(vh-z*vh,ty));
     cam={z,tx,ty};
@@ -204,18 +212,20 @@
 
   // ── caption typewriter ─────────────────────────────────────────────────
   // the visible text types; the screen-reader copy lands once, whole
-  let typeTimer=null,typing=false,fullText='';
-  function typeText(text){
-    clearTimeout(typeTimer);fullText=text;liveEl.textContent=text;
-    if(REDUCE){textEl.textContent=text;typing=false;return;}
-    typing=true;let i=0;textEl.innerHTML='<span class="caret"></span>';
+  let typeTimer=null,typing=false,fullText='',typeDone=null;
+  const setHint=()=>{if(hintEl)hintEl.innerHTML='<kbd>space</kbd> '+(typing?'skip':'next')+' · <kbd>esc</kbd> leave';};
+  const fireDone=()=>{const cb=typeDone;typeDone=null;if(cb)cb();};
+  function typeText(text,onDone){
+    clearTimeout(typeTimer);fullText=text;liveEl.textContent=text;typeDone=onDone||null;
+    if(REDUCE){textEl.textContent=text;typing=false;setHint();fireDone();return;}
+    typing=true;setHint();let i=0;textEl.innerHTML='<span class="caret"></span>';
     const step=()=>{i++;textEl.textContent=text.slice(0,i);
       if(i<text.length){const c=text[i-1];const caret=document.createElement('span');caret.className='caret';textEl.appendChild(caret);
         typeTimer=setTimeout(step,33+(/[,.:;]/.test(c)?140:0));}
-      else{typing=false;}};
+      else{typing=false;setHint();fireDone();}};
     typeTimer=setTimeout(step,420);
   }
-  function finishTyping(){clearTimeout(typeTimer);textEl.textContent=fullText;typing=false;}
+  function finishTyping(){clearTimeout(typeTimer);textEl.textContent=fullText;typing=false;setHint();fireDone();}
 
   // ── category detail, read from the Projects grid the page already has ──
   function catInfo(cat){
@@ -241,7 +251,13 @@
     cardOpen=!!open;cardEl.hidden=!cardOpen;
     moreBtn.setAttribute('aria-expanded',cardOpen?'true':'false');
     moreBtn.textContent=cardOpen?'Less ▴':'Details ▾';
+    if(on&&isMobile()&&route[idx]&&!atEnd)camTo(route[idx]);   // the taller panel must not cover the sign
   }
+  // a stop's destination comes from its category; derive it wherever a stop
+  // object is fresh (buildRoute() runs on start and on every city:rebuilt)
+  function ensureTo(st){if(st&&!st.to&&st.cat){const info=catInfo(st.cat);st.to={page:'projects',cat:st.cat,name:info.title||st.label};}return st?st.to:null;}
+  // never hide the control that holds focus: focus would drop to <body>
+  function guardFocus(btn){if(document.activeElement===btn){try{cap.focus({preventScroll:true});}catch(_){}}}
 
   // ── state ──────────────────────────────────────────────────────────────
   let on=false,idx=-1,route=[],hot=-1,flashTimer=null,leaveTimer=null,atEnd=false,resizing=false;
@@ -249,7 +265,15 @@
     const m=/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex||'');
     return m?'rgba('+parseInt(m[1],16)+','+parseInt(m[2],16)+','+parseInt(m[3],16)+',.55)':'rgba(255,77,157,.55)';
   }
-  function renderDots(){dotsEl.innerHTML='';route.forEach((r,i)=>{const d=document.createElement('i');if(i<idx)d.className='done';if(i===idx)d.className='on';dotsEl.appendChild(d);});}
+  // the dots are a map you can tap: any stop, back or forward (arrows stay for keyboards)
+  function renderDots(){
+    dotsEl.innerHTML='';
+    route.forEach((r,i)=>{const d=document.createElement('button');d.type='button';d.tabIndex=-1;
+      d.className='nw-dot'+(i<idx?' done':i===idx?' on':'');
+      d.setAttribute('aria-label','Stop '+(i+1)+' of '+route.length+': '+r.label);
+      d.addEventListener('click',e=>{e.stopPropagation();if(!on)return;if(typing)finishTyping();if(i!==idx||atEnd)show(i);});
+      dotsEl.appendChild(d);});
+  }
   function show(i){
     idx=i;atEnd=false;const st=route[i];
     camTo(st);
@@ -259,12 +283,10 @@
     labelEl.textContent=st.label;
     port.style.transform=st.flip?'scaleX(-1)':'';
     setCard(false);
-    if(st.cat){
-      const info=catInfo(st.cat);
-      st.to=st.to||{page:'projects',cat:st.cat,name:info.title||st.label};
-      renderCard(info);moreBtn.hidden=false;
-    }else{moreBtn.hidden=true;}
-    if(st.to){goBtn.hidden=false;goBtn.textContent=st.to.name+' →';}else{goBtn.hidden=true;}
+    ensureTo(st);
+    if(st.cat){renderCard(catInfo(st.cat));moreBtn.hidden=false;}
+    else{guardFocus(moreBtn);moreBtn.hidden=true;}
+    if(st.to){goBtn.hidden=false;goBtn.textContent=st.to.name+' →';}else{guardFocus(goBtn);goBtn.hidden=true;}
     renderDots();
     typeText(st.copy);
     api.setHot(st.signIdx);
@@ -274,6 +296,7 @@
     clearTimeout(leaveTimer);
     on=true;document.body.classList.add('nw-on');document.body.classList.remove('nw-hover');hot=-1;
     if(heroContent)heroContent.inert=true;
+    if(topbar)topbar.inert=true;                          // the dialog owns focus while the walk is on
     api.mute(true);
     startPortrait();
     show(Math.max(0,Math.min(at,route.length-1)));
@@ -281,9 +304,10 @@
   }
   function exit(){
     if(!on)return;
-    on=false;atEnd=false;clearTimeout(typeTimer);clearTimeout(leaveTimer);typing=false;
+    on=false;atEnd=false;clearTimeout(typeTimer);clearTimeout(leaveTimer);typing=false;typeDone=null;setHint();
     document.body.classList.remove('nw-on');document.body.classList.remove('nw-hover');
     if(heroContent)heroContent.inert=false;
+    if(topbar)topbar.inert=false;
     goBtn.hidden=true;moreBtn.hidden=true;setCard(false);hot=-1;
     camReset();api.setHot(-1);api.mute(false);stopPortrait();
     if(enterBtn){try{enterBtn.focus({preventScroll:true});}catch(_){}}
@@ -303,11 +327,11 @@
     const st=route[idx];
     camReset();api.setHot(-1);
     stopnoEl.textContent='END';labelEl.textContent='→ PROJECTS';
-    setCard(false);moreBtn.hidden=true;
+    setCard(false);guardFocus(moreBtn);moreBtn.hidden=true;
     goBtn.hidden=false;goBtn.textContent='Open '+(st.to?st.to.name:'Projects')+' →';
-    typeText('That is the walk. The work is one click away.');
+    // the leave countdown starts once the line has been read, not once it starts typing
+    typeText('That is the walk. The work is one click away.',()=>{clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(on&&atEnd)leaveTo(st.to);},2400);});
     try{goBtn.focus({preventScroll:true});}catch(_){}
-    leaveTimer=setTimeout(()=>{if(on)leaveTo(st.to);},REDUCE?600:2600);
   }
   function leaveTo(to){
     const target=to||{page:'projects'};
@@ -384,6 +408,7 @@
     let j=route.findIndex(r=>r.id===id);
     if(j<0){show(Math.min(idx,route.length-1));return;}   // the stop is gone: land properly on another
     idx=j;const st=route[j];
+    ensureTo(st);if(!atEnd&&st.to)goBtn.textContent=st.to.name+' →';   // the fresh stop object needs its destination back
     if(atEnd){camReset();renderDots();return;}
     camTo(st);api.setHot(st.signIdx);renderDots();
   });

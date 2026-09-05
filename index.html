@@ -1412,7 +1412,6 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
   </main>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/globe.gl"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="assets/pubcover.js"></script>
 <script>
@@ -2696,17 +2695,23 @@ const HOME=CITIES[0];
     {
       const txt='GREEN', fs=PX*8, col=NEON[3];
       const tw=Math.ceil(txt.length*fs*0.62/PX)*PX, bw=tw+PX*6, bh=fs+PX*6;
-      const cands=near.filter(b=>b!==shopHost&&b.w>=bw+PX*8);
-      const b=cands.find(b=>b.ramp===NEAR_FAM[5])||cands.filter(b=>b.x+b.w/2>W*0.5)[0]||cands[0];
-      if(b){
-        const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*4);
-        // hitsSign is declared further down (TDZ); only three signs exist yet
-        const clash=signs.some(s=>{const o=s.box||{x:s.x,y:s.y,w:s.w,h:s.spr&&s.spr.img?s.spr.img.height-2*s.spr.pad:0};
-          return sx<o.x+o.w+PX*2&&sx+bw>o.x-PX*2&&sy<o.y+o.h+PX*2&&sy+bh>o.y-PX*2;});
-        if(sy>b.y+U.cornice+PX*2&&!inText(sx,sy,bw,bh)&&!clash){
+      // preferred host first (green tile, then anything right of centre), then
+      // every other near block, two shelf heights each: one blocked slot must
+      // not cost the tour a stop
+      const pool=near.filter(b=>b!==shopHost&&b.w>=bw+PX*4);
+      const cands=[].concat(pool.filter(b=>b.ramp===NEAR_FAM[5]),
+                            pool.filter(b=>b.ramp!==NEAR_FAM[5]&&b.x+b.w/2>W*0.5),
+                            pool.filter(b=>b.ramp!==NEAR_FAM[5]&&b.x+b.w/2<=W*0.5));
+      // hitsSign is declared further down (TDZ); only a few signs exist yet
+      const clash=(sx,sy)=>signs.some(s=>{const o=s.box||{x:s.x,y:s.y,w:s.w,h:s.spr&&s.spr.img?s.spr.img.height-2*s.spr.pad:0};
+        return sx<o.x+o.w+PX*2&&sx+bw>o.x-PX*2&&sy<o.y+o.h+PX*2&&sy+bh>o.y-PX*2;});
+      outer:for(const b of cands){
+        for(const lift of [PX*4,PX*10]){
+          const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-lift);
+          if(sy<=b.y+U.cornice+PX*2||sx<PX*2||sx+bw>W-PX*2||inText(sx,sy,bw,bh)||clash(sx,sy))continue;
           const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>signEmit(g,bw,bh,col,txt,fs,false));
           signs.push({spr,x:sx,y:sy,ph:1.1,cx:sx+bw/2,w:bw,col,host:b,txt,box:{x:sx,y:sy,w:bw,h:bh}});
-          greenHost=b;
+          greenHost=b;break outer;
         }
       }
     }
@@ -3024,12 +3029,22 @@ const HOME=CITIES[0];
     // ── 10) LED dot-matrix marquee — a 5-row, 12-column amber matrix on the
     // crown-form block. The dots are drawn per frame (see drawLed) and scroll,
     // which makes this the first sign in the scene that actually does something.
-    if(near[2]){
+    {
       // 7 rows so a FONT5 glyph fits one diode per pixel: the ticker now says
-      // something (OPEN DATA) instead of pseudo-glyph noise
-      const b=near[2], bw=PX*32, bh=PX*18;
-      const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-PX*26);
-      if(!hitsSign(sx,sy,bw,bh,PX*2)&&sy>b.y+U.cornice+PX*2){
+      // something (OPEN DATA) instead of pseudo-glyph noise. The crown block is
+      // the intended host; if its shelf is taken try a higher one, then the
+      // neighbours — one stray collision must not delete a tour stop.
+      const bw=PX*32, bh=PX*18;
+      let b=null,sx=0,sy=0;
+      outer:for(const hb of [near[2],near[1],near[3]]){
+        if(!hb||hb===shopHost||hb===greenHost||hb.w<bw+PX*4)continue;
+        for(const lift of [PX*26,PX*34,PX*20]){
+          const tx=snap(hb.x+(hb.w-bw)/2), ty=snap(gY-U.ground-lift);
+          if(ty<=hb.y+U.cornice+PX*2||hitsSign(tx,ty,bw,bh,PX*2))continue;
+          b=hb;sx=tx;sy=ty;break outer;
+        }
+      }
+      if(b){
         const spr=makeSprite(bw,bh,'#ffb14d',g=>{
           g.fillStyle='#2a2440';g.fillRect(0,0,bw,bh);
           g.fillStyle='#0e0918';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
@@ -3494,8 +3509,8 @@ const HOME=CITIES[0];
     buildings.forEach(b=>{if(b.layer===2&&b.claw)bakeClawCorner(g,b);});
     bakeTrees(g);
     bakeStringLights(g);
-    bakeStopDetails(g);
     bakeTubes(g);
+    bakeStopDetails(g);          // after the tubes, so the dock's screen stays on top
     bakeQuay(g);
   }
 
@@ -4271,8 +4286,13 @@ const HOME=CITIES[0];
     setHot:i=>{const n=(typeof i==='number')?i:-1;if(n===hotIdx)return;hotIdx=n;if(!cityRunning)draw();},
     mute:on=>{muteMouse=!!on;if(!cityRunning)draw();}};
 
-  let rsTimer=null;
-  window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(rebuild,150);});
+  let rsTimer=null,cityDirty=false;
+  // a re-bake is 450-750ms of main-thread work; never spend it on a hidden hero.
+  // While another page is up the loop stops too, and the hero re-bakes once,
+  // on its way back in, if a resize happened meanwhile.
+  const cityShown=()=>{const el=document.getElementById('city-screen');return !el||el.style.display!=='none';};
+  window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(()=>{if(!cityShown()){cityDirty=true;return;}rebuild();},150);});
+  window.cityVisible=v=>{if(v){if(cityDirty){cityDirty=false;rebuild();}if(!document.hidden)startCity();}else stopCity();};
   window.addEventListener('load',()=>{rebuild();});
   document.addEventListener('mousemove',e=>{mouse.x=e.clientX;mouse.y=e.clientY;});
   if(document.fonts&&document.fonts.ready){
@@ -4318,12 +4338,25 @@ const HOME=CITIES[0];
 
 
 // ── RESEARCH GLOBE (data-viz inside the site, lazy-loaded on first visit) ──
-let rGlobe=null, rGlobeReady=false;
+let rGlobe=null, rGlobeReady=false, rGlobeLoading=null;
+// globe.gl (with three.js) is ~525 KB gzipped, five times the rest of the page;
+// it is fetched the first time the Research tab opens, never on the home load
+function loadGlobeLib(){
+  if(typeof Globe!=='undefined') return Promise.resolve();
+  if(!rGlobeLoading){
+    rGlobeLoading=new Promise((res,rej)=>{ const sc=document.createElement('script'); sc.src='https://cdn.jsdelivr.net/npm/globe.gl'; sc.async=true; sc.onload=res; sc.onerror=()=>{rGlobeLoading=null;rej(new Error('globe.gl failed to load'));}; document.head.appendChild(sc); });
+  }
+  return rGlobeLoading;
+}
 function fitResearchGlobe(){ const el=document.getElementById('globe'); if(rGlobe&&el&&el.clientWidth){ rGlobe.width(el.clientWidth).height(el.clientHeight); } }
 function initResearchGlobe(){
   if(rGlobeReady) return;
   const el=document.getElementById('globe');
-  if(!el || typeof Globe==='undefined') return;
+  if(!el) return;
+  if(typeof Globe==='undefined'){
+    loadGlobeLib().then(()=>{ initResearchGlobe(); if(document.querySelector('#page-research.active')) startResearchGlobe(); }).catch(()=>{});
+    return;
+  }
   try{
     rGlobe=Globe()(el)
       .backgroundColor('rgba(0,0,0,0)')
@@ -4401,6 +4434,7 @@ function revealPage(id){
 }
 function showPage(id){
   document.getElementById('city-screen').style.display='none';
+  if(window.cityVisible)window.cityVisible(false);
   document.getElementById('sections').style.display='block';
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   const pg=document.getElementById('page-'+id); if(pg)pg.classList.add('active');
@@ -4450,6 +4484,7 @@ function showPage(id){
 function showCity(){
   document.getElementById('sections').style.display='none';
   document.getElementById('city-screen').style.display='block';
+  if(window.cityVisible)window.cityVisible(true);
   if(window.cityStart) window.cityStart();
   stopResearchGlobe();
   window.scrollTo(0,0);

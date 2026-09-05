@@ -49,7 +49,7 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 .nw-body{display:grid;grid-template-rows:auto 1fr auto;gap:6px;min-height:96px;min-width:0}
 .nw-eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#a99cc9;display:flex;align-items:center;gap:10px}
 .nw-eyebrow b{color:var(--nw);font-weight:500;margin-left:auto}
-.nw-close{font:inherit;font-size:14px;line-height:1;color:#a99cc9;background:transparent;border:1px solid #3a2a55;width:26px;height:22px;cursor:pointer;padding:0;flex:0 0 auto}
+.nw-close{font:inherit;font-size:14px;line-height:1;color:#a99cc9;background:transparent;border:1px solid #3a2a55;width:28px;height:24px;cursor:pointer;padding:0;flex:0 0 auto}
 .nw-close:hover{color:#fff;border-color:#a99cc9}
 .nw-close:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff}
 .nw-text{font-size:14px;line-height:1.5;min-height:3em}
@@ -57,10 +57,13 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 @keyframes nw-blink{50%{opacity:0}}
 .nw-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
 .nw-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-.nw-dots{display:flex;gap:6px;align-items:center}
-.nw-dots i{width:6px;height:6px;display:block;background:#3a2a55;transition:background .3s,box-shadow .3s}
-.nw-dots i.on{background:var(--nw);box-shadow:0 0 6px var(--nw)}
-.nw-dots i.done{background:#7a6a95}
+.nw-dots{display:flex;gap:2px;align-items:center}
+.nw-dot{position:relative;width:14px;height:14px;padding:0;border:0;background:transparent;cursor:pointer}
+.nw-dot::before{content:'';position:absolute;left:4px;top:4px;width:6px;height:6px;background:#3a2a55;transition:background .3s,box-shadow .3s}
+.nw-dot.on::before{background:var(--nw);box-shadow:0 0 6px var(--nw)}
+.nw-dot.done::before{background:#7a6a95}
+.nw-dot:hover::before{background:#a99cc9}
+.nw-dot:focus-visible{outline:none}.nw-dot:focus-visible::before{box-shadow:0 0 0 2px #fff}
 .nw-hint{font-size:10.5px;letter-spacing:.06em;color:#a99cc9;white-space:nowrap}
 .nw-hint kbd{font:inherit;color:#f4efff;border:1px solid #3a2a55;padding:0 4px;border-radius:2px}
 .nw-go{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#0a0510;background:var(--nw);
@@ -80,14 +83,14 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 .nw-card ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
 .nw-card li{display:grid;grid-template-columns:1fr auto;gap:10px;color:#e6ddf5;padding-left:10px;position:relative}
 .nw-card li::before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;background:var(--nw)}
-.nw-card li span{color:#7a6a95;white-space:nowrap;font-size:11px}
+.nw-card li span{color:#a99cc9;white-space:nowrap;font-size:11px}
 .nw-card li.nw-card-more{color:#7a6a95}
 .nw-more{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#f4efff;background:transparent;
   border:1px solid #3a2a55;padding:5px 9px;cursor:pointer}
 .nw-more:hover{border-color:#a99cc9}
 .nw-more:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff}
 .nw-more[hidden]{display:none}
-@media (max-width:640px){
+@media (max-width:640px),(max-height:640px){
   .nw-card li span{display:none}
   .nw-card li{grid-template-columns:1fr}
 }
@@ -96,7 +99,7 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
 .btn.nw-enter{border-style:dashed}
 
 /* mobile: caption hugs the top edge under the topbar, portrait goes */
-@media (max-width:640px){
+@media (max-width:640px),(max-height:640px){
   .nw-cap{bottom:auto;top:72px;transform:translate(-50%,-12px)}
   .nw-panel{grid-template-columns:1fr}
   .nw-port{display:none}
@@ -105,6 +108,7 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
   .nw-long{display:none}
   .nw-band.top{height:40%}
   .nw-band.bot{height:18%}
+  .nw-card{max-height:38vh;overflow-y:auto}
 }
 @media (prefers-reduced-motion:reduce){
   .city-stage,.nw-cap,.nw-band,.hero-content,.scroll-hint{transition:none}
