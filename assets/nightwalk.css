@@ -1,0 +1,112 @@
+/* ── NIGHT WALK — guided camera tour over the hero city (preview) ── */
+
+/* the stage is what the camera moves: canvas + vignette + grid, nothing else */
+.city-stage{position:absolute;inset:0;z-index:1;transform-origin:0 0;will-change:transform;
+  transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.city-stage>#city-canvas{z-index:1}
+.city-stage>.hero-vignette{transition:opacity .5s ease}
+body.nw-on .city-stage>.hero-vignette{opacity:0}
+
+/* hero text steps aside while the camera is out; the topbar stays.
+   (the module also sets `inert` on .hero-content so it leaves the tab order) */
+.hero-content,.scroll-hint{transition:opacity .45s ease}
+body.nw-on .hero-content{opacity:0!important;pointer-events:none}
+body.nw-on .scroll-hint{opacity:0!important;pointer-events:none}
+body.nw-on #city-screen::after{opacity:.5}
+
+/* pointer feedback in idle (free-roam) mode */
+body.nw-hover #city-screen{cursor:pointer}
+body.nw-on #city-screen{cursor:default}
+body.nw-on.nw-hover #city-screen{cursor:pointer}
+
+/* letterbox: a soft dark band top and bottom so the caption reads against
+   whatever the camera lands on. Drawn on the screen, not the stage, so it
+   does not scale. */
+.nw-band{position:absolute;left:0;right:0;z-index:4;pointer-events:none;opacity:0;transition:opacity .5s ease}
+.nw-band.top{top:0;height:22%;background:linear-gradient(180deg,rgba(5,7,14,.78),transparent)}
+.nw-band.bot{bottom:0;height:34%;background:linear-gradient(0deg,rgba(5,7,14,.86),transparent)}
+body.nw-on .nw-band{opacity:1}
+
+/* the caption box: a sign of its own — black panel, chamfered corners, a tube
+   frame in the current stop's neon colour. The chamfer is a clip-path, and a
+   clip-path also clips box-shadow and outline, so the frame is a pseudo
+   element UNDER the panel and the glow lives on the unclipped outer box. */
+.nw-cap{position:absolute;z-index:7;left:50%;bottom:clamp(18px,5vh,44px);transform:translate(-50%,16px);
+  width:min(600px,calc(100vw - 32px));
+  --nw:#ff4d9d;--nw-glow:rgba(255,77,157,.55);
+  box-shadow:0 0 24px var(--nw-glow);
+  opacity:0;pointer-events:none;transition:opacity .35s ease,transform .35s ease,box-shadow .6s ease;
+  font-family:var(--mono,"Share Tech Mono",monospace);color:#f4efff}
+.nw-cap::before{content:'';position:absolute;inset:0;background:var(--nw);
+  clip-path:polygon(7px 0,calc(100% - 7px) 0,100% 7px,100% calc(100% - 7px),calc(100% - 7px) 100%,7px 100%,0 calc(100% - 7px),0 7px)}
+.nw-panel{position:relative;margin:2px;background:#0a0510;
+  clip-path:polygon(6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px),0 6px);
+  display:grid;grid-template-columns:72px 1fr;gap:14px;padding:14px 16px 12px}
+body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
+.nw-cap:focus{outline:none}
+.nw-cap:focus-visible::before{background:#fff}
+.nw-port{width:72px;height:96px;image-rendering:pixelated;image-rendering:crisp-edges;display:block;background:#0a0510}
+.nw-body{display:grid;grid-template-rows:auto 1fr auto;gap:6px;min-height:96px;min-width:0}
+.nw-eyebrow{font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:#a99cc9;display:flex;align-items:center;gap:10px}
+.nw-eyebrow b{color:var(--nw);font-weight:500;margin-left:auto}
+.nw-close{font:inherit;font-size:14px;line-height:1;color:#a99cc9;background:transparent;border:1px solid #3a2a55;width:26px;height:22px;cursor:pointer;padding:0;flex:0 0 auto}
+.nw-close:hover{color:#fff;border-color:#a99cc9}
+.nw-close:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff}
+.nw-text{font-size:14px;line-height:1.5;min-height:3em}
+.nw-text .caret{display:inline-block;width:.55em;height:1em;vertical-align:-.15em;background:var(--nw);margin-left:2px;animation:nw-blink 1s steps(1) infinite}
+@keyframes nw-blink{50%{opacity:0}}
+.nw-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.nw-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.nw-dots{display:flex;gap:6px;align-items:center}
+.nw-dots i{width:6px;height:6px;display:block;background:#3a2a55;transition:background .3s,box-shadow .3s}
+.nw-dots i.on{background:var(--nw);box-shadow:0 0 6px var(--nw)}
+.nw-dots i.done{background:#7a6a95}
+.nw-hint{font-size:10.5px;letter-spacing:.06em;color:#a99cc9;white-space:nowrap}
+.nw-hint kbd{font:inherit;color:#f4efff;border:1px solid #3a2a55;padding:0 4px;border-radius:2px}
+.nw-go{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#0a0510;background:var(--nw);
+  border:0;padding:6px 10px;cursor:pointer;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px)}
+.nw-go:hover{filter:brightness(1.12)}
+.nw-go:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #0a0510,inset 0 0 0 4px #fff}
+.nw-go[hidden]{display:none}
+
+/* the detail card: the direction's icon, title, blurb and first projects,
+   pulled from the Projects grid so the words are the site's own */
+.nw-card{border-top:1px solid #2a2040;padding-top:10px;display:grid;gap:8px;font-size:12.5px;line-height:1.45}
+.nw-card[hidden]{display:none}
+.nw-card-head{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+.nw-card-ico svg{width:28px;height:28px;display:block;color:var(--nw)}
+.nw-card-head b{display:block;font-weight:500;color:#f4efff;letter-spacing:.02em;margin-bottom:2px}
+.nw-card-head p{margin:0;color:#a99cc9}
+.nw-card ul{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.nw-card li{display:grid;grid-template-columns:1fr auto;gap:10px;color:#e6ddf5;padding-left:10px;position:relative}
+.nw-card li::before{content:'';position:absolute;left:0;top:.55em;width:4px;height:4px;background:var(--nw)}
+.nw-card li span{color:#7a6a95;white-space:nowrap;font-size:11px}
+.nw-card li.nw-card-more{color:#7a6a95}
+.nw-more{font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#f4efff;background:transparent;
+  border:1px solid #3a2a55;padding:5px 9px;cursor:pointer}
+.nw-more:hover{border-color:#a99cc9}
+.nw-more:focus-visible{outline:none;box-shadow:inset 0 0 0 2px #fff}
+.nw-more[hidden]{display:none}
+@media (max-width:640px){
+  .nw-card li span{display:none}
+  .nw-card li{grid-template-columns:1fr}
+}
+
+/* entry control sits with the other CTAs; a real <button> styled like them */
+.btn.nw-enter{border-style:dashed}
+
+/* mobile: caption hugs the top edge under the topbar, portrait goes */
+@media (max-width:640px){
+  .nw-cap{bottom:auto;top:72px;transform:translate(-50%,-12px)}
+  .nw-panel{grid-template-columns:1fr}
+  .nw-port{display:none}
+  .nw-body{min-height:0}
+  .nw-hint{display:none}
+  .nw-long{display:none}
+  .nw-band.top{height:40%}
+  .nw-band.bot{height:18%}
+}
+@media (prefers-reduced-motion:reduce){
+  .city-stage,.nw-cap,.nw-band,.hero-content,.scroll-hint{transition:none}
+  .nw-text .caret{animation:none}
+}

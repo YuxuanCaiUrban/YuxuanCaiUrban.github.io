@@ -21,6 +21,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@300;400;500;600&family=Share+Tech+Mono&family=DotGothic16&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/nightwalk.css">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"Person","name":"Yuxuan Cai","alternateName":"蔡雨轩","url":"https://yuxuancai.com/","jobTitle":"PhD Student","affiliation":{"@type":"CollegeOrUniversity","name":"University of North Carolina at Chapel Hill"},"alumniOf":[{"@type":"CollegeOrUniversity","name":"University of Chicago"},{"@type":"CollegeOrUniversity","name":"University of California, Berkeley"}],"knowsAbout":["Urban planning","Vision-language models","Urban perception","Urban health","Machine learning"],"sameAs":["https://scholar.google.com/citations?user=V1_-l2IAAAAJ&hl=en","https://github.com/YuxuanCaiUrban"]}
 </script>
@@ -1027,9 +1028,11 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
 
 <!-- ════ HERO ════ -->
 <div id="city-screen">
-  <div class="hero-grid"></div>
-  <canvas id="city-canvas" aria-hidden="true"></canvas>
-  <div class="hero-vignette"></div>
+  <div class="city-stage">
+    <div class="hero-grid"></div>
+    <canvas id="city-canvas" aria-hidden="true"></canvas>
+    <div class="hero-vignette"></div>
+  </div>
 
   <nav class="topbar" aria-label="Primary">
     <a class="brand" href="#"><b>Y</b>uxuan Cai</a>
@@ -1451,6 +1454,7 @@ const HOME=CITIES[0];
   const mouse={x:-999,y:-999};
   let glowX=-999,glowY=-999;
   let rafId=null,cityRunning=false,lastTs=0;
+  let hotIdx=-1,muteMouse=false;        // night walk: highlighted sign, pointer glow frozen
 
   // ════ PALETTE — 44 colours, explicit ramps (see art-direction plan) ════
   // luminance-checked ramp: every band ≥11% relative luminance, so the sky is
@@ -2630,7 +2634,7 @@ const HOME=CITIES[0];
           }
         }
       },g=>signEmit(g,bw,bh,col,txt,fs,false));
-      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:hero,
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:hero,txt,
                   box:{x:sx,y:sy,w:bw,h:bh},roof:true});
     }
     // ── 2) vertical kanban, 1 glyph wide — hosted on the hero because a
@@ -2660,7 +2664,7 @@ const HOME=CITIES[0];
           signEmit(g,bw,panelH,col,txt,fs,true);
           g.restore();
         });
-        signs.push({spr,x:sx,y:sy,ph:1.7,cx:sx+bw/2,w:bw,col,host:b,
+        signs.push({spr,x:sx,y:sy,ph:1.7,cx:sx+bw/2,w:bw,col,host:b,txt,
                     box:{x:sx,y:sy,w:bw,h:bh},
                     bracket:{x:side==='r'?b.x+b.w-PX*3:b.x+PX,y:sy+PX*3,w:PX*4}});
       }
@@ -2682,9 +2686,31 @@ const HOME=CITIES[0];
       const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*3);
       const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),
                            g=>signEmit(g,bw,bh,col,txt,fs,false));
-      signs.push({spr,x:sx,y:sy,ph:2.6,cx:sx+bw/2,w:bw,col,host:b,
+      signs.push({spr,x:sx,y:sy,ph:2.6,cx:sx+bw/2,w:bw,col,host:b,txt:shopTxt,
                   box:{x:sx,y:sy,w:bw,h:bh}});
     }
+    // ── 3b) GREEN — the second worded lightbox, on the near block whose
+    // material already says park (the green-black tile family). Placed before
+    // the abstract strips so they stay off its host, as they do for VISION.
+    let greenHost=null;
+    {
+      const txt='GREEN', fs=PX*8, col=NEON[3];
+      const tw=Math.ceil(txt.length*fs*0.62/PX)*PX, bw=tw+PX*6, bh=fs+PX*6;
+      const cands=near.filter(b=>b!==shopHost&&b.w>=bw+PX*8);
+      const b=cands.find(b=>b.ramp===NEAR_FAM[5])||cands.filter(b=>b.x+b.w/2>W*0.5)[0]||cands[0];
+      if(b){
+        const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-bh-PX*4);
+        // hitsSign is declared further down (TDZ); only three signs exist yet
+        const clash=signs.some(s=>{const o=s.box||{x:s.x,y:s.y,w:s.w,h:s.spr&&s.spr.img?s.spr.img.height-2*s.spr.pad:0};
+          return sx<o.x+o.w+PX*2&&sx+bw>o.x-PX*2&&sy<o.y+o.h+PX*2&&sy+bh>o.y-PX*2;});
+        if(sy>b.y+U.cornice+PX*2&&!inText(sx,sy,bw,bh)&&!clash){
+          const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>signEmit(g,bw,bh,col,txt,fs,false));
+          signs.push({spr,x:sx,y:sy,ph:1.1,cx:sx+bw/2,w:bw,col,host:b,txt,box:{x:sx,y:sy,w:bw,h:bh}});
+          greenHost=b;
+        }
+      }
+    }
+
     // ── 5) protruding pictogram signs (袖看板) — signage that reads as a
     // PICTURE rather than a word, so the scene's text budget stays at the
     // three brand signs while the street stops being three words on a wall
@@ -2817,7 +2843,7 @@ const HOME=CITIES[0];
     // ── 4) background signage: abstract marks only (below the legibility floor)
     // never give the VISION host a second abstract sign — the two boxes fuse
     // into one garbled "EVISION" read
-    const absHosts=near.slice(2).filter(b=>b!==shopHost).concat(mid.slice(0,6));
+    const absHosts=near.slice(2).filter(b=>b!==shopHost&&b!==greenHost).concat(mid.slice(0,6));
     absHosts.forEach((b,i)=>{
       const col=NEON[(i*2+3)%NEON.length];
       const vert=i%2===0;
@@ -2991,7 +3017,7 @@ const HOME=CITIES[0];
         g.fillStyle=mix(col,'#fff4fa',0.55);                      // the gas
         drawText5(g,txt,PX*2,PX,fp);
       });
-      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,roof:true,
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,roof:true,txt,
                   kind:'rooftext',box:{x:sx,y:sy,w:bw,h:bh}});
     });
 
@@ -2999,16 +3025,18 @@ const HOME=CITIES[0];
     // crown-form block. The dots are drawn per frame (see drawLed) and scroll,
     // which makes this the first sign in the scene that actually does something.
     if(near[2]){
-      const b=near[2], bw=PX*28, bh=PX*14;
+      // 7 rows so a FONT5 glyph fits one diode per pixel: the ticker now says
+      // something (OPEN DATA) instead of pseudo-glyph noise
+      const b=near[2], bw=PX*32, bh=PX*18;
       const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-PX*26);
       if(!hitsSign(sx,sy,bw,bh,PX*2)&&sy>b.y+U.cornice+PX*2){
         const spr=makeSprite(bw,bh,'#ffb14d',g=>{
           g.fillStyle='#2a2440';g.fillRect(0,0,bw,bh);
           g.fillStyle='#0e0918';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
           g.fillStyle='#3a2416';                                       // unlit diodes
-          for(let r=0;r<5;r++)for(let c=0;c<12;c++)g.fillRect(PX*2+c*PX*2,PX*2+r*PX*2,PX,PX);
+          for(let r=0;r<7;r++)for(let c=0;c<14;c++)g.fillRect(PX*2+c*PX*2,PX*2+r*PX*2,PX,PX);
         },()=>{});
-        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffb14d',host:b,
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffb14d',host:b,txt:'OPEN DATA',
                     kind:'led',box:{x:sx,y:sy,w:bw,h:bh}});
       }
     }
@@ -3058,7 +3086,7 @@ const HOME=CITIES[0];
           g.save();g.globalCompositeOperation='destination-out';
           g.fillStyle='#000';drawText5(g,txt,PX*3,PX*3,PX);g.restore();
         });
-        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffe0a8',host:b,dim:true,
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffe0a8',host:b,dim:true,txt,
                     kind:'box',box:{x:sx,y:sy,w:bw,h:bh}});
       }
     }
@@ -3330,6 +3358,24 @@ const HOME=CITIES[0];
     }
     g.fillStyle=mix(MID[0],'#000000',0.25);
     g.fillRect(0,railY+PX*4,W,PX);           // contact wire
+    bakeMidDetails(g);
+  }
+
+  // SENSE — a sensor mast on the roof that carries the word: taller than the
+  // letters so it reads above them, with two instrument boxes and a dish
+  function bakeMidDetails(g){
+    const ss=signs.find(s=>s.txt==='SENSE');
+    if(!ss||!ss.host)return;
+    const b=ss.host, x=snap(b.x+PX*3);
+    g.fillStyle=METAL;
+    g.fillRect(x,b.y-PX*27,PX,PX*27);                        // mast
+    g.fillRect(x-PX*2,b.y-PX*25,PX*5,PX);                    // crossbars
+    g.fillRect(x-PX*2,b.y-PX*21,PX*5,PX);
+    g.fillStyle='#1a1626';
+    g.fillRect(x-PX*2,b.y-PX*24,PX*2,PX*2);                  // instrument boxes
+    g.fillRect(x+PX,b.y-PX*20,PX*2,PX*2);
+    g.fillStyle='#b8b8c8';g.fillRect(x-PX*3,b.y-PX*18,PX*3,PX*3);   // dish
+    beacons.push({x,y:b.y-PX*28,fast:true});
   }
 
   function bakeNear(){
@@ -3448,8 +3494,79 @@ const HOME=CITIES[0];
     buildings.forEach(b=>{if(b.layer===2&&b.claw)bakeClawCorner(g,b);});
     bakeTrees(g);
     bakeStringLights(g);
+    bakeStopDetails(g);
     bakeTubes(g);
     bakeQuay(g);
+  }
+
+  // ── stop details — what the night-walk camera lands on at 3x. Each cluster
+  // is placed relative to the sign it belongs to, so it follows that sign
+  // across viewports; every colour here is already in the palette.
+  function bakeStopDetails(g){
+    const hero=buildings.filter(b=>b.hero)[0];
+    const byTxt=t=>signs.find(s=>s.txt===t);
+    // VISION — a pair of cameras watching the street, one each side of the sign
+    const vs=byTxt('VISION');
+    if(vs){
+      [[vs.x-PX*7,false],[vs.x+vs.w+PX*3,true]].forEach(spec=>{
+        const cx=spec[0], flip=spec[1], cy=vs.y+PX*2;
+        g.fillStyle='#1a1626';
+        g.fillRect(flip?cx:cx+PX*3,cy,PX,PX*2);                          // bracket
+        g.fillRect(cx,cy+PX*2,PX*4,PX*2);                                // body
+        g.fillStyle='#0b0616';g.fillRect(flip?cx+PX*3:cx,cy+PX*2,PX,PX*2); // hood
+        g.fillStyle='#b8b8c8';g.fillRect(flip?cx+PX*3:cx,cy+PX*2,PX,PX);   // glass
+        beacons.push({x:flip?cx:cx+PX*3,y:cy+PX*3,fast:true});
+      });
+    }
+    if(hero){
+      // GEOAI — a bikeshare dock under the kanban: three bikes and the pay post
+      const bike=x=>{
+        g.fillStyle='#1a1626';
+        g.fillRect(x,gY-PX*4,PX*4,PX);g.fillRect(x+PX*7,gY-PX*4,PX*4,PX);
+        g.fillRect(x+PX,gY-PX*5,PX,PX);g.fillRect(x+PX*8,gY-PX*5,PX,PX);
+        g.fillRect(x+PX*2,gY-PX*7,PX*7,PX);
+        g.fillRect(x+PX*3,gY-PX*9,PX,PX*2);
+        g.fillStyle=RIM_NEAR;g.fillRect(x+PX*2,gY-PX*8,PX*7,PX);
+      };
+      const x0=hero.x+PX*3;
+      g.fillStyle=METAL;g.fillRect(x0,gY-PX*6,PX*40,PX);               // dock rail
+      bike(x0+PX*2);bike(x0+PX*15);bike(x0+PX*28);
+      g.fillStyle=METAL;g.fillRect(x0+PX*41,gY-PX*11,PX*2,PX*11);       // pay post
+      g.fillStyle='#7cb4e4';g.fillRect(x0+PX*41,gY-PX*11,PX*2,PX*2);    // its screen
+      // 24H — the cat by the door
+      const catX=snap(hero.x+hero.w-PX*13);
+      g.fillStyle='#0b0616';
+      g.fillRect(catX,gY-PX*2,PX*5,PX*2);g.fillRect(catX+PX*5,gY-PX*3,PX*2,PX*3);
+      g.fillRect(catX+PX*5,gY-PX*4,PX,PX);g.fillRect(catX+PX*6,gY-PX*4,PX,PX);   // ears
+      g.fillRect(catX-PX,gY-PX*4,PX,PX*2);                                        // tail
+      g.fillStyle='#ffd8a0';g.fillRect(catX+PX*6,gY-PX*3,PX,PX);                  // one eye catching the light
+      // URBAN AI — pigeons along the roof edge under the billboard
+      g.fillStyle='#0b0616';
+      [PX*6,PX*11,hero.w-PX*9].forEach(dx=>{g.fillRect(hero.x+dx,hero.y-PX*2,PX*2,PX*2);g.fillRect(hero.x+dx+PX*2,hero.y-PX*3,PX,PX);});
+    }
+    // OPEN DATA — an antenna array on the ticker's roof
+    const ls=signs.find(s=>s.kind==='led');
+    if(ls&&ls.host){
+      const b=ls.host;
+      const mast=(x,h)=>{g.fillStyle=METAL;g.fillRect(x,b.y-h,PX,h);for(let y=b.y-h+PX*2;y<b.y-PX;y+=PX*3)g.fillRect(x-PX,y,PX*3,PX);};
+      mast(b.x+PX*4,PX*13);mast(b.x+b.w-PX*6,PX*9);
+      g.fillStyle='#b8b8c8';g.fillRect(b.x+b.w-PX*10,b.y-PX*9,PX*3,PX*3);   // dish
+      g.fillStyle='#1a1626';g.fillRect(b.x+b.w-PX*9,b.y-PX*8,PX,PX);
+      beacons.push({x:b.x+PX*4,y:b.y-PX*14,fast:true});
+    }
+    // GREEN — a hedge along the pavement and a bench under the sign
+    const gs=byTxt('GREEN');
+    if(gs&&gs.host){
+      const b=gs.host;
+      for(let x=snap(b.x-PX*4);x<b.x+b.w+PX*4;x+=PX){
+        if((Math.round((x-b.x)/PX)%11+11)%11===5)continue;                 // gaps for the paths
+        g.fillStyle='#0c1c16';g.fillRect(x,gY-PX*3,PX,PX*3);
+        if(rnd(x*0.37)<0.4){g.fillStyle='#1b3b2c';g.fillRect(x,gY-PX*3,PX,PX);}
+      }
+      const bx=snap(b.x+b.w*0.55);
+      g.fillStyle='#1a1626';g.fillRect(bx,gY-PX*5,PX*10,PX);g.fillRect(bx+PX,gY-PX*4,PX,PX*4);g.fillRect(bx+PX*8,gY-PX*4,PX,PX*4);
+      g.fillStyle=RIM_NEAR;g.fillRect(bx,gY-PX*6,PX*10,PX);
+    }
   }
 
   // ── trees ──
@@ -3471,6 +3588,8 @@ const HOME=CITIES[0];
       }
     };
     tree(0.418,38,7.7); tree(0.700,33,11.3); tree(0.955,30,19.1);
+    const gs=signs.find(s=>s.txt==='GREEN');
+    if(gs&&gs.host)tree((gs.host.x+gs.host.w*0.22)/W,24,23.3);
   }
 
   // ── string lights ──
@@ -3506,13 +3625,29 @@ const HOME=CITIES[0];
   // Amber diodes on a 2px pitch, 5 rows, scrolling right to left. Columns are
   // pseudo-glyph bit patterns with a blank every sixth column, which is what a
   // ticker looks like from across a street: words you cannot quite read.
+  // the marquee carries a real message: FONT5 glyphs at one diode per pixel,
+  // scrolling right to left, a blank column between letters, three for a space
+  const LED_MSG='OPEN DATA   ';
+  let ledCols=null;
+  function ledColumns(){
+    if(ledCols)return ledCols;
+    const cols=[];
+    for(const ch of LED_MSG){
+      if(ch===' '){cols.push(0,0,0);continue;}
+      const gl=FONT5[ch];if(!gl){cols.push(0);continue;}
+      for(let c=0;c<5;c++){let bits=0;for(let r=0;r<7;r++)if(gl[r][c]==='1')bits|=1<<r;cols.push(bits);}
+      cols.push(0);
+    }
+    return ledCols=cols;
+  }
   function drawLed(s){
-    const c0=s.x+PX*2, r0=s.y+PX*2, sc=Math.floor(t/5);
-    for(let c=0;c<12;c++){
-      const k=c+sc, bits=(k%6===5)?0:1+Math.floor(rnd(k*3.7)*30);
-      for(let r=0;r<5;r++){
+    const cols=ledColumns(), n=cols.length;
+    const c0=s.x+PX*2, r0=s.y+PX*2, sc=Math.floor(t/4);
+    for(let c=0;c<14;c++){
+      const bits=cols[(c+sc)%n];
+      for(let r=0;r<7;r++){
         if(!((bits>>r)&1))continue;
-        ctx.fillStyle=(r===2)?'#ffd8a0':'#ffb14d';
+        ctx.fillStyle=(r===3)?'#ffd8a0':'#ffb14d';
         ctx.fillRect(c0+c*PX*2,r0+r*PX*2,PX,PX);
       }
     }
@@ -3882,6 +4017,27 @@ const HOME=CITIES[0];
     }
   }
 
+  // two searchlight beams from the PLAN tower's roof, pixel-stepped wedges
+  // fading with distance, drawn in the sky behind every building
+  function drawSearchlights(){
+    const sp=signs.find(s=>s.kind==='spire');
+    if(!sp||!sp.host)return;
+    const b=sp.host;
+    const beams=[[b.x+PX*2,-0.42,0.011,0],[b.x+b.w-PX*3,0.38,0.008,1.7]];
+    ctx.fillStyle='#ffd8a0';
+    for(let i=0;i<beams.length;i++){
+      const ax=beams[i][0], a=beams[i][1]+0.26*Math.sin(t*beams[i][2]+beams[i][3]);
+      const tanA=Math.tan(a);
+      for(let y=b.y-PX;y>0;y-=PX){
+        const d=b.y-y;
+        const cx=ax+d*tanA, half=PX+d*0.045;
+        ctx.globalAlpha=0.085*(1-Math.min(0.85,d/(b.y+1)));
+        ctx.fillRect(snap(cx-half),y,Math.max(PX,snap(half*2)),PX);
+      }
+    }
+    ctx.globalAlpha=1;
+  }
+
   function drawBeacons(){
     for(let i=0;i<beacons.length;i++){
       const bc=beacons[i];
@@ -3947,6 +4103,16 @@ const HOME=CITIES[0];
       ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);
     }
     ctx.globalAlpha=1;
+    // the sign under the pointer (or the current tour stop) breathes: the
+    // sprite is added onto itself, so the tube and its bloom go white-hot
+    // while the dark panel stays put
+    if(hotIdx>=0&&hotIdx<signs.length){
+      const s=signs[hotIdx];
+      ctx.globalCompositeOperation='lighter';
+      ctx.globalAlpha=0.26+0.22*Math.sin(t*0.35);
+      ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);
+      ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
+    }
   }
 
   function drawTraffic(){
@@ -4022,12 +4188,12 @@ const HOME=CITIES[0];
 
   function drawMouseGlow(){
     const mx=mouse.x*DPR,my=mouse.y*DPR;
-    if(mouse.x>0){
+    if(mouse.x>0&&!muteMouse){
       if(glowX===-999){glowX=mx;glowY=my;}
       else{glowX+=(mx-glowX)*0.07;glowY+=(my-glowY)*0.07;}
     }
     const screen=document.getElementById('city-screen');
-    if(glowX>0&&screen&&screen.style.display!=='none'){
+    if(glowX>0&&!muteMouse&&screen&&screen.style.display!=='none'){
       const ratio=Math.max(0,Math.min(1,glowX/W));
       const r=Math.round(255*(1-ratio)+62*ratio);
       const g2=Math.round(77*(1-ratio)+230*ratio);
@@ -4082,6 +4248,7 @@ const HOME=CITIES[0];
     ctx.drawImage(sunSprite,sunX-sunSprite.width/2,sunY-sunSprite.height/2);
     drawClouds();
     drawSkyLife();
+    drawSearchlights();
     ctx.drawImage(Lback,0,0);
     ctx.drawImage(Lmid,0,0);
     drawTrain();
@@ -4096,10 +4263,13 @@ const HOME=CITIES[0];
     drawForeground();
   }
 
-  function rebuild(){resize();bakeAll();draw();}
+  function rebuild(){resize();bakeAll();draw();hotIdx=-1;try{window.dispatchEvent(new CustomEvent('city:rebuilt'));}catch(_){}}
   window.cityRebuild=rebuild;
   window.citySigns=()=>signs.map(s=>s.kind||'tube');   // debug: what got placed
   window.cityDbg={b:()=>buildings,s:()=>signs,g:()=>({W,H,PX,gY,U}),cov:(x,y)=>coveredByNear(x,y)};
+  window.cityTour={signs:()=>signs,geom:()=>({W,H,PX,gY,DPR}),
+    setHot:i=>{const n=(typeof i==='number')?i:-1;if(n===hotIdx)return;hotIdx=n;if(!cityRunning)draw();},
+    mute:on=>{muteMouse=!!on;if(!cityRunning)draw();}};
 
   let rsTimer=null;
   window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(rebuild,150);});
@@ -5955,5 +6125,6 @@ runBootCeremony(() => {
 });
 route();
 </script>
+<script src="assets/nightwalk.js"></script>
 </body>
 </html>
