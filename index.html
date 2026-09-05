@@ -3114,8 +3114,11 @@ const HOME=CITIES[0];
     // field, a dark figure standing in it, two short words, and the wall around
     // it flooded with the field's colour (see bakeSignWall). The one sign in the
     // scene that is a picture rather than a word or a glyph.
-    const posterCands=mid.filter(b=>!b.pitched&&b.h>=PX*64&&b.w>=PX*30&&b.x>W*0.16&&b.x+b.w<W*0.88
-        &&b!==pickL&&b!==pickR).sort((a,b)=>b.h-a.h);
+    // The roof-letter towers stay eligible: the letters sit on the roof and the
+    // poster hangs on the facade, and hitsSign keeps them apart. Excluding them
+    // left the only tower clear of the hero text block off the list.
+    const posterCands=mid.filter(b=>!b.pitched&&b.h>=PX*64&&b.w>=PX*30&&b.x>W*0.16&&b.x+b.w<W*0.88)
+        .sort((a,b)=>b.h-a.h);
     let posterHost=null;
     let posterBH=PX*52, posterSY=0;
     outer: for(const b of posterCands){
