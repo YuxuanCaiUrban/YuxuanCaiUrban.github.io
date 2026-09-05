@@ -103,6 +103,9 @@ a{color:inherit}
 .hero-tag{font-family:var(--display);font-weight:500;font-size:clamp(18px,2.2vw,26px);line-height:1.3;margin:22px 0 6px;color:var(--text)}
 .hero-tag em{font-style:normal;color:var(--accent)}
 .hero-sub{color:var(--muted);font-size:15px;max-width:440px}
+/* the city behind the type got busy on purpose; the type carries its own
+   dark halo so legibility never depends on which sign lands where */
+.hero-content .eyebrow,.hero-name,.hero-tag,.hero-sub{text-shadow:0 1px 2px rgba(5,7,14,.9),0 0 12px rgba(5,7,14,.8)}
 .hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 
 .hero-stats{position:absolute;z-index:5;left:clamp(20px,5vw,72px);bottom:clamp(20px,5vh,56px);display:flex;gap:34px}
@@ -1444,6 +1447,7 @@ const HOME=CITIES[0];
   if(!cv||!ctx)return;
 
   let W=0,H=0,PX=2,DPR=1,gY=0,t=0;
+  let walkers=[];
   const mouse={x:-999,y:-999};
   let glowX=-999,glowY=-999;
   let rafId=null,cityRunning=false,lastTs=0;
@@ -1631,6 +1635,19 @@ const HOME=CITIES[0];
   // the PX grid — and the re-pixelize pass turned that into ragged letters.
   // Hand-set glyphs are PX-exact by construction.
   const FONT5={
+    // added for the emblem captions (VLM / ECO) and the konbini 24H box — the
+    // font only ever carried the letters of the three brand words
+    'H':['10001','10001','10001','11111','10001','10001','10001'],
+    'T':['11111','00100','00100','00100','00100','00100','00100'],
+    'Y':['10001','10001','01010','00100','00100','00100','00100'],
+    'P':['11110','10001','10001','11110','10000','10000','10000'],
+    'D':['11110','10001','10001','10001','10001','10001','11110'],
+    'L':['10000','10000','10000','10000','10000','10000','11111'],
+    'M':['10001','11011','10101','10101','10001','10001','10001'],
+    'C':['01110','10001','10000','10000','10000','10001','01110'],
+    '2':['01110','10001','00001','00010','00100','01000','11111'],
+    '4':['00010','00110','01010','10010','11111','00010','00010'],
+
     A:['01110','10001','10001','11111','10001','10001','10001'],
     B:['11110','10001','10001','11110','10001','10001','11110'],
     E:['11111','10000','10000','11110','10000','10000','11111'],
@@ -1802,6 +1819,14 @@ const HOME=CITIES[0];
     // HERO — the focal building: tallest near mass, carries the billboard
     buildings.push({xf:0.435,wf:0.185,hf:0.60,layer:2,type:'hero',
       ramp:NEAR_FAM[1],seed:42.7,hero:true,shop:true});
+    // Tiled pitched roofs on a few blocks — reference 1's alley is all eaves.
+    // The two asymmetric near forms whose top mass is a slim shaft take one,
+    // and about a third of the plain mid rects. Never on a block that will
+    // carry a roof sign; placeSigns filters these out of its crown hosts.
+    buildings.forEach(b=>{
+      b.pitched=(b.layer===2&&(b.type==='offset'||b.type==='slab'))||
+                (b.layer===1&&b.type==='rect'&&rnd(b.seed*2.3)<0.4);
+    });
 
     buildings.sort((a,b)=>a.layer-b.layer);
     buildings.forEach(b=>{
@@ -2225,6 +2250,7 @@ const HOME=CITIES[0];
   function bakeRoof(g,b){
     const R2=b.ramp;
     const top=shapeSpan(b,b.y+PX);
+    if(b.pitched){bakePitched(g,b,top);return;}
     if(b.hero){
       const sx=snap(b.x+b.w/2);
       g.fillStyle=R2[1];
@@ -2549,7 +2575,9 @@ const HOME=CITIES[0];
     g.globalAlpha=0.24;g.fillRect(PX,ch+PX,PX,bh-(ch+PX)*2);
     g.globalAlpha=1;
     if(!txt)return;
-    g.fillStyle=col;
+    // two-tone: frame in the tube colour, letters in its white-hot tint. A
+    // frame and text in one identical hue read as a coloured sticker.
+    g.fillStyle=mix(col,'#fff4fa',0.42);
     const fp=Math.max(PX,Math.floor(fs/(7*PX))*PX);
     if(vertical){
       const gx=snap((bw-fp*5)/2);
@@ -2562,6 +2590,11 @@ const HOME=CITIES[0];
   }
 
   function placeSigns(){
+    // Lit plates must stay out from behind the hero type. The text block is
+    // read from the DOM, so this follows the layout on every viewport.
+    const hcEl=document.querySelector('.hero-content');
+    const tz=hcEl?(r=>({x:r.left*DPR,y:r.top*DPR,w:r.width*DPR,h:r.height*DPR}))(hcEl.getBoundingClientRect()):null;
+    const inText=(x,y,w,h)=>!!tz&&x<tz.x+tz.w&&x+w>tz.x&&y<tz.y+tz.h&&y+h>tz.y;
     const hero=buildings.filter(b=>b.hero)[0];
     const near=buildings.filter(b=>b.layer===2&&!b.hero).sort((a,b)=>a.x-b.x);
     const mid=buildings.filter(b=>b.layer===1&&b.h>=PX*40).sort((a,b)=>a.x-b.x);
@@ -2684,6 +2717,30 @@ const HOME=CITIES[0];
     // this is 42% smaller on screen than the version that shipped, and the
     // drawings still have the room a bowl or a handle needs.
     const ICON_N=10;
+    ICONS.bottle=['....11....','....11....','...1111...','...1111...','...1111...',
+                  '...1111...','...1111...','...1111...','...1111...','....11....'];
+    ICONS.chev  =['1........1','.1......1.','..1....1..','...1..1...','....11....',
+                  '1........1','.1......1.','..1....1..','...1..1...','....11....'];
+    ICONS.dart  =['..........','......1...','.......1..','1.1.1.1.11','.......1..',
+                  '......1...','..........','....1.1.1.','..........','..........'];
+    // A glyph as bare neon tube, no plate: the shape once in the tube colour at
+    // the four cardinal offsets (the glass), then once in its white-hot tint on
+    // top (the gas). Two tones, no panel, nothing but light on the wall.
+    const drawTube=(g,name,x0,y0,col)=>{
+      g.fillStyle=col;
+      [[PX,0],[-PX,0],[0,PX],[0,-PX]].forEach(o=>drawIcon(g,name,x0+o[0],y0+o[1]));
+      g.fillStyle=mix(col,'#fff4fa',0.55);drawIcon(g,name,x0,y0);
+    };
+    const dimHex=(h,k)=>{const c=hex2rgb(h);return '#'+c.map(v=>Math.round(v*(1-k)).toString(16).padStart(2,'0')).join('');};
+    const drawIconRows=(g,name,x0,y0,r0,r1)=>{
+      ICONS[name].forEach((row,r)=>{if(r<r0||r>=r1)return;
+        for(let c=0;c<row.length;c++)if(row[c]==='1')g.fillRect(x0+c*PX,y0+r*PX,PX,PX);});
+    };
+    const drawTubeRows=(g,name,x0,y0,col,r0,r1)=>{
+      g.fillStyle=col;
+      [[PX,0],[-PX,0],[0,PX],[0,-PX]].forEach(o=>drawIconRows(g,name,x0+o[0],y0+o[1],r0,r1));
+      g.fillStyle=mix(col,'#fff4fa',0.55);drawIconRows(g,name,x0,y0,r0,r1);
+    };
     const drawIcon=(g,name,x0,y0)=>{
       ICONS[name].forEach((row,r)=>{
         for(let c=0;c<row.length;c++)
@@ -2721,7 +2778,7 @@ const HOME=CITIES[0];
     // every sign gets its own pictogram: the old table used the cocktail glass
     // twice, and two identical signs a few buildings apart read as a copy-paste
     // slip rather than as two bars on the same street
-    const picto=[[near[0],'ramen',0,PX*8,'r'],[near[1],'cup',3,PX*8,'r'],
+    const picto=[[near[0],'ramen',0,PX*8,'r','bare'],[near[1],'cup',3,PX*8,'r','bare'],
                  [near[3],'glass',4,PX*2,'r'],[hero,'arrow',1,PX*2,'l'],
                  [near[5],'mast',2,PX*4,'c']];
     picto.forEach((spec,pi)=>{
@@ -2744,13 +2801,16 @@ const HOME=CITIES[0];
       }
       if(hitsSign(sx,sy,bw,bh))return;
       if(sy<topLim||sx<PX||sx+bw>W-PX)return;
-      const spr=makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
-        signEmit(g,bw,bh,col,null,0,false);
-        g.fillStyle=col;drawIcon(g,spec[1],PX*2,PX*2);
-      });
+      const bare=spec[5]==='bare';
+      const spr=bare
+        ?makeSprite(bw,bh,col,()=>{},g=>drawTube(g,spec[1],PX*2,PX*2,col))
+        :makeSprite(bw,bh,col,g=>signPanel(g,bw,bh),g=>{
+          signEmit(g,bw,bh,col,null,0,false);
+          g.fillStyle=col;drawIcon(g,spec[1],PX*2,PX*2);
+        });
       signs.push({spr,x:sx,y:sy,ph:2.2+pi*1.3,cx:sx+bw/2,w:bw,col,host:b,
                   kind:'picto',box:{x:sx,y:sy,w:bw,h:bh},
-                  bracket:side==='c'?undefined
+                  bracket:(side==='c'||bare)?undefined
                     :{x:side==='r'?b.x+b.w-PX*3:b.x+PX,y:sy+PX*2,w:PX*4}});
     });
 
@@ -2848,7 +2908,7 @@ const HOME=CITIES[0];
 
     // ── 7) rooftop skeleton sign on a mid tower — an open steel frame with
     // glyph cells and one burned-out socket, silhouetted against the sky
-    const skelHost=mid.filter(b=>b.x>W*0.14&&b.x+b.w<W*0.36)
+    const skelHost=mid.filter(b=>!b.pitched&&b.x>W*0.14&&b.x+b.w<W*0.36)
       .sort((a,b)=>b.h-a.h)[0];
     if(skelHost){
       // muted violet, not full neon — a half-dead sign shouldn't glow as hard
@@ -2900,6 +2960,290 @@ const HOME=CITIES[0];
       },()=>{});
       signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#7a2545',host:b,dim:true});
     }
+
+    // ── 9) rooftop letters — the big signs go on the crowns, and in every
+    // reference the crown carries WORDS (iCUP, PROTO, L.A. BANK), not a glyph.
+    // The first pass here hung the Projects icons up there and they read as
+    // app tiles on a stick. These are the site's own words as standing tube
+    // letters on a steel rail: no plate, two tones, light against the sky.
+    const crownHosts=mid.filter(b=>b.h>=PX*44&&!b.pitched&&!coveredByNear(b.x+b.w/2,b.y-PX*8))
+      .sort((a,b)=>a.x-b.x);
+    const pickL=crownHosts.filter(b=>b.x+b.w/2<W*0.44).sort((a,b)=>b.h-a.h)[0];
+    const pickR=crownHosts.filter(b=>b.x>W*0.58).sort((a,b)=>b.h-a.h)[0];
+    [[pickL,'SENSE',NEON[0]],[pickR,'CITY',NEON[1]]].forEach(spec=>{
+      const b=spec[0];if(!b)return;
+      const txt=spec[1], col=spec[2];
+      // cap height 14 logical px; drop to 7 only if the word would overhang
+      // the tower by more than a third
+      let fp=PX*2; let tw=(txt.length*6-1)*fp;
+      if(tw>b.w*1.35){fp=PX;tw=(txt.length*6-1)*fp;}
+      const bw=tw+PX*4, bh=fp*7+PX*2, railH=PX*4;
+      const sx=snap(b.x+(b.w-bw)/2), sy=b.y-bh-railH;
+      if(sy<PX*3||hitsSign(sx,sy,bw,bh+railH))return;
+      const spr=makeSprite(bw,bh+railH,col,g=>{
+        g.fillStyle='#1a1028';                                   // rail and posts
+        g.fillRect(PX,bh+railH-PX,bw-PX*2,PX);
+        g.fillRect(PX*2,bh,PX,railH);g.fillRect(bw-PX*3,bh,PX,railH);
+        g.fillRect(snap(bw/2)-PX,bh,PX,railH);
+      },g=>{
+        g.fillStyle=col;                                          // the glass
+        [[PX,0],[-PX,0],[0,PX],[0,-PX]].forEach(o=>drawText5(g,txt,PX*2+o[0],PX+o[1],fp));
+        g.fillStyle=mix(col,'#fff4fa',0.55);                      // the gas
+        drawText5(g,txt,PX*2,PX,fp);
+      });
+      signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,roof:true,
+                  kind:'rooftext',box:{x:sx,y:sy,w:bw,h:bh}});
+    });
+
+    // ── 10) LED dot-matrix marquee — a 5-row, 12-column amber matrix on the
+    // crown-form block. The dots are drawn per frame (see drawLed) and scroll,
+    // which makes this the first sign in the scene that actually does something.
+    if(near[2]){
+      const b=near[2], bw=PX*28, bh=PX*14;
+      const sx=snap(b.x+(b.w-bw)/2), sy=snap(gY-U.ground-PX*26);
+      if(!hitsSign(sx,sy,bw,bh,PX*2)&&sy>b.y+U.cornice+PX*2){
+        const spr=makeSprite(bw,bh,'#ffb14d',g=>{
+          g.fillStyle='#2a2440';g.fillRect(0,0,bw,bh);
+          g.fillStyle='#0e0918';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
+          g.fillStyle='#3a2416';                                       // unlit diodes
+          for(let r=0;r<5;r++)for(let c=0;c<12;c++)g.fillRect(PX*2+c*PX*2,PX*2+r*PX*2,PX,PX);
+        },()=>{});
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffb14d',host:b,
+                    kind:'led',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 11) more bare tubes — a bottle, a chevron stack, a dotted dart. Signs
+    // that are only light on a wall, no plate: the construction the references
+    // use most and the scene had none of.
+    [[near[4],'bottle',0,PX*20,'l'],[near[5],'chev',1,PX*24,'r'],[near[0],'dart',3,PX*30,'c']].forEach((spec,bi)=>{
+      const b=spec[0];if(!b)return;
+      const col=NEON[spec[2]], bw=PX*14, bh=PX*14;
+      const xFor=sd=>sd==='c'?snap(b.x+(b.w-bw)/2):sd==='r'?b.x+b.w-bw-PX*2:b.x+PX*2;
+      let sx=0, sy=-1;
+      // slide up until the wall is clear; if this flank never clears (a strip
+      // from the next block can hang over it), try the other flank
+      for(const sd of (spec[4]==='c'?['c']:[spec[4],spec[4]==='l'?'r':'l'])){
+        for(let k=spec[3];k<=spec[3]+PX*36;k+=PX*4){
+          const ty=snap(gY-U.ground-k-bh);
+          if(ty<b.y+U.cornice+PX*2)break;
+          if(!hitsSign(xFor(sd),ty,bw,bh,PX*2)){sx=xFor(sd);sy=ty;break;}
+        }
+        if(sy>=0)break;
+      }
+      if(sy<0)return;
+      // arrows fade along their length (reference 6): head at full tube, tail
+      // dimmed — a sign that points rather than a symbol that sits
+      const spr=makeSprite(bw,bh,col,()=>{},g=>{
+        if(spec[1]==='chev'){drawTubeRows(g,'chev',PX*2,PX*2,dimHex(col,0.5),0,5);drawTubeRows(g,'chev',PX*2,PX*2,col,5,10);}
+        else if(spec[1]==='dart'){drawTubeRows(g,'dart',PX*2,PX*2,dimHex(col,0.45),7,10);drawTubeRows(g,'dart',PX*2,PX*2,col,0,7);}
+        else drawTube(g,spec[1],PX*2,PX*2,col);
+      });
+      signs.push({spr,x:sx,y:sy,ph:3.1+bi*1.7,cx:sx+bw/2,w:bw,col,host:b,
+                  kind:'bare',box:{x:sx,y:sy,w:bw,h:bh}});
+    });
+
+    // ── 12) "24H" acrylic lightbox on the konbini — a lit FIELD with dark
+    // letters, warm white: the exact opposite of every tube in the scene.
+    if(hero){
+      const b=hero, txt='24H';
+      const bw=(txt.length*6-1)*PX+PX*6, bh=PX*7+PX*6;
+      // above the lintel strip (which owns gY-U.ground-9..-1), clear of its pad
+      const sx=snap(b.x+b.w-bw-PX*3), sy=snap(gY-U.ground-PX*30);
+      if(!hitsSign(sx,sy,bw,bh,PX*2)){
+        const spr=makeSprite(bw,bh,'#ffe0a8',g=>{
+          g.fillStyle='#2a2236';g.fillRect(0,0,bw,bh);                // shows through as the letters
+        },g=>{
+          g.fillStyle='#fff0d0';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
+          g.save();g.globalCompositeOperation='destination-out';
+          g.fillStyle='#000';drawText5(g,txt,PX*3,PX*3,PX);g.restore();
+        });
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:'#ffe0a8',host:b,dim:true,
+                    kind:'box',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // Wall plates hunt for a free slot instead of naming one: the abstract
+    // strips take a random slot on every host and the hosts differ by viewport,
+    // so any fixed height collides somewhere. Scan upward from kMin on each host
+    // in turn; first slot that is inside the facade and clear of every box wins.
+    const findSlot=(hosts,bw,bh,kMin,side,lit)=>{
+      for(const hb of hosts){
+        if(!hb)continue;
+        const kMax=Math.floor((hb.h-U.ground-U.cornice-PX*3-bh)/PX);
+        // the centre column of every near block is already taken by a vertical
+        // strip hanging off the mid tower behind it, so try the flanks too
+        const sides=side==='c'?['c','l','r']:[side];
+        for(let k=kMin;k<=kMax;k+=3){
+          const ty=snap(gY-U.ground-PX*k-bh);
+          if(ty<=hb.y+U.cornice+PX*2)break;
+          for(const sd of sides){
+            const tx=sd==='l'?hb.x+PX*2:sd==='r'?hb.x+hb.w-bw-PX*2:snap(hb.x+(hb.w-bw)/2);
+            if(lit&&inText(tx,ty,bw,bh))continue;
+            if(!hitsSign(tx,ty,bw,bh,PX*2))return {b:hb,sx:tx,sy:ty};
+          }
+        }
+      }
+      return null;
+    };
+
+    // ── 13) one round plate — every sign in the scene was a rectangle
+    {
+      // the abstract strips take a random slot on every host, so a fixed
+      // position collides on some viewports — scan candidates and take the
+      // first clear one
+      const col=NEON[3], r=PX*7, bw=r*2+PX*2, bh=bw;
+      const slot=findSlot([near[3],near[5],near[4],near[0]],bw,bh,26,'c');
+      const b=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
+      if(b){
+        const disc=(g,rad,fill)=>{g.fillStyle=fill;
+          for(let y=-rad;y<rad;y+=PX){const hw=snap(Math.sqrt(Math.max(0,rad*rad-y*y)));
+            if(hw>0)g.fillRect(PX+r-hw,PX+r+y,hw*2,PX);}};
+        const spr=makeSprite(bw,bh,col,g=>disc(g,r,'#0a0510'),g=>{
+          disc(g,r,col);disc(g,r-PX,'#0a0510');                          // tube ring
+          disc(g,r-PX*2,mix(col,'#fff4fa',0.55));disc(g,r-PX*3,'#0a0510'); // hot core ring
+          g.fillStyle=mix(col,'#fff4fa',0.55);                            // centre mark: a small diamond
+          g.fillRect(PX+r-PX,PX+r-PX*2,PX*2,PX);g.fillRect(PX+r-PX*2,PX+r-PX,PX*4,PX*2);g.fillRect(PX+r-PX,PX+r+PX,PX*2,PX);
+        });
+        signs.push({spr,x:sx,y:sy,ph:4.4,cx:sx+bw/2,w:bw,col,host:b,
+                    kind:'round',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 14) image billboard — reference 1's MOON LIGHT: a saturated colour
+    // field, a dark figure standing in it, two short words, and the wall around
+    // it flooded with the field's colour (see bakeSignWall). The one sign in the
+    // scene that is a picture rather than a word or a glyph.
+    // The roof-letter towers stay eligible: the letters sit on the roof and the
+    // poster hangs on the facade, and hitsSign keeps them apart. Excluding them
+    // left the only tower clear of the hero text block off the list.
+    const posterCands=mid.filter(b=>!b.pitched&&b.h>=PX*64&&b.w>=PX*30&&b.x>W*0.16&&b.x+b.w<W*0.88)
+        .sort((a,b)=>b.h-a.h);
+    let posterHost=null;
+    let posterBH=PX*52, posterSY=0;
+    outer: for(const b of posterCands){
+      const bw=Math.min(snap(b.w*0.82),PX*36), sx=snap(b.x+(b.w-bw)/2);
+      // towers carry strips near their tops, so the plate may slide down the
+      // facade, and shrink once, before the tower is given up. Only the top 40%
+      // has to clear the near row: a poster peeking over rooftops is exactly
+      // reference 1; a poster whose head is hidden is nothing.
+      for(const bh of [PX*52,PX*40]){
+        for(let sy=snap(b.y+U.cornice+PX*5);sy+bh<gY-U.ground;sy+=PX*6){
+          if(coveredByNear(sx,sy+bh*0.4)||coveredByNear(sx+bw,sy+bh*0.4))break;
+          if(inText(sx,sy,bw,bh))continue;                   // never behind the name
+          if(!hitsSign(sx,sy,bw,bh,PX*2)){posterHost=b;posterBH=bh;posterSY=sy;break outer;}
+        }
+      }
+    }
+    if(posterHost){
+      const b=posterHost, col='#e0344e', bw=Math.min(snap(b.w*0.82),PX*36), bh=posterBH;
+      const sx=snap(b.x+(b.w-bw)/2), sy=posterSY;
+      const figure=(g,punch)=>{                       // coat-and-hat silhouette, off-centre
+        const fx=snap(bw*0.56), fy=PX*9, fh=bh-PX*22, t=snap(fh*0.55), l=snap(fh*0.45);
+        if(!punch)g.fillStyle='#120a18';
+        g.fillRect(fx-PX*2,fy,PX*5,PX*2);g.fillRect(fx-PX,fy-PX*2,PX*3,PX*2);   // hat
+        g.fillRect(fx,fy+PX*2,PX*2,PX*2);                                     // head
+        g.fillRect(fx-PX*3,fy+PX*4,PX*7,t);                                    // coat
+        g.fillRect(fx-PX*2,fy+PX*4+t,PX*2,l);g.fillRect(fx+PX,fy+PX*4+t,PX*2,l); // legs
+        g.fillRect(fx+PX*4,fy+PX*7,PX,snap(fh*0.30));                          // arm
+      };
+      {
+        const spr=makeSprite(bw,bh,col,g=>{
+          g.fillStyle='#1a1028';g.fillRect(0,0,bw,bh);figure(g,false);
+        },g=>{
+          g.fillStyle=col;g.fillRect(PX,PX,bw-PX*2,bh-PX*2);
+          g.save();g.globalCompositeOperation='destination-out';figure(g,true);g.restore();
+          // two words, sized to the plate: five letters need 29px of field
+          const words=bw>=PX*35?['URBAN','NIGHT']:['NEON','LIVE'];
+          g.fillStyle='#fff0ec';
+          drawText5(g,words[0],PX*3,bh-PX*19,PX);drawText5(g,words[1],PX*3,bh-PX*10,PX);
+        });
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,dim:true,
+                    kind:'poster',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 15) spire letters — reference 2's QOOM LAB: a word climbing a mast,
+    // one glyph per rung, tube letters with no plate
+    const spireCands=mid.filter(b=>!b.pitched&&b.h>=PX*40&&b!==pickL&&b!==pickR&&b!==posterHost&&b.x>W*0.18&&b.x+b.w<W*0.96
+        &&!coveredByNear(b.x+b.w/2,b.y-PX*8)).sort((a,b)=>b.h-a.h);
+    {
+      const txt='PLAN', col=NEON[4], fp=PX;
+      const bw=PX*11, bh=txt.length*(fp*7+PX*2)+PX*6;
+      // the tallest tower usually already carries a strip; take the first one
+      // whose mast is clear instead of giving up on the first collision
+      const b=spireCands.find(c=>{const tx=snap(c.x+c.w/2-PX*3), ty=c.y-bh;return ty>PX*3&&!hitsSign(tx,ty,bw,bh);});
+      const sx=b?snap(b.x+b.w/2-PX*3):0, sy=b?b.y-bh:0;
+      if(b){
+        const spr=makeSprite(bw,bh,col,g=>{
+          g.fillStyle='#1a1028';
+          g.fillRect(PX*2,0,PX,bh);                                    // mast
+          for(let y=PX*3;y<bh;y+=PX*8)g.fillRect(PX,y,PX*3,PX);         // ties
+          g.fillRect(0,bh-PX,PX*5,PX);                                   // base plate
+        },g=>{
+          for(let i=0;i<txt.length;i++){
+            const gy=PX*3+i*(fp*7+PX*2);
+            g.fillStyle=col;[[PX,0],[-PX,0],[0,PX],[0,-PX]].forEach(o=>drawText5(g,txt[i],PX*5+o[0],gy+o[1],fp));
+            g.fillStyle=mix(col,'#fff4fa',0.55);drawText5(g,txt[i],PX*5,gy,fp);
+          }
+        });
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col,host:b,roof:true,
+                    kind:'spire',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 16) hexagon emblem — reference 3's badge as a wall plate: a six-sided
+    // tube frame with a small geometric mark inside. No text, no glyph.
+    {
+      const col=NEON[2], r=PX*9, bw=r*2+PX*2, bh=bw;
+      const hexRow=(y,rad)=>{const a=Math.abs(y)/rad;return snap(rad*(a<0.5?1:2*(1-a)));};
+      const slot=findSlot([near[0],near[4],near[1],near[5],near[3]],bw,bh,28,'c');
+      const host=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
+      if(host){
+        const hexFill=(g,rad,fill)=>{g.fillStyle=fill;for(let y=-rad;y<rad;y+=PX){const hw=hexRow(y,rad);if(hw>0)g.fillRect(PX+r-hw,PX+r+y,hw*2,PX);}};
+        const spr=makeSprite(bw,bh,col,g=>hexFill(g,r,'#0a0510'),g=>{
+          hexFill(g,r,col);hexFill(g,r-PX,'#0a0510');
+          hexFill(g,r-PX*2,mix(col,'#fff4fa',0.55));hexFill(g,r-PX*3,'#0a0510');
+          g.fillStyle=mix(col,'#fff4fa',0.55);                            // three dots, a triangle
+          g.fillRect(PX+r-PX,PX+r-PX*4,PX*2,PX*2);g.fillRect(PX+r-PX*4,PX+r+PX,PX*2,PX*2);g.fillRect(PX+r+PX*2,PX+r+PX,PX*2,PX*2);
+        });
+        signs.push({spr,x:sx,y:sy,ph:2.9,cx:sx+bw/2,w:bw,col,host,kind:'hex',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 17) pattern lightbox — reference 2's argyle panel: a lit box carrying
+    // a geometric pattern instead of words, two tones chasing (drawPattern
+    // redraws the field every frame)
+    {
+      const bw=PX*26, bh=PX*12;
+      const slot=findSlot([near[4],near[1],near[3],near[0]],bw,bh,30,'c',true);
+      const host=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
+      if(host){
+        const spr=makeSprite(bw,bh,NEON[0],g=>{g.fillStyle='#2a2440';g.fillRect(0,0,bw,bh);g.fillStyle='#0e0918';g.fillRect(PX,PX,bw-PX*2,bh-PX*2);},()=>{});
+        signs.push({spr,x:sx,y:sy,ph:0,cx:sx+bw/2,w:bw,col:NEON[0],host,kind:'pattern',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
+
+    // ── 18) message board — reference 7's chalkboard: a header and five rows
+    // of small marks in one colour. Menu density, none of it legible, which is
+    // exactly how a board reads from across the street.
+    {
+      const col=NEON[1], bw=PX*22, bh=PX*23;
+      const slot=findSlot([near[1],near[3],near[0],near[4],hero,near[2]],bw,bh,22,'c',true);
+      const host=slot&&slot.b, sx=slot?slot.sx:0, sy=slot?slot.sy:0;
+      if(host){
+        const spr=makeSprite(bw,bh,col,g=>{
+          g.fillStyle='#0e1a1e';g.fillRect(0,0,bw,bh);
+          g.fillStyle='#1c2e34';g.fillRect(0,0,bw,PX);g.fillRect(0,bh-PX,bw,PX);g.fillRect(0,0,PX,bh);g.fillRect(bw-PX,0,PX,bh);
+        },g=>{
+          g.fillStyle=col;g.fillRect(PX*2,PX*2,bw-PX*4,PX*2);                 // header bar
+          g.globalAlpha=0.85;
+          for(let r=0;r<5;r++)drawMarks(g,PX*2,PX*6+r*PX*3,bw-PX*4-(r%2?PX*4:0),PX*2,host.seed*4.3+r*7.9,false);
+          g.globalAlpha=1;
+        });
+        signs.push({spr,x:sx,y:sy,ph:1.3,cx:sx+bw/2,w:bw,col,host,kind:'board',box:{x:sx,y:sy,w:bw,h:bh}});
+      }
+    }
   }
 
   // ── sign → wall: cast shadow, colour bleed, conduit stub ──
@@ -2925,6 +3269,22 @@ const HOME=CITIES[0];
           g.fillRect(cx,cy,PX,PX);
         }
       });
+      // the poster billboard floods its wall the way reference 1's floods the
+      // alley: a wide dithered wash in three registered tones, densest at the
+      // frame, gone by half a panel-width out
+      if(s.kind==='poster'){
+        const W3=['#6a2c4a','#5a2a48','#4a2440'];
+        for(let ring=1;ring<=3;ring++){
+          const pad=Math.round(o.w*0.18*ring/PX)*PX;
+          g.fillStyle=W3[ring-1];
+          const x0=o.x-pad,y0=o.y-pad,w0=o.w+pad*2,h0=o.h+pad*2;
+          for(let cy=y0;cy<y0+h0;cy+=PX)for(let cx=x0;cx<x0+w0;cx+=PX){
+            if(cx>=o.x&&cx<o.x+o.w&&cy>=o.y&&cy<o.y+o.h)continue;
+            if(rnd(cx*0.531+cy*0.277+ring)>0.75-ring*0.2)continue;
+            g.fillRect(cx,cy,PX,PX);
+          }
+        }
+      }
       // conduit up to the roofline
       g.fillStyle=b.ramp[0];
       g.fillRect(snap(o.x+o.w*0.5),b.y+U.cornice,PX,o.y-b.y-U.cornice);
@@ -3086,7 +3446,147 @@ const HOME=CITIES[0];
     // the arcade corner bakes after the props: prop anchors shift with viewport
     // width, and twice now one has parked itself on top of a cabinet
     buildings.forEach(b=>{if(b.layer===2&&b.claw)bakeClawCorner(g,b);});
+    bakeTrees(g);
+    bakeStringLights(g);
+    bakeTubes(g);
     bakeQuay(g);
+  }
+
+  // ── trees ──
+  // The scene had no vegetation at all — every shape in it was a rectangle.
+  // Three street trees at the kerb: dark crowns with a lit rim on the side the
+  // city glows from, the one organic silhouette in the picture.
+  function bakeTrees(g){
+    const tree=(xf,hLog,seed)=>{
+      const x=snap(W*xf), base=gY+PX*3, h=PX*hLog;
+      g.fillStyle='#0f0a14';g.fillRect(x-PX,base-snap(h*0.38),PX*2,snap(h*0.38));
+      const top=base-h, crownH=snap(h*0.72);
+      for(let y=top;y<top+crownH;y+=PX){
+        const f=(y-top)/crownH;
+        const hw=snap(h*0.30*Math.pow(Math.sin(Math.PI*Math.min(1,f*0.92+0.04)),0.65)*(0.82+0.36*rnd(seed+y*0.13)));
+        if(hw<PX)continue;
+        g.fillStyle='#0c1c16';g.fillRect(x-hw,y,hw*2,PX);
+        if(rnd(seed*3.1+y*0.31)<0.55){g.fillStyle='#122a20';g.fillRect(x-hw+PX,y,snap(hw*0.7),PX);}
+        if(rnd(seed*5.7+y*0.17)<0.6){g.fillStyle='#1b3b2c';g.fillRect(x+hw-PX*2,y,PX*2,PX);}
+      }
+    };
+    tree(0.418,38,7.7); tree(0.700,33,11.3); tree(0.955,30,19.1);
+  }
+
+  // ── string lights ──
+  // Warm bulbs on a sagging wire along a shopfront eave, and one run across the
+  // gap between two blocks. The scene's only warm-white light source: a warm
+  // string is what lets neon read as neon instead of as the whole palette.
+  function bakeStringLights(g){
+    // reference 1's rows are paper lanterns, not bare bulbs: a cap, a body two
+    // pixels wide and three tall, a rib across it
+    const run=(x0,x1,y0,sag,seed)=>{
+      if(x1-x0<PX*12)return;
+      g.fillStyle='#160b24';
+      for(let x=x0;x<x1;x+=PX){const f=(x-x0)/(x1-x0);g.fillRect(x,snap(y0+4*f*(1-f)*sag),PX,PX);}
+      for(let x=x0+PX*3,k=0;x<x1-PX*3;x+=PX*6,k++){
+        const f=(x-x0)/(x1-x0), y=snap(y0+4*f*(1-f)*sag)+PX;
+        const dead=rnd(seed+k*4.1)<0.08;
+        g.fillStyle='#160b24';g.fillRect(x,y-PX,PX*2,PX);                // cap
+        g.fillStyle=dead?'#2a2236':'#ffd8a0';g.fillRect(x,y,PX*2,PX*3);  // body
+        g.fillStyle=dead?'#2a2236':'#ffb14d';g.fillRect(x,y+PX,PX*2,PX);  // rib
+        if(dead)continue;
+        g.fillStyle='#ffb14d';g.globalAlpha=0.22;
+        g.fillRect(x-PX,y+PX,PX,PX);g.fillRect(x+PX*2,y+PX,PX,PX);g.fillRect(x,y+PX*3,PX*2,PX);
+        g.globalAlpha=1;
+      }
+    };
+    const near=buildings.filter(b=>b.layer===2&&!b.hero).sort((a,b)=>a.x-b.x);
+    const hero=buildings.filter(b=>b.hero)[0];
+    if(near[4])run(near[4].x+PX*3,near[4].x+near[4].w-PX*3,gY-U.ground-PX*4,PX*3,3.3);
+    if(near[2]&&hero)run(near[2].x+near[2].w-PX,hero.x+PX,gY-U.ground-PX*9,PX*4,8.9);
+  }
+
+  // ── LED marquee ──
+  // Amber diodes on a 2px pitch, 5 rows, scrolling right to left. Columns are
+  // pseudo-glyph bit patterns with a blank every sixth column, which is what a
+  // ticker looks like from across a street: words you cannot quite read.
+  function drawLed(s){
+    const c0=s.x+PX*2, r0=s.y+PX*2, sc=Math.floor(t/5);
+    for(let c=0;c<12;c++){
+      const k=c+sc, bits=(k%6===5)?0:1+Math.floor(rnd(k*3.7)*30);
+      for(let r=0;r<5;r++){
+        if(!((bits>>r)&1))continue;
+        ctx.fillStyle=(r===2)?'#ffd8a0':'#ffb14d';
+        ctx.fillRect(c0+c*PX*2,r0+r*PX*2,PX,PX);
+      }
+    }
+  }
+
+  // ── pedestrians ──
+  // Six figures walking the pavement at the 10-logical-px scale, two-frame
+  // gait off step4(). The scene had exactly one person in it; a street with
+  // people on it is the difference between a set and a place.
+  if(!walkers.length)walkers=[
+    {xf:0.08,v:0.55,ph:0,kind:'bag'},{xf:0.31,v:-0.48,ph:2,kind:'umb'},
+    {xf:0.47,v:0.62,ph:1,kind:'plain'},{xf:0.58,v:-0.40,ph:3,kind:'phone'},
+    {xf:0.77,v:0.50,ph:1,kind:'plain'},{xf:0.91,v:-0.58,ph:2,kind:'bag'}];
+  function drawWalkers(){
+    const footY=gY+PX*4;
+    for(const w of walkers){
+      w.xf+=w.v*PX*0.11/Math.max(1,W);
+      if(w.xf>1.04)w.xf=-0.04; if(w.xf<-0.04)w.xf=1.04;
+      const x=snap(w.xf*W), y=footY-U.fig, fwd=w.v>0;
+      const gait=(step4()+w.ph)%4<2;
+      ctx.fillStyle='#0a0616';
+      ctx.fillRect(x+PX,y,PX*2,PX*2);                         // head
+      ctx.fillRect(x,y+PX*2,PX*4,PX*5);                       // torso
+      if(gait){ctx.fillRect(x,y+PX*7,PX,PX*3);ctx.fillRect(x+PX*3,y+PX*7,PX,PX*3);}
+      else    {ctx.fillRect(x+PX,y+PX*7,PX*2,PX*3);}
+      if(w.kind==='umb'){ctx.fillRect(x-PX*2,y-PX*3,PX*8,PX);ctx.fillRect(x-PX,y-PX*4,PX*6,PX);ctx.fillRect(x+PX*2,y-PX*2,PX,PX*3);}
+      if(w.kind==='bag'){ctx.fillRect(fwd?x+PX*4:x-PX*2,y+PX*5,PX*2,PX*3);}
+      if(w.kind==='phone'){ctx.fillStyle=PHONE_GLOW;ctx.fillRect(fwd?x+PX*4:x-PX,y+PX*3,PX,PX);}
+    }
+  }
+
+  // ── pitched tile roof ──
+  // Reference 1: eave overhang, tile courses, a ridge cap, one aerial. Sits above
+  // the flat roofline so it changes the silhouette, and it replaces the roof
+  // kit — a water tank on a tiled roof is two eras on one building.
+  function bakePitched(g,b,top){
+    const fam=rnd(b.seed*1.7)<0.5?['#1e2f36','#28404a','#3a5a66']:['#3a1a24','#4e2430','#6a3040'];
+    const x0=top[0]-PX*2, w=top[1]+PX*4, rh=Math.min(PX*11,snap(w*0.30)), cx=snap(x0+w/2);
+    for(let y=b.y-rh,i=0;y<b.y;y+=PX,i++){
+      const f=(y-(b.y-rh))/rh;                                  // 0 at the ridge, 1 at the eave
+      const hw=snap(PX*2+(w/2-PX*2)*f);
+      g.fillStyle=i%2?fam[1]:fam[0];g.fillRect(cx-hw,y,hw*2,PX); // alternate courses
+      g.fillStyle=fam[2];g.fillRect(cx+hw-PX,y,PX,PX);           // lit verge toward the neon
+    }
+    g.fillStyle=fam[2];g.fillRect(cx-PX*2,b.y-rh-PX,PX*4,PX);     // ridge cap
+    g.fillStyle='#0a0510';g.fillRect(x0,b.y,w,PX);                 // eave shadow on the fascia
+    if(rnd(b.seed*9.9)<0.6){g.fillStyle=METAL;g.fillRect(snap(x0+w*0.7),b.y-rh-PX*7,PX,PX*7);}
+  }
+
+  // ── fluorescent tubes ──
+  // Reference 7's ceiling bars, under the awnings: one straight cold-white line
+  // per shopfront, the only hard-edged light in the street.
+  function bakeTubes(g){
+    buildings.forEach(b=>{
+      if(b.layer!==2||!b.shop)return;
+      const x0=b.x+PX*5, x1=b.x+b.w-PX*5, y=gY-U.ground+PX*2;
+      if(x1-x0<PX*10)return;
+      g.fillStyle='#6a9a88';g.fillRect(x0-PX,y-PX,x1-x0+PX*2,PX);g.fillRect(x0-PX,y+PX,x1-x0+PX*2,PX);
+      g.fillStyle='#d8ffe8';g.fillRect(x0,y,x1-x0,PX);
+    });
+  }
+
+  // ── pattern lightbox field ──
+  // Diamonds on a 4px lattice in two tones, the tones swapping every 16 frames
+  // so the panel chases the way a real one does.
+  function drawPattern(s){
+    const x0=s.x+PX, y0=s.y+PX, w=s.box.w-PX*2, h=s.box.h-PX*2, cell=PX*4, ph=Math.floor(t/16);
+    for(let j=0;j*cell<h+cell;j++)for(let i=0;i*cell<w+cell;i++){
+      const cxp=x0+i*cell, cyp=y0+j*cell;
+      ctx.fillStyle=((i+j+ph)%2)?'#ff4d9d':'#3ee6ff';
+      for(let dy=-2;dy<=2;dy++){const hw=(2-Math.abs(dy))*PX; if(hw<=0)continue;
+        const yy=cyp+dy*PX; if(yy<y0||yy>=y0+h)continue;
+        const xa=Math.max(x0,cxp-hw), xb=Math.min(x0+w,cxp+hw); if(xb>xa)ctx.fillRect(xa,yy,xb-xa,PX);}
+    }
   }
 
   // ── foreground plane ──
@@ -3245,6 +3745,10 @@ const HOME=CITIES[0];
     // the one thing that told you what he was doing.
     ['#ff8c3c','#0b0616','#06030d','#241028','#ff9ec8'].forEach(add);
     ['#fff5c0','#ffdf9e','#ffb87e','#ff8f74','#ff5f82','#ff3a90','#f22a8c'].forEach(add);
+    // trees, string-light bulbs and their wire — baked into Lnear, so registered
+    ['#0c1c16','#122a20','#1b3b2c','#0f0a14','#ffd8a0','#ffb14d','#160b24','#2a2236'].forEach(add);
+    // pitched roofs (two tile families), fluorescent tubes, the poster's wall wash
+    ['#1e2f36','#28404a','#3a5a66','#3a1a24','#4e2430','#6a3040','#d8ffe8','#6a9a88','#6a2c4a','#5a2a48','#4a2440'].forEach(add);
     QP=list.map(hex2rgb);
     QLUT=new Int16Array(32768).fill(-1);
   }
@@ -3433,6 +3937,8 @@ const HOME=CITIES[0];
       // paper and cloth don't flicker — dropouts are for gas and diodes.
       // Rooftop brand signs don't either: the flagship spending frames hazy
       // read as a rendering bug in every review of a frozen frame.
+      if(s.kind==='pattern'){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);drawPattern(s);continue;}
+      if(s.kind==='led'){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);drawLed(s);continue;}
       if(s.dim||s.roof){ctx.drawImage(s.spr.img,s.x-s.spr.pad,s.y-s.spr.pad);continue;}
       // state machine: mostly on, occasional single-step dropout, phase-offset
       const c=step4()+Math.floor(s.ph*7);
@@ -3585,12 +4091,15 @@ const HOME=CITIES[0];
     drawSteam();
     drawBeacons();
     drawSigns();
+    drawWalkers();
     drawTraffic();
     drawForeground();
   }
 
   function rebuild(){resize();bakeAll();draw();}
   window.cityRebuild=rebuild;
+  window.citySigns=()=>signs.map(s=>s.kind||'tube');   // debug: what got placed
+  window.cityDbg={b:()=>buildings,s:()=>signs,g:()=>({W,H,PX,gY,U}),cov:(x,y)=>coveredByNear(x,y)};
 
   let rsTimer=null;
   window.addEventListener('resize',()=>{clearTimeout(rsTimer);rsTimer=setTimeout(rebuild,150);});
