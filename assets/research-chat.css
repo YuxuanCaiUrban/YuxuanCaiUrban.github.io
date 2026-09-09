@@ -1,0 +1,17 @@
+/* A local coming-soon card in the story's night palette. */
+.rc-entry{color:#ffd0a7!important;font:13px 'Share Tech Mono',monospace!important;border:1px solid #a57e67!important;padding:6px 10px!important;background:#2b1838!important;cursor:pointer}
+.rs-guide .rc-portrait-entry{pointer-events:auto;margin-top:4px;font-size:12px!important;white-space:nowrap}
+.rs-guide .rc-character{pointer-events:auto;display:block;padding:0;border:0;background:none;cursor:pointer;line-height:0}
+.rc-character canvas{display:block}
+.rc-entry:focus-visible,.rc-character:focus-visible,.rc-dialog button:focus-visible{outline:2px solid #ffd0a7;outline-offset:4px}
+.rc-dialog{box-sizing:border-box;position:fixed;inset:0;width:min(460px,calc(100% - 32px));max-height:calc(100svh - 32px);margin:auto;padding:38px 32px 30px;border:1px solid #b98a76;background:#1b1026;color:#f5eaf7;text-align:center;font:16px/1.65 'Space Grotesk',system-ui,sans-serif;box-shadow:9px 9px 0 #09051080;overflow:auto;overscroll-behavior:contain}
+.rc-dialog::backdrop{background:#080510d9;backdrop-filter:blur(5px)}
+.rc-dialog>canvas{display:block;width:60px;height:80px;image-rendering:pixelated;margin:0 auto 22px}
+.rc-eyebrow{display:block;font:10px 'Share Tech Mono',monospace;letter-spacing:.14em;color:#d2a08b}
+.rc-dialog h2{font:500 clamp(32px,6vw,42px)/1.15 'Space Grotesk',system-ui,sans-serif;letter-spacing:-.04em;margin:12px 0 6px;color:#ffdebe}
+.rc-subtitle{margin:0;color:#e5c0d2;font-size:15px;letter-spacing:.08em}
+#rc-description{max-width:310px;margin:22px auto 26px;font-size:14px;color:#c8afce}
+.rc-close{border:1px solid #ffd0a7;background:#f5c198;color:#271529;padding:11px 22px;cursor:pointer;font:500 14px 'Space Grotesk',system-ui,sans-serif}
+.rc-close:hover{background:#ffdcbb}
+@media(max-width:600px){.rc-dialog{padding:30px 24px 25px}.rs-guide .rc-portrait-entry{font-size:11px!important;padding:5px 7px!important}}
+@media print{.rc-entry,.rc-dialog{display:none!important}}
