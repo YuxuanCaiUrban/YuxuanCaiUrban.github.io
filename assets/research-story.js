@@ -7,6 +7,7 @@
   const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let index=0, cursor=0, route=[], timer=null, typing=false, fullText='', chartMode='quartile', returnFocus=null, artToken=0, portraitTimer=null, frame=0;
   const decisions=new Map(), earned=new Set(), readBeats=new Set();
+  let travelling=false, started=false, arrivalTimer=null;
   root.innerHTML=`
   <a class="rs-skip" href="#rs-dialogue">Skip to dialogue</a>
   <main class="rs-shell" aria-label="The air we share: a visual research novel">
@@ -29,6 +30,8 @@
   </main>
   <dialog class="rs-notebook" id="rs-notebook" aria-labelledby="rs-note-title"><div class="rs-note-top"><span>THE CASEBOOK</span><button id="rs-close-note" type="button">Close ×</button></div><h2 id="rs-note-title"></h2><div id="rs-note-content"></div><p class="rs-note-source" id="rs-note-source"></p><a href="${esc(data.paper)}" target="_blank" rel="noopener noreferrer">Published article & supplementary materials ↗</a></dialog>`;
   const byId=id=>document.getElementById(id), next=byId('rs-next'), prev=byId('rs-prev'), notebook=byId('rs-notebook'), narration=byId('rs-narration');
+  const shell=root.querySelector('.rs-shell');
+  const transition=window.ResearchSceneTransition?.(root.querySelector('.rs-stage'),byId('rs-backdrop'),reduce);
   const back=document.createElement('button');back.type='button';back.className='rs-return';back.textContent='← Return to the investigation';brief.prepend(back);
   function scene(){return data.scenes[index];}
   function beat(){return route[cursor];}
@@ -52,6 +55,7 @@
   }
   function stopTyping(){clearTimeout(timer);typing=false;timer=null;}
   function updateControls(){
+    if(travelling){prev.disabled=true;next.disabled=true;next.textContent='Walking…';byId('rs-keyhint').textContent='ESC TO ARRIVE';return;}
     const b=beat(), needsChoice=!!b.choices&&!decisions.has(b.id);
     prev.disabled=index===0&&cursor===0;
     next.disabled=!typing&&needsChoice;
@@ -102,17 +106,18 @@
 
 
   function setExhibit(open){byId('rs-exhibit').hidden=!open;byId('rs-show-exhibit').hidden=open;root.classList.toggle('has-exhibit',open);}
-  function setArt(){
+  function setArt(prepared){
     const img=byId('rs-backdrop'), url=scene().background, token=++artToken;
     img.style.objectPosition=scene().position||'center';
+    const upcoming=data.scenes[index+1];if(upcoming){const warm=new Image();warm.src=upcoming.background;}
+    if(prepared){img.src=prepared.src;return;}
     if(img.getAttribute('src')===url)return;
     const preload=new Image();
-    preload.onload=()=>{if(token!==artToken)return;img.src=url;if(!reduce.matches&&img.animate)img.animate([{opacity:.25},{opacity:1}],{duration:650});};
+    preload.onload=()=>{if(token===artToken)img.src=url;};
     preload.onerror=()=>{if(token===artToken)img.src='../assets/images/research/proj_health_pm25.jpg';};
     preload.src=url;
-    const upcoming=data.scenes[index+1];if(upcoming){const warm=new Image();warm.src=upcoming.background;}
   }
-  function renderBeat(instant=false){
+  function renderBeat(instant=false,defer=false){
     const b=beat(), s=scene();root.dataset.speaker=b.speaker;byId('rs-guide').classList.toggle('is-listening',b.speaker==='YOU');
     byId('rs-guide-portrait').hidden=b.speaker==='YOU';byId('rs-visitor-mark').hidden=b.speaker!=='YOU';
     byId('rs-speaker').textContent=b.speaker==='YOU'?'YOU / THE VISITOR':'THE NIGHT GUIDE';
@@ -129,30 +134,58 @@
       });options.appendChild(button);
     });
     chartMode='quartile';byId('rs-artifact').innerHTML=artifactHTML(b.artifact||s.artifact);byId('rs-exhibit').scrollTop=0;
-    setExhibit(!!b.exhibit);type(b.text,instant);drawGuide();
+    setExhibit(!!b.exhibit);
+    if(defer){fullText=b.text;narration.textContent='';byId('rs-accessible-narration').textContent='';updateControls();}
+    else type(b.text,instant);
+    drawGuide();
   }
   function focusDialogue(){byId('rs-dialogue').focus({preventScroll:true});}
-  function show(i,at=0,instant=false){
+  function commitScene(i,at,instant,defer=false,prepared){
     stopTyping();index=Math.max(0,Math.min(i,data.scenes.length-1));makeRoute();cursor=at==='last'?route.length-1:Math.min(at,route.length-1);
     const s=scene();chartMode='quartile';root.dataset.scene=s.id;
     const act=data.acts?.find(a=>a.id===s.act);
     byId('rs-chapter-label').textContent=`ACT ${String(s.act||index+1).padStart(2,'0')} / ${act?.title||s.chapter}`;
-    byId('rs-title').textContent=index===0?'The air we share.':s.chapter;
+    const title=byId('rs-title');title.replaceChildren();
+    (index===0?'The air we share.':s.chapter).split(' ').forEach((word,i)=>{if(i)title.append(' ');const span=document.createElement('span');span.className='rs-title-word';span.style.setProperty('--word',i);span.textContent=word;title.append(span);});
     byId('rs-location').textContent=s.location;
     byId('rs-question').textContent=s.question||s.subtitle;
     byId('rs-progress-label').textContent=`${String(index+1).padStart(2,'0')} / ${String(data.scenes.length).padStart(2,'0')}`;
     byId('rs-artifact').innerHTML=artifactHTML(s.artifact);
     byId('rs-chapters').querySelectorAll('button').forEach((b,i)=>{b.classList.toggle('is-current',i===index);if(i===index)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current');});
-    setArt();renderBeat(instant);if(!instant)focusDialogue();
+    setArt(prepared);renderBeat(instant,defer);
+  }
+  async function show(i,at=0,instant=false){
+    if(travelling)return;
+    const target=Math.max(0,Math.min(i,data.scenes.length-1));
+    if(!started||target===index||!transition||reduce.matches||document.hidden){
+      commitScene(target,at,instant);started=true;
+      if(!instant&&!root.hidden&&!document.querySelector('dialog[open]'))focusDialogue();
+      return;
+    }
+    const from=scene(),direction=target>index?1:-1;
+    stopTyping();travelling=true;clearTimeout(arrivalTimer);
+    root.classList.remove('is-arriving');root.classList.add('is-travelling');
+    root.setAttribute('aria-busy','true');shell.inert=true;updateControls();
+    try {
+      await transition.play({from,to:data.scenes[target],direction,commit:prepared=>commitScene(target,at,instant,true,prepared)});
+    } finally {
+      travelling=false;shell.inert=false;root.removeAttribute('aria-busy');root.classList.remove('is-travelling');
+      renderBeat(instant||root.hidden||!!document.querySelector('dialog[open]'));
+      if(!root.hidden&&!document.hidden&&!document.querySelector('dialog[open]')){
+        if(!reduce.matches){root.classList.add('is-arriving');arrivalTimer=setTimeout(()=>root.classList.remove('is-arriving'),1000);}
+        focusDialogue();
+      }
+    }
   }
   function advance(){
+    if(travelling)return;
     if(typing){finishTyping();return;}
     if(beat().choices&&!decisions.has(beat().id)){byId('rs-decisions').querySelector('button')?.focus();return;}
     if(cursor<route.length-1){cursor++;renderBeat();focusDialogue();}
     else if(index<data.scenes.length-1)show(index+1);else openBrief();
   }
-  function previous(){if(cursor>0){cursor--;renderBeat(true);focusDialogue();}else if(index>0)show(index-1,'last',true);}
-  function openBrief(){stopTyping();root.hidden=true;brief.hidden=false;document.body.classList.remove('story-active');clearInterval(portraitTimer);window.scrollTo(0,0);back.focus();}
+  function previous(){if(travelling)return;if(cursor>0){cursor--;renderBeat(true);focusDialogue();}else if(index>0)show(index-1,'last',true);}
+  function openBrief(){transition?.finish();stopTyping();root.hidden=true;brief.hidden=false;document.body.classList.remove('story-active');clearInterval(portraitTimer);window.scrollTo(0,0);back.focus();}
   function openStory(){brief.hidden=true;root.hidden=false;document.body.classList.add('story-active');window.scrollTo(0,0);finishTyping();animateGuide();focusDialogue();}
   function beginNotebook(title){
     finishTyping();if(!notebook.open)returnFocus=document.activeElement;
@@ -185,9 +218,9 @@
   notebook.addEventListener('close',()=>{if(returnFocus?.isConnected&&!root.hidden)returnFocus.focus({preventScroll:true});});
   notebook.addEventListener('click',e=>{if(e.target!==notebook)return;const r=notebook.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)notebook.close();});
   byId('rs-artifact').addEventListener('click',e=>{const b=e.target.closest('[data-chart]');if(!b)return;chartMode=b.dataset.chart;byId('rs-artifact').innerHTML=artifactHTML(beat().artifact||scene().artifact);byId('rs-artifact').querySelector(`[data-chart="${chartMode}"]`).focus({preventScroll:true});});
-  root.addEventListener('research-story:pause',finishTyping);
-  document.addEventListener('keydown',e=>{if(root.hidden||document.querySelector('dialog[open]')||e.altKey||e.ctrlKey||e.metaKey)return;if(e.target.closest('input,textarea,select,[contenteditable="true"],[data-chart]'))return;if(e.key==='ArrowRight'){e.preventDefault();advance();}else if(e.key==='ArrowLeft'){e.preventDefault();previous();}else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();advance();}});
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){finishTyping();clearInterval(portraitTimer);}else animateGuide();});
-  reduce.addEventListener('change',()=>{if(reduce.matches)finishTyping();animateGuide();});
+  root.addEventListener('research-story:pause',()=>{transition?.finish();finishTyping();});
+  document.addEventListener('keydown',e=>{if(travelling){if(e.key==='Escape'){e.preventDefault();transition?.finish();}return;}if(root.hidden||document.querySelector('dialog[open]')||e.altKey||e.ctrlKey||e.metaKey)return;if(e.target.closest('input,textarea,select,[contenteditable="true"],[data-chart]'))return;if(e.key==='ArrowRight'){e.preventDefault();advance();}else if(e.key==='ArrowLeft'){e.preventDefault();previous();}else if(e.key===' '&&!e.target.closest('button,a')){e.preventDefault();advance();}});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){transition?.finish();finishTyping();clearInterval(portraitTimer);}else animateGuide();});
+  reduce.addEventListener('change',()=>{if(reduce.matches){transition?.finish();finishTyping();}animateGuide();});
   brief.hidden=true;root.hidden=false;document.body.classList.add('story-active');show(0,0,true);animateGuide();
 })();
