@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="dark">
+  <title>AI for Planning: Course &amp; Online Textbook — Yuxuan Cai</title>
+  <meta name="description" content="A brief project update on the AI for Planning course and online textbook, currently maintained in a private repository and available through local preview only.">
+  <link rel="canonical" href="https://yuxuancai.com/projects/ai-for-planning.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&amp;family=Space+Grotesk:wght@300;400;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070e;
+      --panel: #0b0f19;
+      --text: #f4f5f6;
+      --muted: #98a2bd;
+      --accent: #3ee6ff;
+      --accent-pink: #ff4d9d;
+      --line: rgba(255,255,255,.1);
+      --font-mono: 'Share Tech Mono','Courier New',monospace;
+      --font-display: 'Space Grotesk',system-ui,sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      padding: clamp(20px,5vw,72px) clamp(20px,4vw,40px);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      line-height: 1.65;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right,rgba(255,255,255,.018) 1px,transparent 1px),
+        linear-gradient(to bottom,rgba(255,255,255,.018) 1px,transparent 1px),
+        radial-gradient(circle at 75% 15%,rgba(62,230,255,.06),transparent 32%),
+        radial-gradient(circle at 18% 70%,rgba(255,77,157,.05),transparent 30%);
+      background-size: 40px 40px,40px 40px,auto,auto;
+    }
+    a { color: inherit; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .container { width: min(100%,960px); margin: 0 auto; }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: clamp(34px,6vh,58px);
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--line);
+    }
+    .back-btn {
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: rgba(255,255,255,.02);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-decoration: none;
+      transition: color .2s ease,border-color .2s ease,background .2s ease;
+    }
+    .back-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(62,230,255,.04); }
+    .hud-info {
+      color: var(--accent-pink);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-align: right;
+      text-transform: uppercase;
+    }
+    .project-header { margin-bottom: 30px; }
+    .project-venue {
+      margin-bottom: 12px;
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .project-title {
+      max-width: 760px;
+      margin-bottom: 12px;
+      color: #fff;
+      font-size: clamp(32px,6vw,58px);
+      font-weight: 300;
+      letter-spacing: -.035em;
+      line-height: 1.05;
+    }
+    .project-deck { max-width: 670px; margin-bottom: 20px; color: var(--muted); font-size: clamp(16px,2vw,19px); }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      padding: 4px 10px;
+      border: 1px solid var(--line);
+      border-radius: 3px;
+      background: rgba(255,255,255,.035);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .showcase {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      margin-bottom: 42px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+    .showcase::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      box-shadow: inset 0 0 70px rgba(5,7,14,.28);
+    }
+    .showcase img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center 46%; }
+    .project-content {
+      display: grid;
+      grid-template-columns: minmax(0,1.8fr) minmax(245px,1fr);
+      gap: clamp(32px,6vw,64px);
+      padding-top: 40px;
+      border-top: 1px solid var(--line);
+    }
+    .main-text h2 { margin-bottom: 14px; color: #fff; font-size: 21px; font-weight: 400; letter-spacing: -.01em; }
+    .main-text h2:not(:first-child) { margin-top: 34px; }
+    .main-text p { margin-bottom: 20px; color: var(--muted); font-size: 16px; }
+    .access-note {
+      margin-top: 28px;
+      padding: 18px 20px;
+      border-left: 2px solid var(--accent-pink);
+      background: rgba(255,77,157,.045);
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .access-note strong { color: var(--text); font-weight: 600; }
+    .sidebar {
+      height: fit-content;
+      padding: 24px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(11,15,25,.72);
+    }
+    .sidebar-title {
+      margin-bottom: 17px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid var(--line);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .meta-list { display: grid; gap: 16px; }
+    .meta-item { display: grid; gap: 3px; }
+    .meta-label { color: var(--muted); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; }
+    .meta-value { color: var(--text); font-size: 14px; }
+    .source-btn,
+    .pending-link {
+      display: block;
+      width: 100%;
+      margin-top: 20px;
+      padding: 10px 14px;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: var(--accent);
+      color: #05070e;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      text-decoration: none;
+      transition: color .2s ease,background .2s ease;
+    }
+    .source-btn:hover { background: transparent; color: var(--accent); }
+    .pending-link {
+      margin-top: 9px;
+      border-color: var(--line);
+      background: transparent;
+      color: var(--muted);
+      font-weight: 400;
+    }
+    footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 58px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    @media (max-width: 760px) {
+      header { align-items: flex-start; }
+      .project-content { grid-template-columns: 1fr; }
+      .showcase { aspect-ratio: 1/1; }
+      footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { scroll-behavior: auto!important; transition-duration: .01ms!important; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="../index.html#projects" class="back-btn">← Back to Projects</a>
+      <div class="hud-info">Teaching project // In development</div>
+    </header>
+
+    <main>
+      <section class="project-header">
+        <div class="project-venue">Course &amp; textbook project · Updated September 2026</div>
+        <h1 class="project-title">AI for Planning</h1>
+        <p class="project-deck">A course and online textbook in development, intended to connect AI methods with planning questions, evidence, and hands-on learning.</p>
+        <div class="tags">
+          <span class="tag">AI for Planning</span>
+          <span class="tag">Online Textbook</span>
+          <span class="tag">Teaching</span>
+        </div>
+      </section>
+
+      <figure class="showcase">
+        <img src="../assets/images/research/proj_platform_ai_planning.jpg" width="1024" height="1024" alt="Pixel-art planning studio with an open digital textbook above an urban model and map layers">
+      </figure>
+
+      <section class="project-content">
+        <div class="main-text">
+          <h2>Project update</h2>
+          <p>The textbook source is now maintained in a private GitHub repository. The project is intended as an online learning resource that brings AI concepts into the practical work of reading evidence, examining places, and reasoning through planning decisions.</p>
+
+          <h2>Current access</h2>
+          <p>The reading site is not yet independently hosted. The current build can be viewed only while the local preview service is running on the computer that holds the source files.</p>
+          <p>The repository button opens the private source project for authorized collaborators; it is not a public textbook link. A stable reading link will be added here when a standalone public edition is available.</p>
+
+          <div class="access-note"><strong>Access boundary:</strong> private source repository · local reading preview · no independent public textbook yet.</div>
+        </div>
+
+        <aside class="sidebar" aria-label="Project status">
+          <h2 class="sidebar-title">Current status</h2>
+          <div class="meta-list">
+            <div class="meta-item"><span class="meta-label">Status</span><span class="meta-value">In development</span></div>
+            <div class="meta-item"><span class="meta-label">Format</span><span class="meta-value">Course &amp; online textbook</span></div>
+            <div class="meta-item"><span class="meta-label">Source</span><span class="meta-value">Private GitHub repository</span></div>
+            <div class="meta-item"><span class="meta-label">Reading access</span><span class="meta-value">Local preview only</span></div>
+            <div class="meta-item"><span class="meta-label">Public edition</span><span class="meta-value">Not yet available</span></div>
+          </div>
+          <a class="source-btn" href="https://github.com/Hamsterradcc/ai-for-planning" target="_blank" rel="noopener noreferrer">View private source ↗</a>
+          <span class="pending-link" aria-disabled="true">Public reading link — forthcoming</span>
+        </aside>
+      </section>
+    </main>
+
+    <footer>
+      <span>© 2026 Yuxuan Cai</span>
+      <a href="../index.html#projects">Projects index</a>
+    </footer>
+  </div>
+</body>
+</html>

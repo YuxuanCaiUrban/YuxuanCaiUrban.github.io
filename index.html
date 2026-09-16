@@ -1272,7 +1272,7 @@ main#content{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,5vw,40px)}
             <div class="proj-cat-meta">
               <div class="proj-cat-num"><span class="cat-ico"><svg shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><g><path d="M4 4h6v6H4Z" fill="currentColor" stroke-width="1"></path><path d="M22 4h6v6h-6Z" fill="currentColor" stroke-width="1"></path><path d="M4 22h6v6H4Z" fill="currentColor" stroke-width="1"></path><path d="M22 22h6v6h-6Z" fill="currentColor" stroke-width="1"></path><path d="M10 6h12v2H10Z" fill="currentColor" stroke-width="1"></path><path d="M10 24h12v2H10Z" fill="currentColor" stroke-width="1"></path><path d="M6 10h2v12H6Z" fill="currentColor" stroke-width="1"></path><path d="M24 10h2v12h-2Z" fill="currentColor" stroke-width="1"></path><path d="M14 14h4v4h-4Z" fill="currentColor" stroke-width="1"></path><path d="M10 10h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M20 10h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M10 20h2v2h-2Z" fill="currentColor" stroke-width="1"></path><path d="M20 20h2v2h-2Z" fill="currentColor" stroke-width="1"></path></g></svg></span>06 // PLATFORMS</div>
               <h3 class="proj-cat-title">Platforms &amp; Infrastructure</h3>
-              <p class="proj-cat-desc">Open platforms I build and run for computational urban research — a community, a data registry, an experimentation layer, and a research program.</p>
+              <p class="proj-cat-desc">Open infrastructure for computational urban research and teaching — communities, data and experimentation platforms, and learning resources.</p>
               <div class="proj-cat-go">
                 <span class="proj-cat-count"></span>
                 <span class="proj-cat-arr">→</span>
@@ -4681,8 +4681,19 @@ const PROJECTS_DATA = [
     page: "projects/shanghai-biking-perception.html",
     links: {}
   },
-  // Platforms & Infrastructure — live sites rather than papers, so these carry a
-  // `site` link and lean on the procedural cover generator for their artwork.
+  // Platforms & Infrastructure — public research platforms and learning
+  // infrastructure rather than papers.
+  {
+    id: "proj-platform-ai-planning",
+    category: "platforms",
+    title: "AI for Planning: Course & Online Textbook",
+    venue: "Teaching project · In development · Updated Sep 2026",
+    desc: "Developing an online learning resource intended to connect AI methods with planning questions, evidence, and hands-on exercises. Source files are maintained in a private GitHub repository. The reading build currently requires a local preview service; a standalone public textbook is not yet available.",
+    tags: ["AI for Planning", "Online Textbook", "Teaching"],
+    img: "assets/images/research/proj_platform_ai_planning.jpg",
+    page: "projects/ai-for-planning.html",
+    links: { github: "https://github.com/Hamsterradcc/ai-for-planning" }
+  },
   {
     id: "proj-platform-ccc",
     category: "platforms",
@@ -4825,9 +4836,9 @@ function projLinks(p) {
 
 // The category cards advertise how much sits behind them, which replaces
 // the old block of instructions telling the reader to click.
-// Not every category counts papers: the platforms sit behind the same card
-// shape but what they hold is live sites, so each category names its own unit.
-const CATEGORY_UNIT = { platforms: ['platform', 'platforms'] };
+// Not every category counts papers: the platform category also includes
+// learning infrastructure, so each category names its own unit.
+const CATEGORY_UNIT = { platforms: ['initiative', 'initiatives'] };
 function labelProjectCategories() {
   document.querySelectorAll('.proj-cat-card[data-cat]').forEach(card => {
     const cat = card.getAttribute('data-cat');
