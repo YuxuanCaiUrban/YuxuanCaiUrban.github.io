@@ -24,28 +24,28 @@
   // tries its anchors in order and is skipped if none is on screen.
   const TOUR=[
     {id:'urban', label:'URBAN AI', anchor:[{txt:'URBAN AI'},{roof:true,kind:undefined}], zoom:2, ay:0.40,
-     copy:'This city is a model. Every lit word on it is a research direction; I will point at six.',
+     copy:'Evening. The city is a model, and every lit word on it is one line of research. Follow me from sign to sign, then the walk home.',
      to:{page:'research',name:'Research'}},
     {id:'vision', label:'VISION', anchor:[{txt:'VISION'}], zoom:3, ground:true,
-     copy:'VISION. Cameras on every corner, and models that learn to read a street the way people do.',
+     copy:'Two cameras under the sign. Up here the question is whether a model can read a street the way a person does.',
      cat:'vlm'},
     {id:'sense', label:'SENSE', anchor:[{txt:'SENSE'}], zoom:2, ay:0.44,
-     copy:'SENSE. The mast on that roof logs heat, air and noise. Exposure is where policy meets a person.',
+     copy:'The mast on that roof logs heat, air and noise. What people breathe and hear, measured where they live.',
      cat:'health'},
     {id:'plan', label:'PLAN', anchor:[{kind:'spire'}], zoom:2, ay:0.46,
-     copy:'PLAN. Agents that argue like a planning meeting; we read how they reason, not just what they pick.',
+     copy:'In the tower, language models take the planners\' seats. We read how they argue before we read what they decide.',
      cat:'llm'},
     {id:'open', label:'OPEN DATA', anchor:[{txt:'OPEN DATA'},{kind:'led'}], zoom:3,
-     copy:'OPEN DATA. The ticker never stops: probes, APIs and datasets, all of it built in the open.',
+     copy:'The ticker runs all night. Communities, data, a place to run experiments, a place to learn. All of it built in the open.',
      cat:'platforms'},
     {id:'geo', label:'GEOAI', anchor:[{txt:'GEOAI'}], zoom:2, ay:0.28, ground:true,
-     copy:'GEOAI. The bikes under this sign are the data. Where people actually go, block by block.',
+     copy:'The bike dock under the sign is the dataset. Where people actually go, one block at a time.',
      cat:'mobility'},
     {id:'green', label:'GREEN', anchor:[{txt:'GREEN'}], zoom:3, ay:0.38, ground:true,
-     copy:'GREEN. The only trees on the street, and who gets to sit under them. Vitality is measurable.',
+     copy:'The only trees on this street, and one bench. Who gets to sit under them, and how alive the block feels, can both be measured.',
      cat:'nature'},
     {id:'street', label:'24H', anchor:[{txt:'24H'}], zoom:3, ay:0.36, flip:true, ground:true,
-     copy:'24H. The walk home. That is the whole city; the rest of this page is the work.',
+     copy:'The all-night shop, and the walk home. Mind the cat. Everything the signs pointed at is one page down.',
      to:{page:'projects',name:'All projects'}, finale:true},
   ];
   // signs that answer a click with a wink rather than a jump: the little icon
@@ -79,7 +79,7 @@
   const cap=el('div','nw-cap');cap.setAttribute('role','dialog');cap.setAttribute('aria-label','Night walk');cap.tabIndex=-1;
   cap.innerHTML=
     '<div class="nw-panel">'+
-      '<canvas class="nw-port" width="24" height="32" aria-hidden="true"></canvas>'+
+      '<canvas class="nw-port" width="48" height="64" aria-hidden="true"></canvas>'+
       '<div class="nw-body">'+
         '<div class="nw-eyebrow"><span class="nw-stopno"></span><b class="nw-label"></b>'+
           '<button class="nw-close" type="button" aria-label="Leave the walk" title="Leave (Esc)">×</button></div>'+
@@ -108,62 +108,115 @@
     if(first&&first.nextSibling)cta.insertBefore(enterBtn,first.nextSibling);else cta.appendChild(enterBtn);
   }
 
-  // ── the guide: the smoker from the konbini door, 24x32, two idle frames ──
-  // legend: H hat  h hat sheen  F face  f face shadow  E eye  C coat  c coat
-  // sheen  S collar  W shirt  G cigarette  O ember  s smoke  . clear
+  // ── the guide: the smoker from the konbini door, 48x64, two idle frames ──
+  // same figure as assets/night-guide.js (the research stories), plus the
+  // cigarette and smoke. Light from the upper left: sheen on the hat crown
+  // and left coat edge, shadow down the right.
+  // legend: K outline  H hat  h hat sheen  J hat dark  P band light  B band
+  // A hair  R hair/brow light  F skin  L skin light  f skin shadow  n skin
+  // deep  W white  I iris  e glint  M mouth  m lower lip  S scarf  s scarf
+  // light  T scarf dark  C coat  c coat light  d coat dark/seam  b button
+  // G cigarette  O ember  ~ smoke  . clear
   const PORTRAIT=[
-    '........................',
-    '........................',
-    '.....................s..',
-    '....................s...',
-    '......HHHHHHHHHH........',
-    '.....HHHHHHHHHHHH.......',
-    '.....HhhHHHHHHHHH...s...',
-    '.....HHHHHHHHHHHH.......',
-    '...HHHHHHHHHHHHHHHHH....',
-    '...HHHHHHHHHHHHHHHHH.s..',
-    '......ffffffffff........',
-    '......FFFFFFFFFF....s...',
-    '......FFEEFFFEEF........',
-    '......FFFFFFFFFF...s....',
-    '......FFFFfFFFFF........',
-    '......FFFFFFffGGGGO.....',
-    '.......FFFFFFFF.........',
-    '........FFFFFF..........',
-    '.....SSSFFFFFFSSS.......',
-    '....SSSSSFFFFSSSSS......',
-    '...CCSSSSSWWSSSSSCC.....',
-    '..CCCCSSSSWWSSSSCCCC....',
-    '.CCCCCCSSSWWSSSCCCCCC...',
-    '.CCCCCCCSSWWSSCCCCCCC...',
-    '.CCCCCCCCSWWSCCCCCCCC...',
-    'CCCCCCCCCCWWCCCCCCCCCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
-    'CCCcCCCCCCWWCCCCCCCcCC..',
+    '................................................',
+    '...............KKKKK........KKKKK...............',
+    '..............KhhhhhKKKKKKKKhhhhhK..............',
+    '.............KHHHHHHhhhhhhhhHHHHHHK.............',
+    '.............KhHHhHHHHHHHHHHHHJHHHK......~......',
+    '.............KhHHhHHHHHHHHHHHHJHHHK.............',
+    '............KhHHHHhHHHHHHHHHHJHHHHJK............',
+    '............KhHHHHhHHHHHHHHHHJHHHHJK......~.....',
+    '............KhHHHHHHHHHHHHHHHHHHHHJK............',
+    '............KhHHHHHHHHHHHHHHHHHHHHJK............',
+    '............KhHHHHHHHHHHHHHHHHHHHHJK.....~......',
+    '...........KPPPPPPPPPPPPPPPPPPPPPPPPK...........',
+    '...........KBBBBBBBBBBBBBBBBBBBBBBBBK...........',
+    '..........KKBBBBBBBBBBBBBBBBBBBBBBBBKK..~.......',
+    '......KKKKHhhhhhhhhhhhhhhhhhhhhhhhhhhHKKKK......',
+    '....KKHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHKK....',
+    '...KJJJJJJJJJJKKKKKKKKKKKKKKKKKKKKJJJJJ~JJJJK...',
+    '..KJJJJKKKKKKKKAAAAAAAAAAAAAAAAAAKKKKKKKKJJJJK..',
+    '...KKKK.......KARAAAAARAAAAAARAAAK.......KKKK...',
+    '..............KAAAARAAAAAARAAAAAAK....~.........',
+    '..............KAAARAAAAAAAAARAAAAK..............',
+    '..............KAAAAAAFAAAAFAAAAAAK..............',
+    '..............KAAFFFFFFAAFFFFFFAAK...~..........',
+    '..............KAAFAAAAFFFFAAAAfAAK..............',
+    '..............KAAFFFFFFFFFFFFFfAAK..............',
+    '.............KKAALKKKKFFFFKKKKfAAKK.~...........',
+    '............KFFAALWIIWFFFFWIIWfAAffK............',
+    '............KfFAALfIIfFFFFfIIffAAFfK............',
+    '............KfFAALFffFFFFFFffFfAAff~............',
+    '.............KKAFLLFFFFFfFFFFFfFAKK.............',
+    '..............KFFLFFFFFLfFFFFffFFK~.............',
+    '...............KFFFFFFFfffFFFffFK...............',
+    '...............KFFFFFFFFFFFFFffFKK..............',
+    '................KFFFFMMMMMGGGGGGGOK.............',
+    '.................KFFFFmmmmffffK..K..............',
+    '..................KKFFFFffffKK..................',
+    '....................KnffffnK....................',
+    '....................KnnnnnnK....................',
+    '....................KFffffFK....................',
+    '............KKKKKKKKKKKKKKKKKKKKKKKK............',
+    '...........KSssssssssFFFFFFssssssssSK...........',
+    '..........KKsssssssssFFFFFFsssssssssKK..........',
+    '........KKCCSSSSSSSSSSSSSSSSSSSSSSSSCCKK........',
+    '......KKCCCCSSSSSSSSSSSSSSSSSSTTTTTTCCCCKK......',
+    '.....KCCCCCCKKKKKKKKKKKKKKKKKKKKKKKKCCCCCCK.....',
+    '....KcccccCCsSSSSSSSWWWWWWWWccCCCCCCCCCCCCCK....',
+    '...KccccccdCsSSSSSSSWWWWWWWWccCCCCCCCdCCCCCCK...',
+    '...KCcCCCCdCsSTTTTTTcWWWWWWccCCCCCCCddCCCCdCK...',
+    '...KCcCCCCdCCsSSSSSScWWWWWWccCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCsSSSSSCccWWWWccCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCsSTTTTCccWWWWccCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCsSSSSCCccccccCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCsSSSSCCccccccCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCsSSSCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCTSTSCCCCCCCbbCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCTCTCCCCCCCbbCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCbbCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCbbCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
+    '...KCccCCCdCCCCCCCCCCCCCCCCCCCCCCCCCddCCCCdCK...',
   ];
-  const INK={H:'#1a1028',h:'#3a2e5c',F:'#d9a889',f:'#b07f66',E:'#1a1028',C:'#2a2236',c:'#3f3560',
-             S:'#6a2c4a',W:'#e8e0f0',G:'#e8e0f0',O:'#ff8c3c',s:'rgba(170,158,200,0.55)'};
+  const INK={K:'#120a18',H:'#1b1230',h:'#3b2f60',J:'#110a1c',P:'#93405f',B:'#6b2748',A:'#1b1a19',R:'#37332f',F:'#ddb5a1',L:'#ecc9b7',f:'#c8a08e',n:'#a98270',W:'#eee6f2',I:'#33282c',e:'#ffffff',M:'#b86b6f',m:'#d4a09c',S:'#6e2d4b',s:'#944068',T:'#4a1c34',C:'#2a2238',c:'#3d3360',d:'#1b1526',b:'#c9a062',G:'#eee6f2',O:'#ff8c3c','~':'rgba(170,158,200,0.55)'};
+  const PW=48,PH=64;
+  // a blink repaints the eye rows with skin and a shut-lid line
+  const EYES=[];for(let y=25;y<=28;y++)for(const x0 of [18,26])for(let x=x0;x<=x0+3;x++)EYES.push([x,y]);
+  const LIDS=[];for(const x0 of [18,26])for(let x=x0;x<=x0+3;x++)LIDS.push([x,26]);
+  // optional external art, same contract as night-guide.js: the script tag's
+  // data-sprite names a transparent PNG with one frame or three (idle, eyes
+  // shut, mouth open), each 3:4. Without it nothing is requested.
+  const sheet={img:null,frames:0,w:PW,h:PH,ready:false};
+  const spriteSrc=document.currentScript&&document.currentScript.dataset?document.currentScript.dataset.sprite:'';
+  if(spriteSrc){const img=new Image();img.onload=()=>{sheet.h=img.naturalHeight;sheet.w=Math.max(1,Math.round(sheet.h*3/4));sheet.frames=Math.max(1,Math.round(img.naturalWidth/sheet.w));sheet.img=img;sheet.ready=true;drawPortrait(0,false);};img.src=spriteSrc;}
   const pctx=port.getContext('2d');
-  function drawPortrait(frame){
+  function drawPortrait(frame,blink){
     if(!pctx)return;
-    pctx.clearRect(0,0,24,32);
-    for(let y=0;y<32;y++){const row=PORTRAIT[y];
-      for(let x=0;x<24;x++){const ch=row[x];if(ch==='.')continue;
+    if(sheet.ready){
+      if(port.width!==sheet.w)port.width=sheet.w;if(port.height!==sheet.h)port.height=sheet.h;
+      pctx.clearRect(0,0,sheet.w,sheet.h);pctx.imageSmoothingEnabled=false;
+      pctx.drawImage(sheet.img,(blink&&sheet.frames>1?1:0)*sheet.w,0,sheet.w,sheet.h,0,0,sheet.w,sheet.h);return;
+    }
+    pctx.clearRect(0,0,PW,PH);
+    for(let y=0;y<PH;y++){const row=PORTRAIT[y];
+      for(let x=0;x<PW;x++){const ch=row[x];if(ch==='.')continue;
         let px=x;
-        if(ch==='s'){if(frame)px=x+((y%2)?1:-1);pctx.fillStyle=frame&&y<6?'rgba(170,158,200,0.3)':INK.s;}
+        if(ch==='~'){if(frame)px=x+((y%2)?1:-1);pctx.fillStyle=frame&&y<12?'rgba(170,158,200,0.3)':INK['~'];}
         else if(ch==='O'){pctx.fillStyle=frame?'#c85a20':INK.O;}
         else pctx.fillStyle=INK[ch]||'#ff00ff';
         pctx.fillRect(px,y,1,1);
       }
     }
+    if(blink){pctx.fillStyle=INK.F;EYES.forEach(([x,y])=>pctx.fillRect(x,y,1,1));pctx.fillStyle=INK.K;LIDS.forEach(([x,y])=>pctx.fillRect(x,y,1,1));}
   }
-  drawPortrait(0);
-  let portTimer=null,portFrame=0;
-  function startPortrait(){stopPortrait();if(REDUCE)return;portTimer=setInterval(()=>{portFrame^=1;drawPortrait(portFrame);},700);}
+  drawPortrait(0,false);
+  let portTimer=null,portFrame=0,portTick=0;
+  function startPortrait(){stopPortrait();if(REDUCE)return;portTimer=setInterval(()=>{portFrame^=1;portTick++;drawPortrait(portFrame,portTick%7===6);},700);}
   function stopPortrait(){if(portTimer)clearInterval(portTimer);portTimer=null;}
 
   // ── camera ─────────────────────────────────────────────────────────────
@@ -330,7 +383,7 @@
     setCard(false);guardFocus(moreBtn);moreBtn.hidden=true;
     goBtn.hidden=false;goBtn.textContent='Open '+(st.to?st.to.name:'Projects')+' →';
     // the leave countdown starts once the line has been read, not once it starts typing
-    typeText('That is the walk. The work is one click away.',()=>{clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(on&&atEnd)leaveTo(st.to);},2400);});
+    typeText('That was the walk. The projects are one click away.',()=>{clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(on&&atEnd)leaveTo(st.to);},2400);});
     try{goBtn.focus({preventScroll:true});}catch(_){}
   }
   function leaveTo(to){
@@ -409,6 +462,7 @@
     if(j<0){show(Math.min(idx,route.length-1));return;}   // the stop is gone: land properly on another
     idx=j;const st=route[j];
     ensureTo(st);if(!atEnd&&st.to)goBtn.textContent=st.to.name+' →';   // the fresh stop object needs its destination back
+    if(!atEnd)stopnoEl.textContent=String(j+1).padStart(2,'0')+' / '+String(route.length).padStart(2,'0');   // the route may have grown or shrunk
     if(atEnd){camReset();renderDots();return;}
     camTo(st);api.setHot(st.signIdx);renderDots();
   });

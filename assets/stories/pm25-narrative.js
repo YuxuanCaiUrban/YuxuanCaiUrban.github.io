@@ -11,7 +11,7 @@ const narrative={
     },
     {
       "id": 2,
-      "title": "Find people in time",
+      "title": "Find the people, then follow them",
       "scenes": [
         "cohort"
       ]
@@ -25,7 +25,7 @@ const narrative={
     },
     {
       "id": 4,
-      "title": "Find the signal, then disturb the average",
+      "title": "Find the signal, then take the average apart",
       "scenes": [
         "results",
         "pattern",
@@ -52,26 +52,26 @@ const narrative={
     {
       "id": "street",
       "act": 1,
-      "question": "How could we investigate something this street cannot show us?",
-      "conclusion": "A view of the city cannot answer a question about years of exposure.",
+      "question": "What would it take to study something this street cannot show us?",
+      "conclusion": "Looking at a street cannot answer a question about years of exposure.",
       "exitLabel": "Follow the guide to the archive",
       "beats": [
         {
           "id": "street-1",
           "speaker": "GUIDE",
-          "text": "The windows are lit. The clinic is still open. But this corner cannot tell us what long-term fine-particle exposure means for mental health.",
+          "text": "Windows lit, the clinic still open. You could stand here all night and not learn what years of fine-particle air mean for anyone's mental health.",
           "exhibit": false
         },
         {
           "id": "street-2",
           "speaker": "YOU",
-          "text": "Then watching the street will not settle it. What would count as evidence?",
+          "text": "So watching will not settle it. What would?",
           "exhibit": false
         },
         {
           "id": "street-3",
           "speaker": "GUIDE",
-          "text": "People, places, and time. Come to the archive: we need to connect all three before we can investigate.",
+          "text": "People, places and time, tied together. The archive has all three. Come on, we connect them first and look for answers after.",
           "exhibit": false
         }
       ],
@@ -81,26 +81,26 @@ const narrative={
     {
       "id": "cohort",
       "act": 2,
-      "question": "What can a newly recorded diagnosis actually tell us?",
-      "conclusion": "The study follows new diagnosis records in two potentially overlapping cohorts.",
+      "question": "What does a newly recorded diagnosis tell us?",
+      "conclusion": "The study follows new diagnosis records in two cohorts that may overlap.",
       "exitLabel": "Find the air around those addresses",
       "beats": [
         {
           "id": "cohort-1",
           "speaker": "GUIDE",
-          "text": "Two files, two outcomes: anxiety and depression. Each begins with no recorded diagnosis of that outcome, then follows later health records. Some people appear in both.",
+          "text": "Two files. One for anxiety, one for depression. Each starts with people who had no recorded diagnosis of that outcome, then follows their health records forward. Some people are in both files.",
           "exhibit": true
         },
         {
           "id": "cohort-2",
           "speaker": "YOU",
-          "text": "So we are looking for a new entry in a record. Before connecting it to the air, I want to check how to read that entry.",
+          "text": "So the outcome is a new line in someone's record. Before we tie that to the air, show me how to read it.",
           "exhibit": false,
           "choices": [
             {
               "id": "inspect-diagnosis",
-              "label": "Inspect the diagnosis labels",
-              "response": "The anxiety file includes a broader family of diagnoses, including stress-related disorders; depression uses its own diagnosis codes. These are medical records, not a direct measure of everyone's symptoms.",
+              "label": "Open the diagnosis labels",
+              "response": "The anxiety file casts a wide net. Stress-related disorders and several others sit under the same heading. Depression has its own codes. Either way, you are reading what a clinician wrote down, which is a different thing from how everyone felt.",
               "exhibit": true,
               "artifact": {
                 "type": "findings",
@@ -126,7 +126,7 @@ const narrative={
             {
               "id": "inspect-followup",
               "label": "Follow the calendar",
-              "response": "During the 2018–2022 study period, the analysis follows later records after excluding pre-baseline diagnoses of the same outcome. That orders the records; it does not tell us exactly when symptoms began.",
+              "response": "The study runs from 2018 to 2022. Anyone with a diagnosis of the same outcome before baseline is set aside, and the rest are followed forward. That puts the records in order. It still cannot tell us when the symptoms began.",
               "exhibit": true,
               "artifact": {
                 "type": "steps",
@@ -159,25 +159,25 @@ const narrative={
       "id": "exposure",
       "act": 3,
       "question": "How does a person's address become an exposure estimate?",
-      "conclusion": "The assigned exposure describes an area and a year, not a person's inhaled dose.",
+      "conclusion": "Each person's exposure is an area's annual average, assigned by address. Nobody's actual breath was measured.",
       "exitLabel": "Compare the exposure groups",
       "beats": [
         {
           "id": "exposure-1",
           "speaker": "YOU",
-          "text": "The records give us a timeline. But where does the air enter the story?",
+          "text": "Fine, the records give us a timeline. Where does the air come in?",
           "exhibit": false
         },
         {
           "id": "exposure-2",
           "speaker": "GUIDE",
-          "text": "Through the baseline address. A fine pollution grid becomes an annual outdoor PM₂.₅ estimate for a three-digit ZIP area. That area estimate is then assigned to the participant.",
+          "text": "Through the address at baseline. There is a fine pollution grid for the whole country. Average it over a three-digit ZIP area for one year, and that number goes to everyone in the study who lives there.",
           "exhibit": true,
           "choices": [
             {
               "id": "zoom-home",
               "label": "Zoom in on a home",
-              "response": "The participant data cannot follow that zoom. They do not reveal indoor air, daily routes, or later moves. A fine source grid still becomes a broad area estimate here.",
+              "response": "The picture zooms. The data do not. Nothing here knows the air indoors, the daily route, or whether anyone moved later. However fine the grid, each person gets the area's number.",
               "exhibit": true,
               "artifact": {
                 "type": "findings",
@@ -199,7 +199,7 @@ const narrative={
             {
               "id": "rebuild-map",
               "label": "Rebuild the ZIP estimate",
-              "response": "The supplement tries four ways to combine the grid values. They agree closely across the sampled ZIP areas. That supports this aggregation choice, while personal exposure remains unmeasured.",
+              "response": "The supplement rebuilds the area number four different ways and checks them against each other in 200 ZIP areas. They agree closely, so the averaging method holds up. What a person actually breathed is still nowhere in the data.",
               "exhibit": true,
               "artifact": {
                 "type": "metrics",
@@ -225,7 +225,7 @@ const narrative={
         {
           "id": "exposure-3",
           "speaker": "GUIDE",
-          "text": "Now we have the connection: a residential-area estimate beside a diagnosis timeline. Do the records show a different pattern at higher exposure?",
+          "text": "Now the two sit side by side. An area's air for the year, and a timeline of diagnoses. Time to ask whether the timeline looks different where the air is worse.",
           "exhibit": false
         }
       ],
@@ -235,26 +235,26 @@ const narrative={
     {
       "id": "results",
       "act": 4,
-      "question": "Does an association remain after accounting for measured differences?",
+      "question": "Does the association survive once measured differences are accounted for?",
       "conclusion": "The highest-exposure group has a higher adjusted hazard for both outcomes.",
       "exitLabel": "Look between the two endpoints",
       "beats": [
         {
           "id": "results-1",
           "speaker": "YOU",
-          "text": "But those areas—and the people in them—could differ in other ways.",
+          "text": "Hold on. The areas with worse air, and the people in them, could differ in other ways too.",
           "exhibit": false
         },
         {
           "id": "results-2",
           "speaker": "GUIDE",
-          "text": "Exactly. The model accounts for measured personal and community differences, then compares the highest-exposure quarter with the lowest. The adjusted hazard ratios are 1.10 for anxiety and 1.45 for depression.",
+          "text": "They could. So the model adjusts for the personal and community differences it can measure, then compares the quarter with the worst air against the quarter with the cleanest. After that, the hazard ratio is 1.10 for anxiety and 1.45 for depression.",
           "exhibit": true
         },
         {
           "id": "results-3",
           "speaker": "GUIDE",
-          "text": "These compare the hazards of newly recorded diagnoses; they do not forecast one person's future. And a comparison of the two ends may hide what happens in between.",
+          "text": "Read those as rates of new diagnoses across groups. They say nothing about any one person. And two endpoints can hide what happens in between.",
           "exhibit": true
         }
       ],
@@ -264,20 +264,20 @@ const narrative={
     {
       "id": "pattern",
       "act": 4,
-      "question": "What did the high-versus-low comparison conceal?",
-      "conclusion": "Anxiety and depression do not share the same exposure–response pattern.",
+      "question": "What did the high-versus-low comparison leave out?",
+      "conclusion": "Anxiety and depression follow different exposure–response patterns.",
       "exitLabel": "Find whose experiences the average hides",
       "beats": [
         {
           "id": "pattern-1",
           "speaker": "YOU",
-          "text": "Let's open the space between the lowest and highest groups.",
+          "text": "Then open up the middle. What do the second and third quarters look like?",
           "exhibit": false
         },
         {
           "id": "pattern-2",
           "speaker": "GUIDE",
-          "text": "Depression is already elevated in the middle exposure groups; anxiety shows its clearest elevation in the highest. One headline number hid two patterns. It could hide differences between people, too.",
+          "text": "Different for each outcome. Depression is already higher in the middle quarters. Anxiety only clearly rises in the top one. One headline number was covering two patterns, and it could be covering differences between people as well.",
           "exhibit": true
         }
       ],
@@ -287,26 +287,26 @@ const narrative={
     {
       "id": "inequity",
       "act": 4,
-      "question": "Is the overall association shared across different social conditions?",
-      "conclusion": "The overall average hides exploratory differences; their mechanisms remain untested.",
+      "question": "Does the overall association hold the same way across different social conditions?",
+      "conclusion": "The average hides differences between groups. Those differences are exploratory, and their causes were not tested.",
       "exitLabel": "Take the finding to the test bench",
       "beats": [
         {
           "id": "inequity-1",
           "speaker": "YOU",
-          "text": "Whose experience disappears when we average everyone together?",
+          "text": "Who disappears when you average everyone together?",
           "exhibit": false
         },
         {
           "id": "inequity-2",
           "speaker": "GUIDE",
-          "text": "The higher-versus-lower pollution association was stronger among Black participants. Before interpreting that difference, choose which comparison we should unpack.",
+          "text": "Start with this. The high-versus-low association was stronger among Black participants. Before you read anything into that, pick which part of it to take apart.",
           "exhibit": true,
           "choices": [
             {
               "id": "unpack-race",
               "label": "Unpack the racial-group comparison",
-              "response": "Each estimate compares higher with lower pollution within a group. It is not Black participants' risk relative to White participants. The proposed social and structural explanations were not directly tested.",
+              "response": "Each of those estimates compares worse air with cleaner air inside one group. Nobody here compared Black participants' risk with White participants'. The authors suggest social and structural reasons for the difference. The paper does not test them.",
               "exhibit": true,
               "artifact": {
                 "type": "findings",
@@ -332,7 +332,7 @@ const narrative={
             {
               "id": "inspect-conditions",
               "label": "Inspect insurance and deprivation",
-              "response": "For anxiety, the association also differed by insurance and community deprivation. The study does not establish those same differences for depression; a larger subgroup estimate alone cannot establish a difference.",
+              "response": "For anxiety, the association also shifted with insurance and with how deprived the community was. For depression the study does not show the same thing. And one subgroup having a bigger number is not, by itself, evidence of a difference between groups.",
               "exhibit": true,
               "artifact": {
                 "type": "findings",
@@ -360,7 +360,7 @@ const narrative={
         {
           "id": "inequity-3",
           "speaker": "GUIDE",
-          "text": "The average is no longer the whole story. These exploratory findings leave the explanations open. Now we should ask whether the signal survives a change in the analysis.",
+          "text": "So the average was never the whole story. These are exploratory results, and the explanations stay open. Next question is whether the signal survives when we change the analysis.",
           "exhibit": false
         }
       ],
@@ -370,20 +370,20 @@ const narrative={
     {
       "id": "checks",
       "act": 5,
-      "question": "Could another pollutant or the residence assumption account for the signal?",
-      "conclusion": "Selected sensitivity checks retain positive associations without resolving every bias.",
+      "question": "Could another pollutant, or the assumption that nobody moved, explain the signal?",
+      "conclusion": "The selected sensitivity checks keep the associations positive. They do not settle every bias.",
       "exitLabel": "Inspect what the tests could not reach",
       "beats": [
         {
           "id": "checks-1",
           "speaker": "YOU",
-          "text": "Before we bring this back to the city, I want to challenge the finding. Which alternative explanation should we test?",
+          "text": "Before we take this back to the street, I want to try to break it. Which alternative do we test first?",
           "exhibit": false,
           "choices": [
             {
               "id": "test-ozone",
               "label": "Account for ozone as well",
-              "response": "After annual ozone is added to the model, the high-versus-low PM₂.₅ associations remain positive for both outcomes. This checks one other pollutant; it does not isolate a causal effect of PM₂.₅.",
+              "response": "Put annual ozone into the model and the high-versus-low PM₂.₅ associations stay positive for both outcomes. That accounts for one other pollutant. It does not make PM₂.₅ the cause.",
               "exhibit": true,
               "artifact": {
                 "type": "findings",
@@ -405,7 +405,7 @@ const narrative={
             {
               "id": "test-residency",
               "label": "Focus on longer-term residents",
-              "response": "Among people at their baseline residence for more than five years, associations remain positive under the supplement's alternative annual exposure measure. Their later moves are still unknown.",
+              "response": "Keep only the people who had lived at their baseline address for more than five years. Under the supplement's alternative annual exposure measure, the associations stay positive. Where those people went afterwards, nobody knows.",
               "exhibit": true,
               "artifact": {
                 "type": "cohorts",
@@ -431,7 +431,7 @@ const narrative={
         {
           "id": "checks-2",
           "speaker": "GUIDE",
-          "text": "The finding survives this check. That matters—but a sensitivity analysis can only test the choices its data allow. What did the study never get to see?",
+          "text": "It survived that one. Worth something. But a sensitivity check can only test what the data let it test. What did this study never get to see?",
           "exhibit": false
         }
       ],
@@ -441,26 +441,26 @@ const narrative={
     {
       "id": "limits",
       "act": 5,
-      "question": "Which missing evidence could still change the interpretation?",
-      "conclusion": "The evidence supports an association, while intervention effects remain untested.",
+      "question": "What missing evidence could still change how we read this?",
+      "conclusion": "The evidence supports an association. What cleaner air would do was not tested.",
       "exitLabel": "Return to the street with the evidence",
       "beats": [
         {
           "id": "limits-1",
           "speaker": "YOU",
-          "text": "Then the missing evidence is part of the case, too. What could still change our reading?",
+          "text": "Then what is missing is part of the case too. What could still change our reading?",
           "exhibit": false
         },
         {
           "id": "limits-2",
           "speaker": "GUIDE",
-          "text": "Moves we cannot follow. Illness that never reaches a record. Smoking, activity, diet, and occupation that the model could not include. These gaps leave room for other explanations.",
+          "text": "People who moved and could not be followed. Illness that never reached a record. Smoking, physical activity, diet, what people did for work, none of it in the model. Each gap leaves room for another explanation.",
           "exhibit": true
         },
         {
           "id": "limits-3",
           "speaker": "YOU",
-          "text": "So the records show an association, with unanswered explanations. They do not tell us how many diagnoses a clean-air policy would prevent.",
+          "text": "So the records show an association and leave the explanation open. They cannot tell us how many diagnoses cleaner air would prevent.",
           "exhibit": false
         }
       ],
@@ -470,20 +470,20 @@ const narrative={
     {
       "id": "return",
       "act": 6,
-      "question": "What can we responsibly bring back to the city?",
+      "question": "What can we honestly carry back to the city?",
       "conclusion": "Mental health and unequal conditions belong in air-quality research and discussion.",
       "exitLabel": "Read the research brief",
       "beats": [
         {
           "id": "return-1",
           "speaker": "GUIDE",
-          "text": "Back at the same corner. Mental health belongs in the air-quality conversation—and the average may miss unequal experiences. The evidence gives us a reason to investigate both.",
+          "text": "Same corner. Two things to carry back. Mental health belongs in any conversation about air quality, and an average can hide unequal experiences. This paper gives a reason to look at both.",
           "exhibit": false
         },
         {
           "id": "return-2",
           "speaker": "YOU",
-          "text": "I came looking for a verdict about this street. I leave with a sharper question: would reducing exposure improve mental health, and who would benefit? That needs another study.",
+          "text": "I came here wanting a verdict on this street. I am leaving with a better question. If the air were cleaner, would mental health improve, and for whom? That takes another study.",
           "exhibit": false
         }
       ],

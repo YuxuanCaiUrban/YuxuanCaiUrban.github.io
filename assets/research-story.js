@@ -16,13 +16,13 @@
       <img class="rs-backdrop" id="rs-backdrop" alt="" decoding="async"><div class="rs-shade" aria-hidden="true"></div>
       <div class="rs-scene-heading"><p id="rs-chapter-label"></p><h1 id="rs-title" tabindex="-1"></h1><p class="rs-location" id="rs-location"></p></div>
       <div class="rs-question"><span>THE QUESTION WE ARE FOLLOWING</span><p id="rs-question"></p></div>
-      <div class="rs-guide" id="rs-guide" aria-label="The pixel guide from the homepage"><canvas id="rs-guide-stage" width="24" height="32" aria-hidden="true"></canvas><span>NIGHT GUIDE</span></div>
+      <div class="rs-guide" id="rs-guide" aria-label="The pixel guide from the homepage"><canvas id="rs-guide-stage" width="48" height="64" aria-hidden="true"></canvas><span>NIGHT GUIDE</span></div>
       <aside class="rs-exhibit" id="rs-exhibit" hidden aria-label="Evidence revealed in the scene"><div class="rs-exhibit-top"><span>ON THE DESK / EVIDENCE</span><button type="button" id="rs-hide-exhibit" aria-label="Put the evidence away">×</button></div><div class="rs-artifact" id="rs-artifact"></div><button class="rs-inspect-source" id="rs-exhibit-source" type="button">Read the source note ↗</button></aside>
       <div class="rs-stage-foot"><span>ILLUSTRATED SETTING · PUBLISHED RESEARCH</span><button type="button" id="rs-show-exhibit" hidden>Inspect the evidence +</button></div>
       <div class="rs-clue-toast" id="rs-clue-toast" hidden><span>TAKE THIS WITH YOU</span><p id="rs-clue-text"></p></div>
     </section>
     <section class="rs-dialogue" id="rs-dialogue" tabindex="-1" aria-label="Dialogue and investigation choices">
-      <div class="rs-portrait"><canvas id="rs-guide-portrait" width="24" height="32" aria-hidden="true"></canvas><span id="rs-visitor-mark" hidden>YOU</span></div>
+      <div class="rs-portrait"><canvas id="rs-guide-portrait" width="48" height="64" aria-hidden="true"></canvas><span id="rs-visitor-mark" hidden>YOU</span></div>
       <div class="rs-dialogue-body"><div class="rs-speaker-row"><span id="rs-speaker"></span><span id="rs-line-label"></span></div><p id="rs-narration" aria-hidden="true"></p><p class="rs-sr-only" id="rs-accessible-narration" aria-live="polite" aria-atomic="true"></p><div class="rs-decisions" id="rs-decisions" aria-label="Choose which evidence to follow"></div><div class="rs-dialogue-links"><button id="rs-source" type="button">Source note ↗</button><span id="rs-branch-status"></span></div></div>
       <div class="rs-controls"><button id="rs-prev" type="button" aria-label="Previous dialogue line">←</button><button id="rs-next" type="button">Continue →</button><span id="rs-keyhint">SPACE TO REVEAL · ← → TO MOVE</span></div>
     </section>
