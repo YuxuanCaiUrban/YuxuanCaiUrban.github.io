@@ -14,12 +14,13 @@
   dialog.className = 'rc-dialog';
   dialog.setAttribute('aria-labelledby', 'rc-title');
   dialog.setAttribute('aria-describedby', 'rc-description');
-  dialog.innerHTML = '<canvas width="24" height="32" aria-hidden="true"></canvas><span class="rc-eyebrow">NIGHT GUIDE / AFTER HOURS</span><h2 id="rc-title">Coming soon</h2><p class="rc-subtitle">Conversations with the guide</p><p id="rc-description"></p><button type="button" class="rc-close"></button>';
+  dialog.innerHTML = '<canvas width="48" height="64" aria-hidden="true"></canvas><span class="rc-eyebrow">NIGHT GUIDE / AFTER HOURS</span><h2 id="rc-title">Coming soon</h2><p class="rc-subtitle">Conversations with the guide</p><p id="rc-description"></p><button type="button" class="rc-close"></button>';
   dialog.querySelector('#rc-description').textContent = 'The guide is preparing more stories. For now, let’s continue our night walk.';
   const close = dialog.querySelector('.rc-close');
   close.textContent = 'Back to the story →';
   document.body.appendChild(dialog);
   window.NightGuide.draw(dialog.querySelector('canvas'));
+  window.NightGuide.onReady?.(() => window.NightGuide.draw(dialog.querySelector('canvas')));
 
   function open(event) {
     if (dialog.open) return;

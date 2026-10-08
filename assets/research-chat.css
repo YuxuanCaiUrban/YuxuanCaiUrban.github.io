@@ -6,7 +6,7 @@
 .rc-entry:focus-visible,.rc-character:focus-visible,.rc-dialog button:focus-visible{outline:2px solid #ffd0a7;outline-offset:4px}
 .rc-dialog{box-sizing:border-box;position:fixed;inset:0;width:min(460px,calc(100% - 32px));max-height:calc(100svh - 32px);margin:auto;padding:38px 32px 30px;border:1px solid #b98a76;background:#1b1026;color:#f5eaf7;text-align:center;font:16px/1.65 'Space Grotesk',system-ui,sans-serif;box-shadow:9px 9px 0 #09051080;overflow:auto;overscroll-behavior:contain}
 .rc-dialog::backdrop{background:#080510d9;backdrop-filter:blur(5px)}
-.rc-dialog>canvas{display:block;width:60px;height:80px;image-rendering:pixelated;margin:0 auto 22px}
+.rc-dialog>canvas{display:block;width:96px;height:128px;image-rendering:pixelated;margin:0 auto 22px}
 .rc-eyebrow{display:block;font:10px 'Share Tech Mono',monospace;letter-spacing:.14em;color:#d2a08b}
 .rc-dialog h2{font:500 clamp(32px,6vw,42px)/1.15 'Space Grotesk',system-ui,sans-serif;letter-spacing:-.04em;margin:12px 0 6px;color:#ffdebe}
 .rc-subtitle{margin:0;color:#e5c0d2;font-size:15px;letter-spacing:.08em}
