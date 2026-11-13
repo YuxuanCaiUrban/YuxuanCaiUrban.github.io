@@ -22,32 +22,40 @@
   // anchors are resolved at run time against the live sign list: placement
   // varies with viewport and DPR, so nothing here is a coordinate. Each stop
   // tries its anchors in order and is skipped if none is on screen.
+  // The order is the argument, not the skyline: what a city looks like, how
+  // people move through it, what is good and bad for them there, who decides,
+  // and how the tools get shared. Every caption opens by saying what its sign
+  // stands for and stands on its own, because a click on any sign can start
+  // the walk there and a narrow screen drops the signs that do not fit.
   const TOUR=[
     {id:'urban', label:'URBAN AI', anchor:[{txt:'URBAN AI'},{roof:true,kind:undefined}], zoom:2, ay:0.40,
-     copy:'Evening. The city is a model, and every lit word on it is one line of research. Follow me from sign to sign, then the walk home.',
-     to:{page:'projects',name:'Research'}},
-    {id:'vision', label:'VISION', anchor:[{txt:'VISION'}], zoom:3, ground:true,
-     copy:'Two cameras under the sign. Up here the question is whether a model can read a street the way a person does.',
+     copy:'Hi, I\'m Yuxuan. I use AI to study cities. Each glowing sign in this skyline stands for one topic I work on. I\'ll stop at each sign and explain it in a few plain words.',
+     to:{page:'projects',name:'Research overview'}},
+    {id:'vision', label:'VISION', anchor:[{txt:'VISION'}], zoom:3, ground:true, topic:'how streets look',
+     copy:'VISION is about how a street looks. People can tell at a glance if a street feels safe or walkable. I test whether AI that reads photos can make the same judgment.',
      cat:'vlm'},
-    {id:'sense', label:'SENSE', anchor:[{txt:'SENSE'}], zoom:2, ay:0.44,
-     copy:'The mast on that roof logs heat, air and noise. What people breathe and hear, measured where they live.',
-     cat:'health'},
-    {id:'plan', label:'PLAN', anchor:[{kind:'spire'}], zoom:2, ay:0.46,
-     copy:'In the tower, language models take the planners\' seats. We read how they argue before we read what they decide.',
-     cat:'llm'},
-    {id:'open', label:'OPEN DATA', anchor:[{txt:'OPEN DATA'},{kind:'led'}], zoom:3,
-     copy:'The ticker runs all night. Communities, data, a place to run experiments, a place to learn. All of it built in the open.',
-     cat:'platforms'},
-    {id:'geo', label:'GEOAI', anchor:[{txt:'GEOAI'}], zoom:2, ay:0.28, ground:true,
-     copy:'The bike dock under the sign is the dataset. Where people actually go, one block at a time.',
+    {id:'geo', label:'GEOAI', anchor:[{txt:'GEOAI'}], zoom:2, ay:0.28, ground:true, topic:'how people move',
+     copy:'GEOAI is about how people move. Using bike-share trips and street photos, I find out which street features make cyclists choose one route over another.',
      cat:'mobility'},
-    {id:'green', label:'GREEN', anchor:[{txt:'GREEN'}], zoom:3, ay:0.38, ground:true,
-     copy:'The only trees on this street, and one bench. Who gets to sit under them, and how alive the block feels, can both be measured.',
+    {id:'green', label:'GREEN', anchor:[{txt:'GREEN'}], zoom:3, ay:0.38, ground:true, topic:'trees and parks',
+     copy:'GREEN is about trees and parks. I measure who has greenery near home and who does not, and whether greener places draw more people and activity.',
      cat:'nature'},
+    {id:'sense', label:'SENSE', anchor:[{txt:'SENSE'}], zoom:2, ay:0.44, topic:'health',
+     copy:'SENSE is about health. I study heat, air pollution and segregation in cities, and ask which neighborhoods and which groups of people are affected the most.',
+     cat:'health'},
+    {id:'plan', label:'PLAN', anchor:[{kind:'spire'}], zoom:2, ay:0.46, topic:'planning decisions',
+     copy:'PLAN is about decisions. Can AI language models speak for residents in a planning debate? I compare their answers with real people\'s. So far even the best model matches the average but misses how much people differ.',
+     cat:'llm'},
+    {id:'open', label:'OPEN DATA', anchor:[{txt:'OPEN DATA'},{kind:'led'}], zoom:3, topic:'open tools',
+     copy:'OPEN DATA is about sharing. I build open websites where anyone can find city datasets, try urban AI models, and meet other researchers.',
+     cat:'platforms'},
     {id:'street', label:'24H', anchor:[{txt:'24H'}], zoom:3, ay:0.36, flip:true, ground:true,
-     copy:'The all-night shop, and the walk home. Mind the cat. Everything the signs pointed at is one page down.',
-     to:{page:'projects',name:'All projects'}, finale:true},
+     copy:'Last stop, the all-night shop. The tour ends here. The Projects page lists every paper and project, grouped by the same topics as these signs.',
+     to:{page:'projects',name:'All projects'}},
   ];
+  // wherever the walk ends, the hand-off is the whole Projects page: on a
+  // narrow screen the last stop is a topic, and its own page is the wrong exit
+  const END_TO={page:'projects',name:'All projects'};
   // signs that answer a click with a wink rather than a jump: the little icon
   // plates, and any tour-vocabulary sign the current route did not claim
   const FLASH_KIND=new Set(['picto','bare','hex','spire','pattern','round','led','poster','rooftext','box']);
@@ -87,9 +95,9 @@
         '<div class="nw-live" aria-live="polite"></div>'+
         '<div class="nw-card" id="nw-card" hidden></div>'+
         '<div class="nw-foot"><div class="nw-dots" role="group" aria-label="Stops"></div>'+
-          '<button class="nw-more" type="button" hidden aria-expanded="false" aria-controls="nw-card">Details ▾</button>'+
+          '<button class="nw-more" type="button" hidden aria-expanded="false" aria-controls="nw-card">See projects ▾</button>'+
           '<button class="nw-go" type="button" hidden></button>'+
-          '<div class="nw-hint"><kbd>space</kbd> next · <kbd>esc</kbd> leave</div></div>'+
+          '<div class="nw-hint"></div></div>'+
       '</div>'+
     '</div>';
   screen.appendChild(bandT);screen.appendChild(bandB);screen.appendChild(cap);
@@ -103,6 +111,7 @@
     enterBtn=document.createElement('button');
     enterBtn.type='button';enterBtn.className='btn nw-enter';
     enterBtn.innerHTML='<span class="nw-long">Take a </span>night walk →';
+    enterBtn.title='A one-minute guided tour of my research, sign by sign';
     enterBtn.addEventListener('click',()=>{if(!on)start(0);});
     const first=cta.querySelector('.btn-primary');
     if(first&&first.nextSibling)cta.insertBefore(enterBtn,first.nextSibling);else cta.appendChild(enterBtn);
@@ -228,7 +237,7 @@
     const b=boxOf(stop.sign);
     const cx=(b.x+b.w/2)*vw/g.W, cy=(b.y+b.h/2)*vh/g.H, hh=(b.h/2)*vh/g.H*z;
     // desktop: the sign sits above the bottom-docked caption. phones: below the
-    // top-docked one, however tall it is right now (the Details card grows it)
+    // top-docked one, however tall it is right now (the project card grows it)
     let ay=stop.ay||0.42;
     if(mobile){const cb=cap.getBoundingClientRect().bottom;ay=Math.min(0.84,Math.max(0.5,(cb+20+hh)/vh));}
     let tx=vw*0.5-z*cx, ty=vh*ay-z*cy;
@@ -266,7 +275,8 @@
   // ── caption typewriter ─────────────────────────────────────────────────
   // the visible text types; the screen-reader copy lands once, whole
   let typeTimer=null,typing=false,fullText='',typeDone=null;
-  const setHint=()=>{if(hintEl)hintEl.innerHTML='<kbd>space</kbd> '+(typing?'skip':'next')+' · <kbd>esc</kbd> leave';};
+  const setHint=()=>{if(!hintEl)return;const verb=typing?'skip':'next';
+    hintEl.innerHTML=isMobile()?'tap anywhere: '+verb:'<kbd>space</kbd> or click: '+verb+' · <kbd>esc</kbd> leave';};
   const fireDone=()=>{const cb=typeDone;typeDone=null;if(cb)cb();};
   function typeText(text,onDone){
     clearTimeout(typeTimer);fullText=text;liveEl.textContent=text;typeDone=onDone||null;
@@ -274,7 +284,7 @@
     typing=true;setHint();let i=0;textEl.innerHTML='<span class="caret"></span>';
     const step=()=>{i++;textEl.textContent=text.slice(0,i);
       if(i<text.length){const c=text[i-1];const caret=document.createElement('span');caret.className='caret';textEl.appendChild(caret);
-        typeTimer=setTimeout(step,33+(/[,.:;]/.test(c)?140:0));}
+        typeTimer=setTimeout(step,22+(/[,.:;?]/.test(c)?110:0));}
       else{typing=false;setHint();fireDone();}};
     typeTimer=setTimeout(step,420);
   }
@@ -303,7 +313,7 @@
   function setCard(open){
     cardOpen=!!open;cardEl.hidden=!cardOpen;
     moreBtn.setAttribute('aria-expanded',cardOpen?'true':'false');
-    moreBtn.textContent=cardOpen?'Less ▴':'Details ▾';
+    moreBtn.textContent=cardOpen?'Hide projects ▴':'See projects ▾';
     if(on&&isMobile()&&route[idx]&&!atEnd)camTo(route[idx]);   // the taller panel must not cover the sign
   }
   // a stop's destination comes from its category; derive it wherever a stop
@@ -368,7 +378,7 @@
   function next(){
     if(!on)return;
     if(typing){finishTyping();return;}
-    if(atEnd){clearTimeout(leaveTimer);leaveTo(route[idx]&&route[idx].to);return;}
+    if(atEnd){clearTimeout(leaveTimer);leaveTo(END_TO);return;}
     if(idx>=route.length-1){finale();return;}
     show(idx+1);
   }
@@ -377,13 +387,17 @@
     // pull back to the whole skyline for the hand-off, then leave for Projects
     if(atEnd)return;
     atEnd=true;clearTimeout(leaveTimer);
-    const st=route[idx];
     camReset();api.setHot(-1);
     stopnoEl.textContent='END';labelEl.textContent='→ PROJECTS';
     setCard(false);guardFocus(moreBtn);moreBtn.hidden=true;
-    goBtn.hidden=false;goBtn.textContent='Open '+(st.to?st.to.name:'Projects')+' →';
+    goBtn.hidden=false;goBtn.textContent='Open '+END_TO.name+' →';
+    // signs that did not fit this screen were never visited: say which topics
+    const missed=TOUR.filter(t=>t.topic&&!route.some(r=>r.id===t.id)).map(t=>t.topic);
+    const line='Thanks for walking with me. '+
+      (missed.length?'This screen was too small for a few signs: '+missed.join(', ')+'. You will find them on the Projects page. Opening it now.'
+                    :'Opening the Projects page now.');
     // the leave countdown starts once the line has been read, not once it starts typing
-    typeText('That was the walk. The projects are one click away.',()=>{clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(on&&atEnd)leaveTo(st.to);},2400);});
+    typeText(line,()=>{clearTimeout(leaveTimer);leaveTimer=setTimeout(()=>{if(on&&atEnd)leaveTo(END_TO);},3000);});
     try{goBtn.focus({preventScroll:true});}catch(_){}
   }
   function leaveTo(to){
@@ -397,7 +411,7 @@
     window.addEventListener('hashchange',once);
     location.hash=target.page;
   }
-  goBtn.addEventListener('click',e=>{e.stopPropagation();if(!on)return;clearTimeout(leaveTimer);const st=route[idx];leaveTo(st&&st.to);});
+  goBtn.addEventListener('click',e=>{e.stopPropagation();if(!on)return;clearTimeout(leaveTimer);const st=route[idx];leaveTo(atEnd?END_TO:st&&st.to);});
   moreBtn.addEventListener('click',e=>{e.stopPropagation();if(!on)return;if(typing)finishTyping();setCard(!cardOpen);});
   closeBtn.addEventListener('click',e=>{e.stopPropagation();exit();});
 

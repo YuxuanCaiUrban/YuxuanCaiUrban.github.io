@@ -104,7 +104,7 @@ body.nw-on .nw-cap{opacity:1;pointer-events:auto;transform:translate(-50%,0)}
   .nw-panel{grid-template-columns:1fr}
   .nw-port{display:none}
   .nw-body{min-height:0}
-  .nw-hint{display:none}
+  .nw-hint{flex-basis:100%}
   .nw-long{display:none}
   .nw-band.top{height:40%}
   .nw-band.bot{height:18%}
