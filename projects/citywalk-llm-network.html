@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk — Yuxuan Cai</title>
+  <meta name="description" content="Three LLM agents read 4,528 Citywalk posts about Xiamen and turn them into a walking network that records where people went, why they took the route, and how each stop felt.">
+  <link rel="canonical" href="https://yuxuancai.com/projects/citywalk-llm-network.html">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="Yuxuan Cai">
+  <meta property="og:title" content="From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk">
+  <meta property="og:description" content="Three LLM agents read 4,528 Citywalk posts about Xiamen and turn them into a walking network that records where people went, why they took the route, and how each stop felt.">
+  <meta property="og:url" content="https://yuxuancai.com/projects/citywalk-llm-network.html">
+  <meta property="og:image" content="https://yuxuancai.com/og.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk">
+  <meta name="twitter:description" content="Three LLM agents read 4,528 Citywalk posts about Xiamen and turn them into a walking network that records where people went, why they took the route, and how each stop felt.">
+  <meta name="twitter:image" content="https://yuxuancai.com/og.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Grotesk:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05070e; --panel: #0b0f19; --text: #f4f5f6; --muted: #8892b0;
+      --accent: #ffd23a; --accent-pink: #ff4d9d; --line: rgba(255,255,255,.08);
+      --font-mono: 'Share Tech Mono','Courier New',monospace;
+      --font-display: 'Space Grotesk', system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg); color: var(--text); font-family: var(--font-display);
+      line-height: 1.6; padding: clamp(20px,5vw,80px) clamp(20px,4vw,40px); min-height: 100vh;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(255,255,255,.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255,255,255,.015) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .container { max-width: 900px; margin: 0 auto; }
+    header {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      margin-bottom: clamp(32px,6vh,56px); border-bottom: 1px solid var(--line); padding-bottom: 20px;
+    }
+    .back-btn {
+      font-family: var(--font-mono); font-size: 13px; text-decoration: none; color: var(--muted);
+      border: 1px solid var(--line); padding: 8px 16px; border-radius: 4px;
+      background: rgba(255,255,255,.02); transition: all .25s ease; white-space: nowrap;
+    }
+    .back-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(255,255,255,.04); }
+    .hud-info { font-family: var(--font-mono); font-size: 11px; color: var(--accent-pink);
+      letter-spacing: .15em; text-transform: uppercase; }
+    .project-header { margin-bottom: 32px; }
+    .project-venue { font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px; }
+    .project-title { font-size: clamp(24px,4.5vw,40px); font-weight: 300; letter-spacing: -.01em;
+      line-height: 1.25; margin-bottom: 14px; color: #fff; }
+    .project-authors { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+    .project-authors strong { color: var(--text); font-weight: 600; }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag { font-family: var(--font-mono); font-size: 11px; background: rgba(255,255,255,.04);
+      border: 1px solid var(--line); color: var(--muted); padding: 4px 10px; border-radius: 3px; }
+    .showcase-container { position: relative; width: 100%; aspect-ratio: 16/9;
+      background: rgba(255,255,255,.01); border: 1px solid var(--line); border-radius: 6px;
+      overflow: hidden; margin-bottom: 40px; }
+    .showcase-container img { width: 100%; height: 100%; object-fit: cover; display: block;
+      image-rendering: pixelated; }
+    .project-content { display: grid; grid-template-columns: 2fr 1fr; gap: clamp(30px,5vw,60px);
+      border-top: 1px solid var(--line); padding-top: 40px; }
+    @media (max-width: 768px) { .project-content { grid-template-columns: 1fr; } }
+    .main-text h3 { font-size: 20px; font-weight: 400; color: #fff; margin-bottom: 16px; letter-spacing: -.01em; }
+    .main-text p { color: var(--muted); margin-bottom: 24px; font-size: 16px; }
+    .sidebar-panel { background: rgba(255,255,255,.01); border: 1px solid var(--line);
+      border-radius: 6px; padding: 24px; height: fit-content; }
+    .sidebar-title { font-family: var(--font-mono); font-size: 12px; color: var(--accent);
+      letter-spacing: .1em; text-transform: uppercase; margin-bottom: 16px;
+      border-bottom: 1px solid var(--line); padding-bottom: 8px; }
+    .meta-list { display: flex; flex-direction: column; gap: 16px; }
+    .meta-item { display: flex; flex-direction: column; gap: 4px; }
+    .meta-label { font-family: var(--font-mono); font-size: 11px; color: var(--muted); text-transform: uppercase; }
+    .meta-value { font-size: 14px; color: var(--text); }
+    .project-link-btn { display: inline-block; width: 100%; text-align: center;
+      font-family: var(--font-mono); font-size: 13px; text-decoration: none; color: #05070e;
+      background: var(--accent); border: 1px solid var(--accent); padding: 10px 16px;
+      border-radius: 4px; margin-top: 20px; transition: all .25s ease; font-weight: bold; }
+    .project-link-btn:hover { background: transparent; color: var(--accent); }
+    .pager { display: flex; justify-content: space-between; gap: 16px; margin-top: 56px;
+      border-top: 1px solid var(--line); padding-top: 20px; }
+    .pager a { font-family: var(--font-mono); font-size: 12px; color: var(--muted);
+      text-decoration: none; max-width: 46%; }
+    .pager a:hover { color: var(--accent); }
+    .pager .lbl { display: block; font-size: 10px; letter-spacing: .12em;
+      text-transform: uppercase; opacity: .6; margin-bottom: 4px; }
+    .main-text ol, .main-text ul { color: var(--muted); margin: -8px 0 24px 22px; font-size: 16px; }
+    .main-text li { margin-bottom: 10px; padding-left: 4px; }
+    .main-text li::marker { color: var(--accent); }
+    .main-text li strong { color: var(--text); font-weight: 600; }
+    .author-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted); opacity: .75; margin: -12px 0 24px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="../index.html#projects" class="back-btn">← Back to Projects</a>
+      <div class="hud-info">JOURNAL ARTICLE // 2027</div>
+    </header>
+
+    <main>
+      <section class="project-header">
+        <div class="project-venue">Travel Behaviour and Society · 2027</div>
+        <h1 class="project-title">From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk</h1>
+        <p class="project-authors">Zhu, D.<sup>†</sup>, Zhang, C.<sup>†</sup>*, Liu, Y., Deng, W., &amp; <strong>Cai, Y.</strong></p>
+        <p class="author-note">† Co-first authors &nbsp;·&nbsp; * Corresponding author</p>
+        <div class="tags"><span class="tag">Citywalk</span><span class="tag">LLM Agents</span><span class="tag">Social Media</span><span class="tag">Network Science</span><span class="tag">Walking</span></div>
+      </section>
+
+      <section class="showcase-container">
+        <img data-pubcover='{"title":"From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk","venue":"Travel Behaviour and Society","year":"2027","category":"mobility","tags":["Citywalk","LLM Agents","Social Media","Network Science"],"seed":"proj-mobility-citywalk","w":1600,"h":900}' alt="Cover art for From Social Media Narratives to Experiential Networks: A Large Language Model (LLM) Multi-Agent Framework for Mapping the Integrated Mobility-Theme-Affect Network of Citywalk">
+      </section>
+
+      <section class="project-content">
+        <div class="main-text">
+          <h3>In short</h3>
+          <p>Many people now share their Citywalk routes on Xiaohongshu (RedNote): where they walked, in what order, and how each place felt. This paper turns those posts into data. Three LLM agents read each post, and their output becomes a network map of walking in Xiamen that records not only where people went, but why they took the route and how each stop felt.</p>
+
+          <h3>The problem</h3>
+          <p>GPS traces and travel surveys show where people move, but not why they picked a route or what a street felt like to walk. Citywalk posts carry exactly that information, but in casual language full of nicknames and loose directions, such as “the narrow alley beside the red bookstore,” which standard text-mining tools handle poorly.</p>
+
+          <h3>How it works</h3>
+          <p>Each post goes through three LLM agents, each with its own job:</p>
+          <ol>
+            <li><strong>Place reader.</strong> Lists the stops in the order the author walked them.</li>
+            <li><strong>Route reader.</strong> Gives the whole walk one main purpose: history and art, shopping and sightseeing, nature, or local life.</li>
+            <li><strong>Mood reader.</strong> Scores each stop on three scales from environmental psychology (the PAD model): how pleasant it felt, how stimulating it was, and how much in control the walker felt.</li>
+          </ol>
+          <p>Stops within 100 m of each other are merged into one place, and back-to-back stops up to 1.5 km apart are linked. The result is a directed, weighted network of places, routes, and moods.</p>
+
+          <h3>What we found</h3>
+          <p>The study covers 4,528 posts about Xiamen from 2020 to early 2025. Checked against 100 posts coded by hand, the agents picked out the right places 94% of the time and the right walking order 97% of the time. Running all the posts cost under US$20 in API fees.</p>
+          <ul>
+            <li><strong>Walking clusters in the old city.</strong> Citywalk in Xiamen concentrates in the historic core of Siming District, organized around a few hubs such as Huaxin Road, the Xingfu Road area, and the Eighth Market.</li>
+            <li><strong>Popular is not the same as connecting.</strong> Island Ring Boulevard is the second most-mentioned place but only about 70th by connections: people go there as a scenic end point, not on the way to somewhere else.</li>
+            <li><strong>Route purpose shows in how lively a walk feels.</strong> Shopping and sightseeing routes read as more stimulating; nature and local-life routes read as calmer.</li>
+            <li><strong>The same place feels different on different routes.</strong> Xingfu Road reads as busy on shopping routes but calm and relaxed on local-life routes.</li>
+          </ul>
+
+          <h3>Why it matters</h3>
+          <p>For planners, the network shows which places already work together as one walking area, where signage, crossings, and street design could be planned together, and which popular places sit apart from the rest of the network and may need better walking links. For walkers, the same data could suggest routes by the kind of experience they want, from quiet to lively.</p>
+          <p>The data come from one platform whose users skew young, and only the text of each post is read, not its photos. The map therefore describes how Citywalk is shared online, not all walking in the city.</p>
+        </div>
+
+        <div class="sidebar-panel">
+          <h4 class="sidebar-title">Publication Info</h4>
+          <div class="meta-list">
+            <div class="meta-item"><span class="meta-label">Type</span><span class="meta-value">Journal Article</span></div>
+            <div class="meta-item"><span class="meta-label">Venue</span><span class="meta-value">Travel Behaviour and Society, Vol. 47, Article 101439</span></div>
+            <div class="meta-item"><span class="meta-label">Special issue</span><span class="meta-value">LLM for Behavioral Theory</span></div>
+            <div class="meta-item"><span class="meta-label">Year</span><span class="meta-value">2027 (online November 2026)</span></div>
+            <div class="meta-item"><span class="meta-label">Role</span><span class="meta-value">Co-author (writing: review &amp; editing)</span></div>
+            <div class="meta-item"><span class="meta-label">Methods</span><span class="meta-value">LLM agents with chain-of-thought prompting, PAD affect model, network analysis (centrality, Louvain communities)</span></div>
+            <div class="meta-item"><span class="meta-label">Data</span><span class="meta-value">4,528 Xiaohongshu (RedNote) posts about Xiamen</span></div>
+            <div class="meta-item"><span class="meta-label">Access</span><span class="meta-value">Open access</span></div>
+          </div>
+          <a href="https://doi.org/10.1016/j.tbs.2026.101439" target="_blank" rel="noopener noreferrer" class="project-link-btn">Read Full Paper ↗</a>
+        </div>
+      </section>
+
+      <nav class="pager"><a href="llm-urban-publics.html"><span class="lbl">← Previous</span>Can Large Language Models Represent Urban Publics? Behavioral</a><span></span></nav>
+    </main>
+  </div>
+  <script src="../assets/pubcover.js"></script>
+  <script>applyPubCovers();</script>
+</body>
+</html>
